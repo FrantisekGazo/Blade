@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Automat</string>
+    <string name="show_text">Initializing text:</string>
+    <string name="goto_1">Show text</string>
+</resources>

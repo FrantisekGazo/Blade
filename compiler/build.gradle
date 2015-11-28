@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':annotations')
+
+    /* Annotation Processor */
+    compile 'com.google.auto.service:auto-service:1.0-rc2'
+    compile 'com.squareup:javapoet:1.0.0'
+
+    compile 'com.google.android:android:4.1.1.4'
+
+    /* Testing */
+    compile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
+    testCompile group: 'com.google.guava', name: 'guava', version: '18.0'
+    testCompile group: 'com.google.truth', name: 'truth', version: '0.27'
+    testCompile group: 'com.google.testing.compile', name: 'compile-testing', version: '0.7'
+}
