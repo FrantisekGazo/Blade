@@ -1,111 +1,113 @@
 package eu.f3rog.automat.compiler;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
 
+import eu.f3rog.automat.Arg;
 import eu.f3rog.automat.Extra;
 
 import static eu.f3rog.automat.compiler.util.File.file;
 import static eu.f3rog.automat.compiler.util.File.generatedFile;
 
 /**
- * Class {@link ActivityInjectorTest}
+ * Class {@link FragmentInjectorTest}
  *
  * @author FrantisekGazo
  * @version 2015-11-27
  */
-public class ActivityInjectorTest extends BaseTest {
+public class FragmentInjectorTest extends BaseTest {
 
     @Test
     public void invalidCLass() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file("com.example", "MainFragment")
                 .imports(
-                        Extra.class, "E"
+                        Arg.class, "A"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   @$E String mExtraString;",
+                        "   @$A String mExtraString;",
                         "",
                         "}"
                 );
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_class_with_Extra.toString());
+                .withErrorContaining(ErrorMsg.Invalid_class_with_Arg.toString());
     }
     @Test
     public void invalidField() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file("com.example", "MainFragment")
                 .imports(
-                        Extra.class, "E"
+                        Arg.class, "A"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   @$E private String mExtraString;",
+                        "   @$A private String mExtraString;",
                         "",
                         "}"
                 );
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Extra.toString());
+                .withErrorContaining(ErrorMsg.Invalid_Arg.toString());
 
-        input = file("com.example", "MainActivity")
+        input = file("com.example", "MainFragment")
                 .imports(
-                        Extra.class, "E"
+                        Arg.class, "A"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   @$E protected String mExtraString;",
+                        "   @$A protected String mExtraString;",
                         "",
                         "}"
                 );
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Extra.toString());
+                .withErrorContaining(ErrorMsg.Invalid_Arg.toString());
 
-        input = file("com.example", "MainActivity")
+            input = file("com.example", "MainFragment")
                 .imports(
-                        Extra.class, "E"
+                        Arg.class, "A"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   @$E final String mExtraString;",
+                        "   @$A final String mExtraString;",
                         "",
                         "}"
                 );
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Extra.toString());
+                .withErrorContaining(ErrorMsg.Invalid_Arg.toString());
     }
 
     @Test
     public void test1() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file("com.example", "MainFragment")
                 .imports(
-                        Extra.class, "E",
-                        Activity.class
+                        Arg.class, "A",
+                        Fragment.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        "public class $T extends Fragment {",
                         "",
-                        "   @$E String mExtraString;",
-                        "   @$E int mA;",
+                        "   @$A String mExtraString;",
+                        "   @$A int mA;",
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainActivity_Injector")
+        JavaFileObject expected = generatedFile("com.example", "MainFragment_Injector")
                 .imports(
                         input, "I",
                         Bundle.class
@@ -114,12 +116,12 @@ public class ActivityInjectorTest extends BaseTest {
                         "public final class $T {",
                         "",
                         "   public void inject($I target) {",
-                        "       if (target.getIntent() == null || target.getIntent().getExtras() == null) {",
+                        "       if (target.getArguments() == null) {",
                         "           return;",
                         "       }",
-                        "       Bundle extras = target.getIntent().getExtras();",
-                        "       target.mExtraString = extras.getString(\"com.example.$I-mExtraString\");",
-                        "       target.mA = extras.getInt(\"com.example.$I-mA\");",
+                        "       Bundle args = target.getArguments();",
+                        "       target.mExtraString = args.getString(\"com.example.$I-mExtraString\");",
+                        "       target.mA = args.getInt(\"com.example.$I-mA\");",
                         "   }",
                         "",
                         "}"

@@ -1,5 +1,6 @@
 package eu.f3rog.automat.compiler;
 
+import eu.f3rog.automat.Arg;
 import eu.f3rog.automat.Extra;
 
 /**
@@ -11,8 +12,9 @@ import eu.f3rog.automat.Extra;
 public enum ErrorMsg {
 
     Invalid_class_with_Extra("Only Activity subclass can contain @%s annotations.", Extra.class.getSimpleName()),
-    Extra_cannot_be_private_or_protected("Field annotated with @%s cannot be private or protected", Extra.class.getSimpleName()),
-    Extra_cannot_be_final("Field annotated with @%s cannot be final", Extra.class.getSimpleName()),
+    Invalid_Extra("Field annotated with @%s cannot be private or protected nor final", Extra.class.getSimpleName()),
+    Invalid_class_with_Arg("Only Fragment subclass can contain @%s annotations.", Arg.class.getSimpleName()),
+    Invalid_Arg("Field annotated with @%s cannot be private or protected nor final", Arg.class.getSimpleName()),
     ;
 
     private String mMessage;

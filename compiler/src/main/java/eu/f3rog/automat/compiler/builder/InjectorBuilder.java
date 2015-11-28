@@ -1,13 +1,12 @@
 package eu.f3rog.automat.compiler.builder;
 
 import android.app.Activity;
+import android.app.Fragment;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +33,7 @@ public class InjectorBuilder extends BaseClassBuilder {
     private static final String METHOD_NAME_INJECT = "inject";
 
     private Map<ClassName, ActivityInjectorBuilder> mActivityInjectorBuilders = new HashMap<>();
+    private Map<ClassName, FragmentInjectorBuilder> mFragmentInjectorBuilders = new HashMap<>();
 
     public InjectorBuilder() throws ProcessorError {
         super(GCN.INJECTOR, GPN.AUTOMAT);
@@ -46,17 +46,11 @@ public class InjectorBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.PUBLIC, Modifier.FINAL);
     }
 
-    @Override
-    public void end() throws ProcessorError {
-        super.end();
-    }
-
     public void addExtra(final VariableElement e) throws ProcessorError {
-        if (e.getModifiers().contains(Modifier.PRIVATE) || e.getModifiers().contains(Modifier.PROTECTED)) {
-            throw new ProcessorError(e, ErrorMsg.Extra_cannot_be_private_or_protected);
-        }
-        if (e.getModifiers().contains(Modifier.FINAL)) {
-            throw new ProcessorError(e, ErrorMsg.Extra_cannot_be_final);
+        if (e.getModifiers().contains(Modifier.PRIVATE)
+                || e.getModifiers().contains(Modifier.PROTECTED)
+                || e.getModifiers().contains(Modifier.FINAL)) {
+            throw new ProcessorError(e, ErrorMsg.Invalid_Extra);
         }
 
         TypeElement classElement = (TypeElement) e.getEnclosingElement();
@@ -69,6 +63,23 @@ public class InjectorBuilder extends BaseClassBuilder {
         aib.addExtra(e);
     }
 
+    public void addArg(final VariableElement e) throws ProcessorError {
+        if (e.getModifiers().contains(Modifier.PRIVATE)
+                || e.getModifiers().contains(Modifier.PROTECTED)
+                || e.getModifiers().contains(Modifier.FINAL)) {
+            throw new ProcessorError(e, ErrorMsg.Invalid_Arg);
+        }
+
+        TypeElement classElement = (TypeElement) e.getEnclosingElement();
+        if (!ProcessorUtils.isSubClassOf(classElement, EClass.SupportFragment.getName(), ClassName.get(Fragment.class))) {
+            throw new ProcessorError(classElement, ErrorMsg.Invalid_class_with_Arg);
+        }
+
+        FragmentInjectorBuilder fib = getFragmentInjectorBuilder(ClassName.get(classElement));
+
+        fib.addArg(e);
+    }
+
     private ActivityInjectorBuilder getActivityInjectorBuilder(final ClassName activityClassName) throws ProcessorError {
         ActivityInjectorBuilder builder = mActivityInjectorBuilders.get(activityClassName);
         if (builder == null) {
@@ -78,7 +89,16 @@ public class InjectorBuilder extends BaseClassBuilder {
         return builder;
     }
 
-    private void addInjectMethod(ActivityInjectorBuilder aib) {
+    private FragmentInjectorBuilder getFragmentInjectorBuilder(final ClassName fragmentClassName) throws ProcessorError {
+        FragmentInjectorBuilder builder = mFragmentInjectorBuilders.get(fragmentClassName);
+        if (builder == null) {
+            builder = new FragmentInjectorBuilder(fragmentClassName);
+            mFragmentInjectorBuilders.put(fragmentClassName, builder);
+        }
+        return builder;
+    }
+
+    private void addInjectMethod(BaseInjectorBuilder aib) {
         String injector = "injector";
         String target = "target";
 
@@ -91,13 +111,13 @@ public class InjectorBuilder extends BaseClassBuilder {
         getBuilder().addMethod(method.build());
     }
 
-    private String fullNameOf(ClassName className) {
-        return className.packageName() + "." + className.simpleName();
-    }
-
     @Override
     public void build(Filer filer) throws ProcessorError, IOException {
         for (Map.Entry<ClassName, ActivityInjectorBuilder> entry : mActivityInjectorBuilders.entrySet()) {
+            entry.getValue().build(filer);
+            addInjectMethod(entry.getValue());
+        }
+        for (Map.Entry<ClassName, FragmentInjectorBuilder> entry : mFragmentInjectorBuilders.entrySet()) {
             entry.getValue().build(filer);
             addInjectMethod(entry.getValue());
         }
@@ -106,5 +126,9 @@ public class InjectorBuilder extends BaseClassBuilder {
 
     public Map<ClassName, ActivityInjectorBuilder> getActivityInjectorBuilders() {
         return mActivityInjectorBuilders;
+    }
+
+    public Map<ClassName, FragmentInjectorBuilder> getFragmentInjectorBuilders() {
+        return mFragmentInjectorBuilders;
     }
 }

@@ -11,8 +11,9 @@ import com.squareup.javapoet.ClassName;
 public enum GCN {
 
     NAVIGATOR("I"),
+    FRAGMENT_FACTORY("F"),
     INJECTOR("Injector"),
-    ACTIVITY_INJECTOR("%s_Injector"),
+    CLASS_INJECTOR("%s_Injector"),
     ;
 
     private String mName;

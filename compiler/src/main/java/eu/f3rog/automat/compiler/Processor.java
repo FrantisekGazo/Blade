@@ -22,6 +22,8 @@ import javax.tools.Diagnostic;
 import eu.f3rog.automat.Arg;
 import eu.f3rog.automat.Extra;
 import eu.f3rog.automat.compiler.builder.ActivityInjectorBuilder;
+import eu.f3rog.automat.compiler.builder.FragmentFactoryBuilder;
+import eu.f3rog.automat.compiler.builder.FragmentInjectorBuilder;
 import eu.f3rog.automat.compiler.builder.InjectorBuilder;
 import eu.f3rog.automat.compiler.builder.NavigatorBuilder;
 import eu.f3rog.automat.compiler.util.ProcessorError;
@@ -63,22 +65,34 @@ public class Processor extends AbstractProcessor {
         }
 
         try {
+            // create main INJECTOR
             InjectorBuilder injectorBuilder = new InjectorBuilder();
-            NavigatorBuilder navigatorBuilder = new NavigatorBuilder();
 
-            // CREATE ACTIVITY INJECTORS + main INJECTOR
+            // create ACTIVITY INJECTORS
             Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Extra.class);
             for (Element e : elements) {
                 injectorBuilder.addExtra((VariableElement) e);
+            }
+            // create FRAGMENT INJECTORS
+            elements = roundEnv.getElementsAnnotatedWith(Arg.class);
+            for (Element e : elements) {
+                injectorBuilder.addArg((VariableElement) e);
             }
 
             injectorBuilder.build(mFiler);
 
             // create NAVIGATOR
+            NavigatorBuilder navigatorBuilder = new NavigatorBuilder();
             for (Map.Entry<ClassName, ActivityInjectorBuilder> entry : injectorBuilder.getActivityInjectorBuilders().entrySet()) {
                 navigatorBuilder.integrate(entry.getValue());
             }
             navigatorBuilder.build(mFiler);
+            // create FRAGMENT FACTORY
+            FragmentFactoryBuilder fragmentFactoryBuilder = new FragmentFactoryBuilder();
+            for (Map.Entry<ClassName, FragmentInjectorBuilder> entry : injectorBuilder.getFragmentInjectorBuilders().entrySet()) {
+                fragmentFactoryBuilder.integrate(entry.getValue());
+            }
+            fragmentFactoryBuilder.build(mFiler);
         } catch (ProcessorError pe) {
             error(pe);
         } catch (IOException e) {
