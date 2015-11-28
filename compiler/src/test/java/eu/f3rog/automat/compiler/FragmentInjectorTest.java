@@ -110,7 +110,8 @@ public class FragmentInjectorTest extends BaseTest {
         JavaFileObject expected = generatedFile("com.example", "MainFragment_Injector")
                 .imports(
                         input, "I",
-                        Bundle.class
+                        Bundle.class,
+                        String.class
                 )
                 .body(
                         "public final class $T {",
@@ -120,8 +121,8 @@ public class FragmentInjectorTest extends BaseTest {
                         "           return;",
                         "       }",
                         "       Bundle args = target.getArguments();",
-                        "       target.mExtraString = args.getString(\"com.example.$I-mExtraString\");",
-                        "       target.mA = args.getInt(\"com.example.$I-mA\");",
+                        "       target.mExtraString = (String) args.getString(\"com.example.$I-mExtraString\");",
+                        "       target.mA = (int) args.getInt(\"com.example.$I-mA\");",
                         "   }",
                         "",
                         "}"

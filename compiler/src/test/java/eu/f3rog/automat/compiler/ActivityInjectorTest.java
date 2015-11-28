@@ -108,7 +108,8 @@ public class ActivityInjectorTest extends BaseTest {
         JavaFileObject expected = generatedFile("com.example", "MainActivity_Injector")
                 .imports(
                         input, "I",
-                        Bundle.class
+                        Bundle.class,
+                        String.class
                 )
                 .body(
                         "public final class $T {",
@@ -118,8 +119,8 @@ public class ActivityInjectorTest extends BaseTest {
                         "           return;",
                         "       }",
                         "       Bundle extras = target.getIntent().getExtras();",
-                        "       target.mExtraString = extras.getString(\"com.example.$I-mExtraString\");",
-                        "       target.mA = extras.getInt(\"com.example.$I-mA\");",
+                        "       target.mExtraString = (String) extras.getString(\"com.example.$I-mExtraString\");",
+                        "       target.mA = (int) extras.getInt(\"com.example.$I-mA\");",
                         "   }",
                         "",
                         "}"

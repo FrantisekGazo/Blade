@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.Fragment;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import eu.f3rog.automat.compiler.util.ProcessorUtils;
 public class InjectorBuilder extends BaseClassBuilder {
 
     private static final String METHOD_NAME_INJECT = "inject";
+    private static final String FIELD_NAME_INJECTORS = "sInjectors";
 
     private Map<ClassName, ActivityInjectorBuilder> mActivityInjectorBuilders = new HashMap<>();
     private Map<ClassName, FragmentInjectorBuilder> mFragmentInjectorBuilders = new HashMap<>();
@@ -44,6 +47,18 @@ public class InjectorBuilder extends BaseClassBuilder {
         super.start();
 
         getBuilder().addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+        addInjectorMap();
+    }
+
+    private void addInjectorMap() {
+        // TODO : use interface Injector in Map
+        FieldSpec.Builder field = FieldSpec.builder(
+                ParameterizedTypeName.get(ClassName.get(Map.class), ClassName.get(Class.class), ClassName.get(Object.class)),
+                FIELD_NAME_INJECTORS)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new $T<>()", HashMap.class);
+
+        getBuilder().addField(field.build());
     }
 
     public void addExtra(final VariableElement e) throws ProcessorError {
@@ -105,7 +120,14 @@ public class InjectorBuilder extends BaseClassBuilder {
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(aib.getArgClassName(), target)
-                .addStatement("$T $N = new $T()", aib.getClassName(), injector, aib.getClassName())
+                .addStatement("$T $N", aib.getClassName(), injector)
+                .beginControlFlow("if ($N.containsKey($N.getClass()))", FIELD_NAME_INJECTORS, target)
+                .addStatement("$N = ($T) $N.get($N.getClass())", injector, aib.getClassName(), FIELD_NAME_INJECTORS, target)
+                .endControlFlow()
+                .beginControlFlow("else")
+                .addStatement("$N = new $T()", injector, aib.getClassName())
+                .addStatement("$N.put($N.getClass(), $N)", FIELD_NAME_INJECTORS, target, injector)
+                .endControlFlow()
                 .addStatement("$N.$N($N)", injector, METHOD_NAME_INJECT, target);
 
         getBuilder().addMethod(method.build());

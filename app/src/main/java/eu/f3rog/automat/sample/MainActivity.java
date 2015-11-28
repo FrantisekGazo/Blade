@@ -17,12 +17,6 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.btn_1)
     public void b1() {
         I.startShowTextActivity(this, mEditText.getText().toString());
-
-        /*
-        Intent i = new Intent(this, ShowTextActivity.class);
-        i.putExtra("eu.f3rog.automat.sample.ShowTextActivity-mInitText", mEditText.getText().toString());
-        startActivity(i);
-        */
     }
 
     @OnClick(R.id.btn_2)

@@ -2,12 +2,13 @@ package eu.f3rog.automat.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.FrameLayout;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import automat.F;
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import eu.f3rog.automat.Extra;
 
 public class ShowTextActivity extends AppCompatActivity {
@@ -17,8 +18,19 @@ public class ShowTextActivity extends AppCompatActivity {
 
     @Bind(android.R.id.text1)
     TextView mShownText;
-    @Bind(R.id.frag)
-    FrameLayout mFrame;
+
+    @Bind(R.id.et_num)
+    EditText mEditNumber;
+    @Bind(R.id.et_text)
+    EditText mEditText;
+
+    @OnClick(R.id.show_fragment)
+    public void showFragment() {
+        Data data = new Data(Integer.parseInt(mEditNumber.getText().toString()), mEditText.getText().toString());
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.frag, F.newDataFragment(data))
+                .commit();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +38,6 @@ public class ShowTextActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_text);
         ButterKnife.bind(this);
         mShownText.setText(mInitText);
-
-        DataFragment frag = F.newDataFragment(new Data(13, "Hello World!"));
-        getSupportFragmentManager().beginTransaction().add(R.id.frag, frag).commit();
     }
+
 }
