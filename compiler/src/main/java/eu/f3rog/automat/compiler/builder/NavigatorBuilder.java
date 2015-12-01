@@ -7,13 +7,21 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.automat.compiler.name.GCN;
 import eu.f3rog.automat.compiler.name.GPN;
 import eu.f3rog.automat.compiler.util.ProcessorError;
 import eu.f3rog.automat.core.BundleWrapper;
+
+import static eu.f3rog.automat.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
  * Class {@link NavigatorBuilder}
@@ -36,7 +44,24 @@ public class NavigatorBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.FINAL, Modifier.PUBLIC);
     }
 
-    public void integrate(ActivityInjectorBuilder aib) throws ProcessorError {
+    public void integrate(Map<ClassName, ActivityInjectorBuilder> fibs) throws ProcessorError {
+        List<VariableElement> args = new ArrayList<>();
+        Set<ClassName> classes = fibs.keySet();
+        for (Map.Entry<ClassName, ActivityInjectorBuilder> entry : fibs.entrySet()) {
+            TypeElement fragmentClass = (TypeElement) entry.getValue().getExtras().get(0).getEnclosingElement();
+            if (fragmentClass.getModifiers().contains(Modifier.ABSTRACT)) continue;
+            for (ClassName c : classes) {
+                if (isSubClassOf(fragmentClass, c)) {
+                    args.addAll(fibs.get(c).getExtras());
+                }
+            }
+            args.addAll(entry.getValue().getExtras());
+            integrate(entry.getValue(), args);
+            args.clear();
+        }
+    }
+
+    private void integrate(ActivityInjectorBuilder aib, List<VariableElement> allExtras) throws ProcessorError {
         ClassName activityClassName = aib.getArgClassName();
         String forName = getMethodName(METHOD_NAME_FOR, activityClassName);
         String context = "context";
@@ -55,7 +80,7 @@ public class NavigatorBuilder extends BaseClassBuilder {
         forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, activityClassName)
                 .addStatement("$T $N = new $T()", BundleWrapper.class, extras, BundleWrapper.class);
         startMethod.addCode("$N.startActivity($N($N", context, forName, context);
-        for (VariableElement extra : aib.getExtras()) {
+        for (VariableElement extra : allExtras) {
             TypeName typeName = ClassName.get(extra.asType());
             String name = extra.getSimpleName().toString();
             forMethod.addParameter(typeName, name);

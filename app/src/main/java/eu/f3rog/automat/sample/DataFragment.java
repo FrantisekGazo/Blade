@@ -2,7 +2,6 @@ package eu.f3rog.automat.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,7 @@ import eu.f3rog.automat.Arg;
  * @author FrantisekGazo
  * @version 2015-11-28
  */
-public class DataFragment extends Fragment {
+public class DataFragment extends BaseFragment {
 
     @Arg
     Data data;
@@ -41,7 +40,7 @@ public class DataFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         mTextViewNumber.setText(String.valueOf(data.getNumber()));
-        mTextViewText.setText(data.getText());
+        mTextViewText.setText(data.getText() + number);
     }
 
 }

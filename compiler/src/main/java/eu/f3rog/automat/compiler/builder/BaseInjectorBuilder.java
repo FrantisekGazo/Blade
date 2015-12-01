@@ -17,7 +17,7 @@ import eu.f3rog.automat.compiler.util.ProcessorError;
 public abstract class BaseInjectorBuilder extends BaseClassBuilder {
 
     protected static final String METHOD_NAME_INJECT = "inject";
-    protected static final String EXTRA_ID_FORMAT = "%s.%s-%s";
+    protected static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
 
     public BaseInjectorBuilder(GCN genClassName, ClassName arg) throws ProcessorError {
@@ -46,8 +46,7 @@ public abstract class BaseInjectorBuilder extends BaseClassBuilder {
     protected abstract void addInjectMethod();
 
     public String getExtraId(VariableElement extra) {
-        return String.format(EXTRA_ID_FORMAT,
-                getArgClassName().packageName(), getArgClassName().simpleName(), extra.getSimpleName().toString());
+        return String.format(EXTRA_ID_FORMAT, extra.getSimpleName().toString());
     }
 
 }

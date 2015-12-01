@@ -114,13 +114,13 @@ public class ActivityInjectorTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   public void inject($I target) {",
+                        "   public static void inject($I target) {",
                         "       if (target.getIntent() == null || target.getIntent().getExtras() == null) {",
                         "           return;",
                         "       }",
                         "       BundleWrapper extras = BundleWrapper.from(target.getIntent().getExtras());",
-                        "       target.mExtraString = extras.get(\"com.example.$I-mExtraString\", target.mExtraString);",
-                        "       target.mA = extras.get(\"com.example.$I-mA\", target.mA);",
+                        "       target.mExtraString = extras.get(\"<Extra-mExtraString>\", target.mExtraString);",
+                        "       target.mA = extras.get(\"<Extra-mA>\", target.mA);",
                         "   }",
                         "",
                         "}"

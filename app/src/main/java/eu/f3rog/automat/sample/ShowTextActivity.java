@@ -28,7 +28,7 @@ public class ShowTextActivity extends AppCompatActivity {
     public void showFragment() {
         Data data = new Data(Integer.parseInt(mEditNumber.getText().toString()), mEditText.getText().toString());
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.frag, F.newDataFragment(data))
+                .add(R.id.frag, F.newDataFragment(8d, data))
                 .commit();
     }
 

@@ -39,7 +39,7 @@ public class FragmentInjectorBuilder extends BaseInjectorBuilder {
     public void addInjectMethod() {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(getArgClassName(), target);
 
         method.beginControlFlow("if ($N.getArguments() == null)", target)

@@ -1,11 +1,9 @@
 package eu.f3rog.automat.compiler;
 
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.ClassName;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -21,9 +19,7 @@ import javax.tools.Diagnostic;
 
 import eu.f3rog.automat.Arg;
 import eu.f3rog.automat.Extra;
-import eu.f3rog.automat.compiler.builder.ActivityInjectorBuilder;
 import eu.f3rog.automat.compiler.builder.FragmentFactoryBuilder;
-import eu.f3rog.automat.compiler.builder.FragmentInjectorBuilder;
 import eu.f3rog.automat.compiler.builder.InjectorBuilder;
 import eu.f3rog.automat.compiler.builder.NavigatorBuilder;
 import eu.f3rog.automat.compiler.util.ProcessorError;
@@ -83,15 +79,11 @@ public class Processor extends AbstractProcessor {
 
             // create NAVIGATOR
             NavigatorBuilder navigatorBuilder = new NavigatorBuilder();
-            for (Map.Entry<ClassName, ActivityInjectorBuilder> entry : injectorBuilder.getActivityInjectorBuilders().entrySet()) {
-                navigatorBuilder.integrate(entry.getValue());
-            }
+            navigatorBuilder.integrate(injectorBuilder.getActivityInjectorBuilders());
             navigatorBuilder.build(mFiler);
             // create FRAGMENT FACTORY
             FragmentFactoryBuilder fragmentFactoryBuilder = new FragmentFactoryBuilder();
-            for (Map.Entry<ClassName, FragmentInjectorBuilder> entry : injectorBuilder.getFragmentInjectorBuilders().entrySet()) {
-                fragmentFactoryBuilder.integrate(entry.getValue());
-            }
+            fragmentFactoryBuilder.integrate(injectorBuilder.getFragmentInjectorBuilders());
             fragmentFactoryBuilder.build(mFiler);
         } catch (ProcessorError pe) {
             error(pe);

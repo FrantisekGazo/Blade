@@ -4,9 +4,6 @@ import android.app.Activity;
 
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.tools.JavaFileObject;
 
 import eu.f3rog.automat.Extra;
@@ -44,27 +41,13 @@ public class InjectorTest extends BaseTest {
         JavaFileObject expected = generatedFile("automat", "Injector")
                 .imports(
                         input, "I",
-                        "com.example.MainActivity_Injector",
-                        Map.class,
-                        HashMap.class,
-                        Class.class,
-                        Object.class
+                        "com.example.MainActivity_Injector"
                 )
                 .body(
                         "public final class $T {",
                         "",
-                        "   private static final Map<Class, Object> sInjectors = new HashMap<>();",
-                        "",
                         "   public static void inject($I target) {",
-                        "       $I_Injector injector;",
-                        "       if (sInjectors.containsKey(target.getClass())) {",
-                        "           injector = ($I_Injector) sInjectors.get(target.getClass());",
-                        "       }",
-                        "       else {",
-                        "           injector = new $I_Injector();",
-                        "           sInjectors.put(target.getClass(), injector);",
-                        "       }",
-                        "       injector.inject(target);",
+                        "       $I_Injector.inject(target);",
                         "   }",
                         "",
                         "}"

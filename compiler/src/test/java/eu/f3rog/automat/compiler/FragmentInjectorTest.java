@@ -115,13 +115,13 @@ public class FragmentInjectorTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   public void inject($I target) {",
+                        "   public static void inject($I target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",
                         "       }",
                         "       BundleWrapper args = BundleWrapper.from(target.getArguments());",
-                        "       target.mExtraString = args.get(\"com.example.$I-mExtraString\", target.mExtraString);",
-                        "       target.mA = args.get(\"com.example.$I-mA\", target.mA);",
+                        "       target.mExtraString = args.get(\"<Extra-mExtraString>\", target.mExtraString);",
+                        "       target.mA = args.get(\"<Extra-mA>\", target.mA);",
                         "   }",
                         "",
                         "}"
