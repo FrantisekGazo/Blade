@@ -248,5 +248,8 @@
     <orderEntry type="library" exported="" name="jackson-databind-2.3.2" level="project" />
     <orderEntry type="library" exported="" name="joda-time-2.7" level="project" />
     <orderEntry type="library" exported="" name="gradle-tooling-api-builders-2.4" level="project" />
+    <orderEntry type="library" exported="" name="plugin.plugin-0.2.0" level="project" />
+    <orderEntry type="library" exported="" name="plugin.plugin-0.2.0-sources" level="project" />
+    <orderEntry type="library" exported="" name="plugin.plugin-0.2.0-javadoc" level="project" />
   </component>
 </module>

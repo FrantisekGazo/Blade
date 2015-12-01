@@ -1,10 +1,7 @@
 package eu.f3rog.automat.compiler.builder;
 
-import android.os.Bundle;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +11,7 @@ import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.automat.compiler.name.GCN;
 import eu.f3rog.automat.compiler.util.ProcessorError;
+import eu.f3rog.automat.core.BundleWrapper;
 
 /**
  * Class {@link ActivityInjectorBuilder}
@@ -49,14 +47,14 @@ public class ActivityInjectorBuilder extends BaseInjectorBuilder {
                 .endControlFlow();
 
         String extras = "extras";
-        method.addStatement("$T $N = $N.getIntent().getExtras()", Bundle.class, extras, target);
+        method.addStatement("$T $N = $T.from($N.getIntent().getExtras())", BundleWrapper.class, extras, BundleWrapper.class, target);
 
         for (int i = 0; i < mExtras.size(); i++) {
             VariableElement extra = mExtras.get(i);
-            TypeName type = ClassName.get(extra.asType());
-            method.addStatement("$N.$N = ($T) $N.$N($S)",
-                    target, extra.getSimpleName(), type,
-                    extras, getExtraGetterName(type), getExtraId(extra));
+            method.addStatement("$N.$N = $N.get($S, $N.$N)",
+                    target, extra.getSimpleName(),
+                    extras, getExtraId(extra),
+                    target, extra.getSimpleName());
         }
 
         getBuilder().addMethod(method.build());

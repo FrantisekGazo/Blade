@@ -13,6 +13,7 @@ import javax.lang.model.element.VariableElement;
 import eu.f3rog.automat.compiler.name.GCN;
 import eu.f3rog.automat.compiler.name.GPN;
 import eu.f3rog.automat.compiler.util.ProcessorError;
+import eu.f3rog.automat.core.BundleWrapper;
 
 /**
  * Class {@link NavigatorBuilder}
@@ -40,6 +41,7 @@ public class NavigatorBuilder extends BaseClassBuilder {
         String forName = getMethodName(METHOD_NAME_FOR, activityClassName);
         String context = "context";
         String intent = "intent";
+        String extras = "extras";
         // build FOR method
         MethodSpec.Builder forMethod = MethodSpec.methodBuilder(forName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -50,18 +52,20 @@ public class NavigatorBuilder extends BaseClassBuilder {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context.class, context);
 
-        forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, activityClassName);
+        forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, activityClassName)
+                .addStatement("$T $N = new $T()", BundleWrapper.class, extras, BundleWrapper.class);
         startMethod.addCode("$N.startActivity($N($N", context, forName, context);
         for (VariableElement extra : aib.getExtras()) {
             TypeName typeName = ClassName.get(extra.asType());
             String name = extra.getSimpleName().toString();
             forMethod.addParameter(typeName, name);
-            forMethod.addStatement("$N.putExtra($S, $N)", intent, aib.getExtraId(extra), name);
+            forMethod.addStatement("$N.put($S, $N)", extras, aib.getExtraId(extra), name);
 
             startMethod.addParameter(typeName, name);
             startMethod.addCode(", $N", name);
         }
-        forMethod.addStatement("return $N", intent);
+        forMethod.addStatement("$N.putExtras($N.getBundle())", intent, extras)
+                .addStatement("return $N", intent);
         startMethod.addCode("));\n");
         // add methods
         getBuilder().addMethod(forMethod.build());

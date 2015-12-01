@@ -12,6 +12,7 @@ import javax.lang.model.element.VariableElement;
 import eu.f3rog.automat.compiler.name.GCN;
 import eu.f3rog.automat.compiler.name.GPN;
 import eu.f3rog.automat.compiler.util.ProcessorError;
+import eu.f3rog.automat.core.BundleWrapper;
 
 /**
  * Class {@link FragmentFactoryBuilder}
@@ -43,16 +44,16 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
         String fragment = "fragment";
         String args = "args";
         forMethod.addStatement("$T $N = new $T()", fragmentClassName, fragment, fragmentClassName)
-                .addStatement("$T $N = new $T()", Bundle.class, args, Bundle.class);
+                .addStatement("$T $N = new $T()", BundleWrapper.class, args, BundleWrapper.class);
 
         for (VariableElement arg : fib.getArgs()) {
             TypeName typeName = ClassName.get(arg.asType());
             String name = arg.getSimpleName().toString();
             forMethod.addParameter(typeName, name);
-            forMethod.addStatement("$N.$N($S, $N)", args, fib.getArgSetterName(typeName), fib.getExtraId(arg), name);
+            forMethod.addStatement("$N.put($S, $N)", args, fib.getExtraId(arg), name);
         }
 
-        forMethod.addStatement("$N.setArguments($N)", fragment, args)
+        forMethod.addStatement("$N.setArguments($N.getBundle())", fragment, args)
                 .addStatement("return $N", fragment);
 
         getBuilder().addMethod(forMethod.build());

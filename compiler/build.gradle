@@ -5,13 +5,14 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':annotations')
+    /* Android 4.0.x (http://mvnrepository.com/artifact/com.google.android/android) */
+    compile 'com.google.android:android:4.0.1.2'
+
+    compile project(':automat')
 
     /* Annotation Processor */
     compile 'com.google.auto.service:auto-service:1.0-rc2'
     compile 'com.squareup:javapoet:1.0.0'
-
-    compile 'com.google.android:android:4.1.1.4'
 
     /* Testing */
     compile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())

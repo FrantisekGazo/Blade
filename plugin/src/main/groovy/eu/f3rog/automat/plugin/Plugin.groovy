@@ -31,7 +31,7 @@ public class Plugin extends AWeavingPlugin {
         }
         project.dependencies {
             // library
-            compile 'eu.f3rog.automat:annotations:0.2.0'
+            compile 'eu.f3rog.automat:automat:0.2.0'
             apt 'eu.f3rog.automat:compiler:0.2.0'
         }
     }

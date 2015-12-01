@@ -1,10 +1,7 @@
 package eu.f3rog.automat.compiler.builder;
 
-import android.os.Bundle;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +11,7 @@ import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.automat.compiler.name.GCN;
 import eu.f3rog.automat.compiler.util.ProcessorError;
+import eu.f3rog.automat.core.BundleWrapper;
 
 /**
  * Class {@link FragmentInjectorBuilder}
@@ -49,14 +47,13 @@ public class FragmentInjectorBuilder extends BaseInjectorBuilder {
                 .endControlFlow();
 
         String args = "args";
-        method.addStatement("$T $N = $N.getArguments()", Bundle.class, args, target);
+        method.addStatement("$T $N = $T.from($N.getArguments())", BundleWrapper.class, args, BundleWrapper.class, target);
 
         for (int i = 0; i < mArgs.size(); i++) {
             VariableElement arg = mArgs.get(i);
-            TypeName type = ClassName.get(arg.asType());
-            method.addStatement("$N.$N = ($T) $N.$N($S)",
-                    target, arg.getSimpleName(), type,
-                    args, getExtraGetterName(type), getExtraId(arg));
+            method.addStatement("$N.$N = $N.get($S, $N.$N)",
+                    target, arg.getSimpleName(),
+                    args, getExtraId(arg), target, arg.getSimpleName());
         }
 
         getBuilder().addMethod(method.build());

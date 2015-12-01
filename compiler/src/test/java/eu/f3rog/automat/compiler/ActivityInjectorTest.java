@@ -8,6 +8,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import eu.f3rog.automat.Extra;
+import eu.f3rog.automat.core.BundleWrapper;
 
 import static eu.f3rog.automat.compiler.util.File.file;
 import static eu.f3rog.automat.compiler.util.File.generatedFile;
@@ -108,8 +109,7 @@ public class ActivityInjectorTest extends BaseTest {
         JavaFileObject expected = generatedFile("com.example", "MainActivity_Injector")
                 .imports(
                         input, "I",
-                        Bundle.class,
-                        String.class
+                        BundleWrapper.class
                 )
                 .body(
                         "public final class $T {",
@@ -118,9 +118,9 @@ public class ActivityInjectorTest extends BaseTest {
                         "       if (target.getIntent() == null || target.getIntent().getExtras() == null) {",
                         "           return;",
                         "       }",
-                        "       Bundle extras = target.getIntent().getExtras();",
-                        "       target.mExtraString = (String) extras.getString(\"com.example.$I-mExtraString\");",
-                        "       target.mA = (int) extras.getInt(\"com.example.$I-mA\");",
+                        "       BundleWrapper extras = BundleWrapper.from(target.getIntent().getExtras());",
+                        "       target.mExtraString = extras.get(\"com.example.$I-mExtraString\", target.mExtraString);",
+                        "       target.mA = extras.get(\"com.example.$I-mA\", target.mA);",
                         "   }",
                         "",
                         "}"

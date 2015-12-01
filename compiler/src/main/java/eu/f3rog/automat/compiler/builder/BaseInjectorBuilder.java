@@ -1,14 +1,12 @@
 package eu.f3rog.automat.compiler.builder;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.automat.compiler.name.GCN;
 import eu.f3rog.automat.compiler.util.ProcessorError;
-import eu.f3rog.automat.compiler.util.StringUtils;
 
 /**
  * Class {@link BaseInjectorBuilder}
@@ -46,32 +44,6 @@ public abstract class BaseInjectorBuilder extends BaseClassBuilder {
     }
 
     protected abstract void addInjectMethod();
-
-    /**
-     * Returns getter for given Extra type.
-     */
-    protected String getExtraGetterName(TypeName typeName) {
-        if (typeName.isPrimitive()) {
-            return String.format("get%s", StringUtils.startUpperCase(typeName.toString()));
-        } else if (typeName.equals(ClassName.get(String.class))) {
-            return "getString";
-        } else {
-            return "get";
-        }
-    }
-
-    /**
-     * Returns setter for given Arg type.
-     */
-    protected String getArgSetterName(TypeName typeName) {
-        if (typeName.isPrimitive()) {
-            return String.format("put%s", StringUtils.startUpperCase(typeName.toString()));
-        } else if (typeName.equals(ClassName.get(String.class))) {
-            return "putString";
-        } else {
-            return "putSerializable";
-        } // TODO : putParcelable, putStringArray, putXArray, ...
-    }
 
     public String getExtraId(VariableElement extra) {
         return String.format(EXTRA_ID_FORMAT,

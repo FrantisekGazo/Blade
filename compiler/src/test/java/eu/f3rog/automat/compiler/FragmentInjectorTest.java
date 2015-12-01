@@ -1,6 +1,5 @@
 package eu.f3rog.automat.compiler;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 
@@ -9,7 +8,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import eu.f3rog.automat.Arg;
-import eu.f3rog.automat.Extra;
+import eu.f3rog.automat.core.BundleWrapper;
 
 import static eu.f3rog.automat.compiler.util.File.file;
 import static eu.f3rog.automat.compiler.util.File.generatedFile;
@@ -40,6 +39,7 @@ public class FragmentInjectorTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(ErrorMsg.Invalid_class_with_Arg.toString());
     }
+
     @Test
     public void invalidField() {
         JavaFileObject input = file("com.example", "MainFragment")
@@ -74,7 +74,7 @@ public class FragmentInjectorTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(ErrorMsg.Invalid_Arg.toString());
 
-            input = file("com.example", "MainFragment")
+        input = file("com.example", "MainFragment")
                 .imports(
                         Arg.class, "A"
                 )
@@ -110,8 +110,7 @@ public class FragmentInjectorTest extends BaseTest {
         JavaFileObject expected = generatedFile("com.example", "MainFragment_Injector")
                 .imports(
                         input, "I",
-                        Bundle.class,
-                        String.class
+                        BundleWrapper.class
                 )
                 .body(
                         "public final class $T {",
@@ -120,9 +119,9 @@ public class FragmentInjectorTest extends BaseTest {
                         "       if (target.getArguments() == null) {",
                         "           return;",
                         "       }",
-                        "       Bundle args = target.getArguments();",
-                        "       target.mExtraString = (String) args.getString(\"com.example.$I-mExtraString\");",
-                        "       target.mA = (int) args.getInt(\"com.example.$I-mA\");",
+                        "       BundleWrapper args = BundleWrapper.from(target.getArguments());",
+                        "       target.mExtraString = args.get(\"com.example.$I-mExtraString\", target.mExtraString);",
+                        "       target.mA = args.get(\"com.example.$I-mA\", target.mA);",
                         "   }",
                         "",
                         "}"
