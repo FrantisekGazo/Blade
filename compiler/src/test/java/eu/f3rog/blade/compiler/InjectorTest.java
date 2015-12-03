@@ -38,7 +38,7 @@ public class InjectorTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("automat", "Injector")
+        JavaFileObject expected = generatedFile("blade", "Injector")
                 .imports(
                         input, "I",
                         "com.example.MainActivity_Injector"
