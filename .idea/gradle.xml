@@ -10,10 +10,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/annotations" />
-            <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/automat" />
             <option value="$PROJECT_DIR$/compiler" />
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/plugin" />
+            <option value="$PROJECT_DIR$/sample" />
           </set>
         </option>
       </GradleProjectSettings>

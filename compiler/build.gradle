@@ -9,7 +9,8 @@ dependencies {
     /* Android 4.0.x (http://mvnrepository.com/artifact/com.google.android/android) */
     compile 'com.google.android:android:4.0.1.2'
 
-    compile project(':automat')
+    /* Project Core */
+    compile project(':core')
 
     /* Annotation Processor */
     compile 'com.google.auto.service:auto-service:1.0-rc2'
