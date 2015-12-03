@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id=":compiler" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="GRADLE" external.system.module.group="eu.f3rog.automat" external.system.module.version="0.2.0" type="JAVA_MODULE" version="4">
+<module external.linked.project.id=":compiler" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="GRADLE" external.system.module.group="eu.f3rog.blade" external.system.module.version="1.0.0" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="android-gradle" name="Android-Gradle">
       <configuration>
@@ -31,6 +31,7 @@
     <orderEntry type="library" exported="" name="android-4.0.1.2" level="project" />
     <orderEntry type="library" exported="" name="auto-service-1.0-rc2" level="project" />
     <orderEntry type="library" exported="" name="javapoet-1.0.0" level="project" />
+    <orderEntry type="library" exported="" name="guava-18.0" level="project" />
     <orderEntry type="library" exported="" name="commons-logging-1.1.1" level="project" />
     <orderEntry type="library" exported="" name="httpclient-4.0.1" level="project" />
     <orderEntry type="library" exported="" name="opengl-api-gl1.1-android-2.1_r1" level="project" />
@@ -38,7 +39,6 @@
     <orderEntry type="library" exported="" name="xpp3-1.1.4c" level="project" />
     <orderEntry type="library" exported="" name="json-20080701" level="project" />
     <orderEntry type="library" exported="" name="auto-common-0.3" level="project" />
-    <orderEntry type="library" exported="" name="guava-18.0" level="project" />
     <orderEntry type="library" exported="" name="httpcore-4.0.1" level="project" />
     <orderEntry type="library" exported="" name="commons-codec-1.3" level="project" />
     <orderEntry type="library" exported="" name="tools" level="project" />
@@ -46,6 +46,5 @@
     <orderEntry type="library" exported="" scope="TEST" name="compile-testing-0.7" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.11" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
-    <orderEntry type="library" exported="" name="compiler.compiler-0.2.0" level="project" />
   </component>
 </module>

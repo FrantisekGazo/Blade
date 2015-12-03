@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'com.novoda.bintray-release'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -19,4 +20,15 @@ dependencies {
     testCompile group: 'com.google.guava', name: 'guava', version: '18.0'
     testCompile group: 'com.google.truth', name: 'truth', version: '0.27'
     testCompile group: 'com.google.testing.compile', name: 'compile-testing', version: '0.7'
+}
+
+publish {
+    groupId = LIB_GROUP_ID
+    artifactId = ARTIFACT_ID
+    publishVersion = LIB_VERSION
+    // bintray
+    repoName = LIB_REPO_NAME
+    uploadName = LIB_PACKAGE_NAME
+    desc = DESC
+    website = LIB_GIT_URL
 }

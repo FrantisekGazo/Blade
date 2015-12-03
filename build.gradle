@@ -11,19 +11,11 @@ buildscript {
         // in the individual module build.gradle files
 
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
+
+        // publish plugin for bintray
+        classpath 'com.novoda:bintray-release:0.3.4'
     }
 }
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 
 allprojects {
     repositories {
@@ -31,8 +23,8 @@ allprojects {
         mavenLocal()
     }
 
-    group = GROUP
-    version = VERSION_NAME
+    group = LIB_GROUP_ID
+    version = LIB_VERSION
 
     apply plugin: 'maven'
 
