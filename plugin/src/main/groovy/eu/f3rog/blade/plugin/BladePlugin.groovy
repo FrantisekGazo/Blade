@@ -18,7 +18,7 @@ public class BladePlugin extends AWeavingPlugin {
     @Override
     public IWeaver[] getTransformers(Project project) {
         return [
-                new BladeWeaver(/* add extension params if necessary */)
+                new BladeWeaver(project.blade.debug)
         ]
     }
 
@@ -31,8 +31,8 @@ public class BladePlugin extends AWeavingPlugin {
         }
         project.dependencies {
             // library
-            compile 'eu.f3rog.blade:core:1.0.0'
-            apt 'eu.f3rog.blade:compiler:1.0.0'
+            compile 'eu.f3rog.blade:core:0.9.0'
+            apt 'eu.f3rog.blade:compiler:0.9.0'
         }
     }
 

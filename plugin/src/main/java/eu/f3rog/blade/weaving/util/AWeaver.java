@@ -16,22 +16,22 @@ import javassist.build.JavassistBuildException;
  */
 public abstract class AWeaver implements IWeaver {
 
-    public static final boolean LOG = true;
-
     private final Set<String> mWaitingForClasses;
     private final Set<String> mFoundClasses;
     private final Set<CtClass> mStack;
     private String mDestinationDir;
+    private boolean mDebug;
 
     /**
      * Constructor
      *
      * @param requiredClasses List of application classes that are necessary for class transformation.
      */
-    public AWeaver(Collection<String> requiredClasses) {
+    public AWeaver(Collection<String> requiredClasses, boolean debug) {
         this.mWaitingForClasses = new HashSet<>(requiredClasses);
         this.mFoundClasses = new HashSet<>();
         this.mStack = new HashSet<>();
+        this.mDebug = debug;
     }
 
     @Override
@@ -85,7 +85,7 @@ public abstract class AWeaver implements IWeaver {
     public abstract boolean needTransformation(CtClass candidateClass) throws JavassistBuildException;
 
     protected void log(String msg, Object... args) {
-        if (LOG) {
+        if (mDebug) {
             String format = String.format("@ %s : %s\n", getClass().getSimpleName(), msg);
             System.out.printf(format, args);
         }

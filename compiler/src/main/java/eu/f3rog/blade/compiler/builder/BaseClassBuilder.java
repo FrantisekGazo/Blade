@@ -24,6 +24,8 @@ import eu.f3rog.blade.compiler.util.StringUtils;
  */
 public abstract class BaseClassBuilder {
 
+    private static final boolean LOG_SUCCESS = false;
+
     /**
      * Format of full class name.
      */
@@ -157,7 +159,9 @@ public abstract class BaseClassBuilder {
         javaFile.writeTo(filer);
         //javaFile.writeTo(System.out);
 
-        System.out.println(String.format("Class <%s> successfully generated.", getFullName()));
+        if (LOG_SUCCESS) {
+            System.out.println(String.format("Class <%s> successfully generated.", getFullName()));
+        }
     }
 
     /**

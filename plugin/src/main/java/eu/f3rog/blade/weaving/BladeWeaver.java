@@ -43,22 +43,22 @@ public class BladeWeaver extends AWeaver {
     /**
      * Constructor
      */
-    public BladeWeaver() {
-        super(REQUIRED_CLASSES);
+    public BladeWeaver(boolean debug) {
+        super(REQUIRED_CLASSES, debug);
         mAfterBurner = new AfterBurner();
     }
 
     @Override
     public boolean needTransformation(CtClass candidateClass) throws JavassistBuildException {
         try {
-            log("needTransformation ? %s", candidateClass.getName());
+            //log("needTransformation ? %s", candidateClass.getName());
             return WeavingUtil.isSubclassOf(candidateClass,
                     Class.ACTIVITY,
                     Class.APP_COMPAT_ACTIVITY,
                     Class.FRAGMENT,
                     Class.SUPPORT_FRAGMENT);
         } catch (Exception e) {
-            log("needTransformation - failed");
+            log("needTransformation failed on class %s", candidateClass.getName());
             e.printStackTrace();
             throw new JavassistBuildException(e);
         }
@@ -66,7 +66,7 @@ public class BladeWeaver extends AWeaver {
 
     @Override
     public void applyTransformations(CtClass classToTransform) throws JavassistBuildException {
-        log("applyTransformations - %s", classToTransform.getName());
+        log("Applying transformation to %s", classToTransform.getName());
         try {
             // ACTIVITY
             if (WeavingUtil.isSubclassOf(classToTransform, Class.ACTIVITY, Class.APP_COMPAT_ACTIVITY)) {
@@ -78,11 +78,11 @@ public class BladeWeaver extends AWeaver {
             }
             // nothing done
             else {
-                log("applyTransformations - NOTHING done");
+                log("Nothing changed");
             }
-            log("applyTransformations - done");
+            log("Transformation done");
         } catch (Exception e) {
-            log("applyTransformations - failed");
+            log("Transformation failed!");
             e.printStackTrace();
             throw new JavassistBuildException(e);
         }
@@ -104,7 +104,7 @@ public class BladeWeaver extends AWeaver {
         String body = String.format("{ %s.%s(this); }", Class.INJECTOR, Method.INJECT);
         // weave into method
         mAfterBurner.beforeOverrideMethod(classToTransform, Method.ON_CREATE, body);
-        log("Weaved: %s", body);
+        log("%s weaved into %s", body, Method.ON_CREATE);
     }
 
     private void weaveFragment(CtClass classToTransform) throws Exception {
@@ -113,7 +113,7 @@ public class BladeWeaver extends AWeaver {
         String body = String.format("{ %s.%s(this); }", Class.INJECTOR, Method.INJECT);
         // weave into method
         mAfterBurner.beforeOverrideMethod(classToTransform, Method.ON_ATTACH, body);
-        log("Weaved: %s", body);
+        log("%s weaved into %s", body, Method.ON_ATTACH);
     }
 
 }
