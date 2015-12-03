@@ -125,3 +125,27 @@ I.startMyActivity("some-string", new MyData());
 And given values will be set to coresponding attributes annotated with `@Extra`.
 
 # Download
+
+Gradle plugin:
+```Gradle
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.3.0'
+        // Add Blade plugin
+        classpath 'eu.f3rog.blade:plugin:0.9.0'
+    }
+}
+
+apply plugin: 'com.android.application'
+// Apply Blade plugin
+apply plugin: 'blade'
+```
+
+This library uses Annotation Processor so you have to apply also this Gradle plugin, if not already used:
+```Gradle
+classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+apply plugin: 'com.neenbedankt.android-apt'
+```
