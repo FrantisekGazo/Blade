@@ -31,7 +31,7 @@ public class BladeProcessor extends AbstractProcessor {
     private Messager mMessager;
     private Filer mFiler;
 
-    private boolean mProcessed;
+    private InjectorBuilder mInjectorBuilder = null;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -55,37 +55,36 @@ public class BladeProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (!mProcessed) {
-            mProcessed = true;
-        } else {
-            return false;
-        }
-
         try {
-            // create main INJECTOR
-            InjectorBuilder injectorBuilder = new InjectorBuilder();
+            if (mInjectorBuilder == null) {
+                mInjectorBuilder = new InjectorBuilder();
+            }
 
-            // create ACTIVITY INJECTORS
+            // add ACTIVITY INJECTORS
             Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Extra.class);
             for (Element e : elements) {
-                injectorBuilder.addExtra((VariableElement) e);
+                mInjectorBuilder.addExtra((VariableElement) e);
             }
-            // create FRAGMENT INJECTORS
+            // add FRAGMENT INJECTORS
             elements = roundEnv.getElementsAnnotatedWith(Arg.class);
             for (Element e : elements) {
-                injectorBuilder.addArg((VariableElement) e);
+                mInjectorBuilder.addArg((VariableElement) e);
             }
 
-            injectorBuilder.build(mFiler);
 
-            // create NAVIGATOR
-            NavigatorBuilder navigatorBuilder = new NavigatorBuilder();
-            navigatorBuilder.integrate(injectorBuilder.getActivityInjectorBuilders());
-            navigatorBuilder.build(mFiler);
-            // create FRAGMENT FACTORY
-            FragmentFactoryBuilder fragmentFactoryBuilder = new FragmentFactoryBuilder();
-            fragmentFactoryBuilder.integrate(injectorBuilder.getFragmentInjectorBuilders());
-            fragmentFactoryBuilder.build(mFiler);
+            if (roundEnv.processingOver()) { // write classes
+                // create NAVIGATOR
+                NavigatorBuilder navigatorBuilder = new NavigatorBuilder();
+                navigatorBuilder.integrate(mInjectorBuilder.getActivityInjectorBuilders());
+                navigatorBuilder.build(mFiler);
+
+                // create FRAGMENT FACTORY
+                FragmentFactoryBuilder fragmentFactoryBuilder = new FragmentFactoryBuilder();
+                fragmentFactoryBuilder.integrate(mInjectorBuilder.getFragmentInjectorBuilders());
+                fragmentFactoryBuilder.build(mFiler);
+
+                mInjectorBuilder.build(mFiler);
+            }
         } catch (ProcessorError pe) {
             error(pe);
         } catch (IOException e) {

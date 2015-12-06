@@ -5,9 +5,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -15,6 +15,7 @@ import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
+import eu.f3rog.blade.compiler.util.ClassNameComparator;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
@@ -41,18 +42,31 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
     }
 
     public void integrate(Map<ClassName, FragmentInjectorBuilder> fibs) throws ProcessorError {
+        // get all class names
+        List<ClassName> classes = new ArrayList<>(fibs.keySet());
+        // sort them
+        Collections.sort(classes, new ClassNameComparator());
+
+        FragmentInjectorBuilder fib;
         List<VariableElement> args = new ArrayList<>();
-        Set<ClassName> classes = fibs.keySet();
-        for (Map.Entry<ClassName, FragmentInjectorBuilder> entry : fibs.entrySet()) {
-            TypeElement fragmentClass = (TypeElement) entry.getValue().getArgs().get(0).getEnclosingElement();
+        for (int i = 0, size = classes.size(); i < size; i++) {
+            fib = fibs.get(classes.get(i));
+
+            TypeElement fragmentClass = (TypeElement) fib.getArgs().get(0).getEnclosingElement();
+            // do not create method for abstract class
             if (fragmentClass.getModifiers().contains(Modifier.ABSTRACT)) continue;
-            for (ClassName c : classes) {
-                if (isSubClassOf(fragmentClass, c)) {
-                    args.addAll(fibs.get(c).getArgs());
+            // get all inherited args
+            for (int j = 0; j < size; j++) {
+                if (isSubClassOf(fragmentClass, classes.get(j))) {
+                    args.addAll(fibs.get(classes.get(j)).getArgs());
                 }
             }
-            args.addAll(entry.getValue().getArgs());
-            integrate(entry.getValue(), args);
+            // get all declared args
+            args.addAll(fib.getArgs());
+            // integrate
+            integrate(fib, args);
+
+            // clear args
             args.clear();
         }
     }

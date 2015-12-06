@@ -8,9 +8,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -18,6 +18,7 @@ import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
+import eu.f3rog.blade.compiler.util.ClassNameComparator;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
@@ -44,20 +45,33 @@ public class NavigatorBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.FINAL, Modifier.PUBLIC);
     }
 
-    public void integrate(Map<ClassName, ActivityInjectorBuilder> fibs) throws ProcessorError {
-        List<VariableElement> args = new ArrayList<>();
-        Set<ClassName> classes = fibs.keySet();
-        for (Map.Entry<ClassName, ActivityInjectorBuilder> entry : fibs.entrySet()) {
-            TypeElement fragmentClass = (TypeElement) entry.getValue().getExtras().get(0).getEnclosingElement();
+    public void integrate(Map<ClassName, ActivityInjectorBuilder> aibs) throws ProcessorError {
+        // get all class names
+        List<ClassName> classes = new ArrayList<>(aibs.keySet());
+        // sort them
+        Collections.sort(classes, new ClassNameComparator());
+
+        ActivityInjectorBuilder aib;
+        List<VariableElement> extras = new ArrayList<>();
+        for (int i = 0, size = classes.size(); i < size; i++) {
+            aib = aibs.get(classes.get(i));
+
+            TypeElement fragmentClass = (TypeElement) aib.getExtras().get(0).getEnclosingElement();
+            // do not create method for abstract class
             if (fragmentClass.getModifiers().contains(Modifier.ABSTRACT)) continue;
-            for (ClassName c : classes) {
-                if (isSubClassOf(fragmentClass, c)) {
-                    args.addAll(fibs.get(c).getExtras());
+            // get all inherited extras
+            for (int j = 0; j < size; j++) {
+                if (isSubClassOf(fragmentClass, classes.get(j))) {
+                    extras.addAll(aibs.get(classes.get(j)).getExtras());
                 }
             }
-            args.addAll(entry.getValue().getExtras());
-            integrate(entry.getValue(), args);
-            args.clear();
+            // get all declared extras
+            extras.addAll(aib.getExtras());
+            // integrate
+            integrate(aib, extras);
+
+            // clear extras
+            extras.clear();
         }
     }
 

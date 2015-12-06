@@ -31,7 +31,6 @@ import eu.f3rog.blade.compiler.util.ProcessorUtils;
 public class InjectorBuilder extends BaseClassBuilder {
 
     private static final String METHOD_NAME_INJECT = "inject";
-    private static final String FIELD_NAME_INJECTORS = "sInjectors";
 
     private Map<ClassName, ActivityInjectorBuilder> mActivityInjectorBuilders = new HashMap<>();
     private Map<ClassName, FragmentInjectorBuilder> mFragmentInjectorBuilders = new HashMap<>();
