@@ -18,12 +18,9 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  * @version 2015-11-27
  */
 public class InjectorTest extends BaseTest {
-    public final static String[] SUPPORTED = {
-            "com.example.$I",
-    };
 
     @Test
-    public void test1() {
+    public void one() {
         JavaFileObject input = file("com.example", "MainActivity")
                 .imports(
                         Extra.class, "E",

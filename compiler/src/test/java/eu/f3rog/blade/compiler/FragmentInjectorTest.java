@@ -91,7 +91,7 @@ public class FragmentInjectorTest extends BaseTest {
     }
 
     @Test
-    public void test1() {
+    public void one() {
         JavaFileObject input = file("com.example", "MainFragment")
                 .imports(
                         Arg.class, "A",

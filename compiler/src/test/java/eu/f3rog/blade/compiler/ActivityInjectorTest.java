@@ -38,6 +38,7 @@ public class ActivityInjectorTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(ErrorMsg.Invalid_class_with_Extra.toString());
     }
+
     @Test
     public void invalidField() {
         JavaFileObject input = file("com.example", "MainActivity")
@@ -90,7 +91,7 @@ public class ActivityInjectorTest extends BaseTest {
     }
 
     @Test
-    public void test1() {
+    public void one() {
         JavaFileObject input = file("com.example", "MainActivity")
                 .imports(
                         Extra.class, "E",
