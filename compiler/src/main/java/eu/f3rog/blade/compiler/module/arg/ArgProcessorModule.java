@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.module.arg;
+package eu.f3rog.blade.compiler.module.arg;
 
 import java.util.Set;
 
@@ -8,8 +8,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 import blade.Arg;
-import eu.f3rog.blade.compiler.new_approach.builder.ClassManager;
-import eu.f3rog.blade.compiler.new_approach.processor.ProcessorModule;
+import eu.f3rog.blade.compiler.builder.ClassManager;
+import eu.f3rog.blade.compiler.ProcessorModule;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
 /**

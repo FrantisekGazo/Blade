@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.builder;
+package eu.f3rog.blade.compiler.builder;
 
 import com.squareup.javapoet.ClassName;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.TypeElement;
 
-import eu.f3rog.blade.compiler.new_approach.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.util.ClassNameComparator;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 

@@ -109,7 +109,7 @@ public class FragmentInjectorTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainFragment_Injector")
+        JavaFileObject expected = generatedFile("com.example", "MainFragment_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class

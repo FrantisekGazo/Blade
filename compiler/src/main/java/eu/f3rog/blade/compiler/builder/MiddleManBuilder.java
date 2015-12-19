@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.builder;
+package eu.f3rog.blade.compiler.builder;
 
 import com.squareup.javapoet.MethodSpec;
 

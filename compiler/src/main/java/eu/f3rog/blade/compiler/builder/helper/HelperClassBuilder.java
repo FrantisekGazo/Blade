@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.builder.helper;
+package eu.f3rog.blade.compiler.builder.helper;
 
 import com.squareup.javapoet.ClassName;
 
@@ -11,7 +11,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import eu.f3rog.blade.compiler.name.GCN;
-import eu.f3rog.blade.compiler.new_approach.builder.BaseClassBuilder;
+import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
 /**

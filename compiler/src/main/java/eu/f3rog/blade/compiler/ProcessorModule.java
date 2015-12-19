@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.processor;
+package eu.f3rog.blade.compiler;
 
 import javax.annotation.processing.RoundEnvironment;
 
@@ -15,5 +15,6 @@ public interface ProcessorModule {
     Class[] getSupportedAnnotations();
 
     void process(RoundEnvironment roundEnv) throws ProcessorError;
+
 }
 

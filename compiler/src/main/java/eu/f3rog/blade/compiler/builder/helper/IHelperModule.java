@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.builder.helper;
+package eu.f3rog.blade.compiler.builder.helper;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

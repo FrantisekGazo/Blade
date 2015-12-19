@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.module.extra;
+package eu.f3rog.blade.compiler.module.extra;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +16,9 @@ import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
-import eu.f3rog.blade.compiler.new_approach.builder.BaseClassBuilder;
-import eu.f3rog.blade.compiler.new_approach.builder.ClassManager;
-import eu.f3rog.blade.compiler.new_approach.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
+import eu.f3rog.blade.compiler.builder.ClassManager;
+import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
@@ -36,7 +36,7 @@ public class ActivityNavigatorBuilder extends BaseClassBuilder {
     private static final String METHOD_NAME_START = "start%s";
 
     public ActivityNavigatorBuilder() throws ProcessorError {
-        super(GCN.NAVIGATOR, GPN.BLADE);
+        super(GCN.ACTIVITY_NAVIGATOR, GPN.BLADE);
     }
 
     @Override

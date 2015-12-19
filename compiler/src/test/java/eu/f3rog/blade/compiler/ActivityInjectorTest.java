@@ -43,10 +43,11 @@ public class ActivityInjectorTest extends BaseTest {
     public void invalidField() {
         JavaFileObject input = file("com.example", "MainActivity")
                 .imports(
-                        Extra.class, "E"
+                        Extra.class, "E",
+                        Activity.class
                 )
                 .body(
-                        "public class $T {",
+                        "public class $T extends Activity {",
                         "",
                         "   @$E private String mExtraString;",
                         "",
@@ -59,10 +60,11 @@ public class ActivityInjectorTest extends BaseTest {
 
         input = file("com.example", "MainActivity")
                 .imports(
-                        Extra.class, "E"
+                        Extra.class, "E",
+                        Activity.class
                 )
                 .body(
-                        "public class $T {",
+                        "public class $T extends Activity {",
                         "",
                         "   @$E protected String mExtraString;",
                         "",
@@ -75,10 +77,11 @@ public class ActivityInjectorTest extends BaseTest {
 
         input = file("com.example", "MainActivity")
                 .imports(
-                        Extra.class, "E"
+                        Extra.class, "E",
+                        Activity.class
                 )
                 .body(
-                        "public class $T {",
+                        "public class $T extends Activity {",
                         "",
                         "   @$E final String mExtraString;",
                         "",
@@ -106,7 +109,7 @@ public class ActivityInjectorTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainActivity_Injector")
+        JavaFileObject expected = generatedFile("com.example", "MainActivity_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class

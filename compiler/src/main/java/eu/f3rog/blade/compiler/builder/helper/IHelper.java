@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.new_approach.builder.helper;
+package eu.f3rog.blade.compiler.builder.helper;
 
 import eu.f3rog.blade.compiler.util.ProcessorError;
 

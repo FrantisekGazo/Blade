@@ -22,7 +22,8 @@ import eu.f3rog.blade.compiler.util.StringUtils;
  * @author FrantisekGazo
  * @version 2015-10-17
  */
-public abstract class BaseClassBuilder {
+public abstract class BaseClassBuilder
+        implements IBuildable {
 
     private static final boolean LOG_SUCCESS = false;
 
@@ -31,9 +32,13 @@ public abstract class BaseClassBuilder {
      */
     private static final String FORMAT_FULL_CLASS_NAME = "%s.%s";
     /**
+     * Format of instance field.
+     */
+    private static final String FORMAT_INSTANCE_FIELD_NAME = "m%s";
+    /**
      * Format of class field.
      */
-    private static final String FORMAT_CLASS_FIELD_NAME = "m%s";
+    private static final String FORMAT_CLASS_FIELD_NAME = "s%s";
 
     private TypeSpec.Builder mBuilder;
     private ClassName mClassName = null;
@@ -117,8 +122,12 @@ public abstract class BaseClassBuilder {
         return mClassName;
     }
 
-    protected String getPackage() {
-        return GPN.toString(mGenPackageName);
+    private String getPackage() {
+        if (mGenPackageName.length == 0) {
+            return getArgClassName().packageName();
+        } else {
+            return GPN.toString(mGenPackageName);
+        }
     }
 
     /**
@@ -151,6 +160,7 @@ public abstract class BaseClassBuilder {
      *
      * @param filer File creator.
      */
+    @Override
     public void build(Filer filer) throws ProcessorError, IOException {
         end();
         TypeSpec cls = mBuilder.build();
@@ -165,9 +175,16 @@ public abstract class BaseClassBuilder {
     }
 
     /**
+     * Creates instance field name.
+     */
+    protected String createInstanceFieldName(String name) {
+        return String.format(FORMAT_INSTANCE_FIELD_NAME, StringUtils.startUpperCase(name));
+    }
+
+    /**
      * Creates class field name.
      */
-    protected String createFieldName(String name) {
+    protected String createClassFieldName(String name) {
         return String.format(FORMAT_CLASS_FIELD_NAME, StringUtils.startUpperCase(name));
     }
 
