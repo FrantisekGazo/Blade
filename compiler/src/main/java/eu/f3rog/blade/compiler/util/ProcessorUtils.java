@@ -106,7 +106,7 @@ public class ProcessorUtils {
                     return true;
                 }
             }
-            superClass = (TypeElement) ((Symbol.ClassSymbol) superClass).getSuperclass().asElement();
+            superClass = getSuperClass(superClass);
         }
         return false;
     }
@@ -118,7 +118,7 @@ public class ProcessorUtils {
     public static boolean isSubClassOf(final TypeElement element, final ClassName cls) {
         TypeElement superClass = element;
         do {
-            superClass = (TypeElement) ((Symbol.ClassSymbol) superClass).getSuperclass().asElement();
+            superClass = getSuperClass(superClass);
             if (superClass != null && ClassName.get(superClass).equals(cls)) {
                 return true;
             }
@@ -129,7 +129,7 @@ public class ProcessorUtils {
     public static boolean isSubClassOf(final TypeElement element, final ClassName... classes) {
         TypeElement superClass = element;
         do {
-            superClass = (TypeElement) ((Symbol.ClassSymbol) superClass).getSuperclass().asElement();
+            superClass = getSuperClass(superClass);
             for (ClassName cls : classes) {
                 if (superClass != null && ClassName.get(superClass).equals(cls)) {
                     return true;
@@ -137,6 +137,11 @@ public class ProcessorUtils {
             }
         } while (superClass != null);
         return false;
+    }
+
+    public static TypeElement getSuperClass(final TypeElement element) {
+        if (element == null) return null;
+        return (TypeElement) ((Symbol.ClassSymbol) element).getSuperclass().asElement();
     }
 
     public static String getParamName(final ClassName className) {

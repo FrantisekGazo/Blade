@@ -50,7 +50,7 @@ public class InjectorBuilder extends BaseClassBuilder {
         if (e.getModifiers().contains(Modifier.PRIVATE)
                 || e.getModifiers().contains(Modifier.PROTECTED)
                 || e.getModifiers().contains(Modifier.FINAL)) {
-            throw new ProcessorError(e, ErrorMsg.Invalid_Extra);
+            throw new ProcessorError(e, ErrorMsg.Invalid_Extra_field);
         }
 
         TypeElement classElement = (TypeElement) e.getEnclosingElement();
@@ -67,7 +67,7 @@ public class InjectorBuilder extends BaseClassBuilder {
         if (e.getModifiers().contains(Modifier.PRIVATE)
                 || e.getModifiers().contains(Modifier.PROTECTED)
                 || e.getModifiers().contains(Modifier.FINAL)) {
-            throw new ProcessorError(e, ErrorMsg.Invalid_Arg);
+            throw new ProcessorError(e, ErrorMsg.Invalid_Arg_field);
         }
 
         TypeElement classElement = (TypeElement) e.getEnclosingElement();

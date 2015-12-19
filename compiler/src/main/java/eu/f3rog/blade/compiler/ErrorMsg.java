@@ -11,10 +11,11 @@ import blade.Extra;
  */
 public enum ErrorMsg {
 
+    Invalid_place("Annotation not allowed here."),
     Invalid_class_with_Extra("Only Activity subclass can contain @%s annotations.", Extra.class.getSimpleName()),
-    Invalid_Extra("Field annotated with @%s cannot be private or protected nor final", Extra.class.getSimpleName()),
+    Invalid_Extra_field("Field annotated with @%s cannot be private or protected nor final", Extra.class.getSimpleName()),
     Invalid_class_with_Arg("Only Fragment subclass can contain @%s annotations.", Arg.class.getSimpleName()),
-    Invalid_Arg("Field annotated with @%s cannot be private or protected nor final", Arg.class.getSimpleName()),
+    Invalid_Arg_field("Field annotated with @%s cannot be private or protected nor final", Arg.class.getSimpleName()),
     ;
 
     private String mMessage;

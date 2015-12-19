@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler;
+package eu.f3rog.compiler;
 
 import android.app.Fragment;
 
@@ -7,6 +7,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Arg;
+import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;
@@ -109,7 +110,7 @@ public class FragmentInjectorTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainFragment_Injector")
+        JavaFileObject expected = generatedFile("com.example", "MainFragment_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class
