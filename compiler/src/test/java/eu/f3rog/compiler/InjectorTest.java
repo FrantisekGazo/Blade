@@ -37,16 +37,16 @@ public class InjectorTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "Injector")
+        JavaFileObject expected = generatedFile("blade", "MiddleMan")
                 .imports(
                         input, "I",
-                        "com.example.MainActivity_Injector"
+                        "com.example.MainActivity_Helper", "H"
                 )
                 .body(
                         "public final class $T {",
                         "",
                         "   public static void inject($I target) {",
-                        "       $I_Injector.inject(target);",
+                        "       $H.inject(target);",
                         "   }",
                         "",
                         "}"
