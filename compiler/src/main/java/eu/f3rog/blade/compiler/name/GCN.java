@@ -14,6 +14,7 @@ public enum GCN {
     HELPER("%s_Helper"),
     FRAGMENT_FACTORY("F"),
     ACTIVITY_NAVIGATOR("I"),
+    STATE_MANAGER("StateManager"),
     ;
 
     private String mName;

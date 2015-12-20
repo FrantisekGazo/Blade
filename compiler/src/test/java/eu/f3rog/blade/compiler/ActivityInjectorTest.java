@@ -56,7 +56,7 @@ public class ActivityInjectorTest extends BaseTest {
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Extra_field.toString());
+                .withErrorContaining(ErrorMsg.Invalid_field_with_annotation.toString(Extra.class.getSimpleName()));
 
         input = file("com.example", "MainActivity")
                 .imports(
@@ -73,7 +73,7 @@ public class ActivityInjectorTest extends BaseTest {
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Extra_field.toString());
+                .withErrorContaining(ErrorMsg.Invalid_field_with_annotation.toString(Extra.class.getSimpleName()));
 
         input = file("com.example", "MainActivity")
                 .imports(
@@ -90,7 +90,7 @@ public class ActivityInjectorTest extends BaseTest {
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Extra_field.toString());
+                .withErrorContaining(ErrorMsg.Invalid_field_with_annotation.toString(Extra.class.getSimpleName()));
     }
 
     @Test

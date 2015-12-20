@@ -12,16 +12,20 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
+import blade.Arg;
 import eu.f3rog.blade.compiler.ErrorMsg;
-import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.ClassManager;
+import eu.f3rog.blade.compiler.builder.MiddleManBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.builder.MiddleManBuilder;
+import eu.f3rog.blade.compiler.module.BundleUtil;
+import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
+
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 
 /**
  * Class {@link ArgHelperModule}
@@ -32,13 +36,14 @@ import eu.f3rog.blade.core.BundleWrapper;
 public class ArgHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
-    private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
+
+    private static final String ARG_ID_FORMAT = "<Arg-%s>";
 
     public static String getArgId(VariableElement extra) {
-        return String.format(EXTRA_ID_FORMAT, extra.getSimpleName().toString());
+        return String.format(ARG_ID_FORMAT, extra.getSimpleName().toString());
     }
 
-    private List<VariableElement> mArgs = new ArrayList<>();
+    private final List<VariableElement> mArgs = new ArrayList<>();
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
@@ -49,10 +54,8 @@ public class ArgHelperModule extends BaseHelperModule {
 
     @Override
     public void add(VariableElement e) throws ProcessorError {
-        if (e.getModifiers().contains(Modifier.PRIVATE)
-                || e.getModifiers().contains(Modifier.PROTECTED)
-                || e.getModifiers().contains(Modifier.FINAL)) {
-            throw new ProcessorError(e, ErrorMsg.Invalid_Arg_field);
+        if (cannotHaveAnnotation(e)) {
+            throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName());
         }
 
         mArgs.add(e);
@@ -78,12 +81,7 @@ public class ArgHelperModule extends BaseHelperModule {
         String args = "args";
         method.addStatement("$T $N = $T.from($N.getArguments())", BundleWrapper.class, args, BundleWrapper.class, target);
 
-        for (int i = 0; i < mArgs.size(); i++) {
-            VariableElement arg = mArgs.get(i);
-            method.addStatement("$N.$N = $N.get($S, $N.$N)",
-                    target, arg.getSimpleName(),
-                    args, getArgId(arg), target, arg.getSimpleName());
-        }
+        BundleUtil.getFromBundle(method, target, mArgs, ARG_ID_FORMAT, args);
 
         builder.getBuilder().addMethod(method.build());
     }

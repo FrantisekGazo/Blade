@@ -12,16 +12,20 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
+import blade.Extra;
 import eu.f3rog.blade.compiler.ErrorMsg;
-import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.builder.MiddleManBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.module.BundleUtil;
+import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
+
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 
 /**
  * Class {@link ExtraHelperModule}
@@ -32,6 +36,7 @@ import eu.f3rog.blade.core.BundleWrapper;
 public class ExtraHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
+
     private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
     public static String getExtraId(VariableElement extra) {
@@ -49,10 +54,8 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     @Override
     public void add(VariableElement e) throws ProcessorError {
-        if (e.getModifiers().contains(Modifier.PRIVATE)
-                || e.getModifiers().contains(Modifier.PROTECTED)
-                || e.getModifiers().contains(Modifier.FINAL)) {
-            throw new ProcessorError(e, ErrorMsg.Invalid_Extra_field);
+        if (cannotHaveAnnotation(e)) {
+            throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName());
         }
 
         mExtras.add(e);
@@ -78,13 +81,7 @@ public class ExtraHelperModule extends BaseHelperModule {
         String extras = "extras";
         method.addStatement("$T $N = $T.from($N.getIntent().getExtras())", BundleWrapper.class, extras, BundleWrapper.class, target);
 
-        for (int i = 0; i < mExtras.size(); i++) {
-            VariableElement extra = mExtras.get(i);
-            method.addStatement("$N.$N = $N.get($S, $N.$N)",
-                    target, extra.getSimpleName(),
-                    extras, getExtraId(extra),
-                    target, extra.getSimpleName());
-        }
+        BundleUtil.getFromBundle(method, target, mExtras, EXTRA_ID_FORMAT, extras);
 
         builder.getBuilder().addMethod(method.build());
     }

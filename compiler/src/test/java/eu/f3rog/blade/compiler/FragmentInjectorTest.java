@@ -56,7 +56,7 @@ public class FragmentInjectorTest extends BaseTest {
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Arg_field.toString());
+                .withErrorContaining(ErrorMsg.Invalid_field_with_annotation.toString(Arg.class.getSimpleName()));
 
         input = file("com.example", "MainFragment")
                 .imports(
@@ -73,7 +73,7 @@ public class FragmentInjectorTest extends BaseTest {
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Arg_field.toString());
+                .withErrorContaining(ErrorMsg.Invalid_field_with_annotation.toString(Arg.class.getSimpleName()));
 
         input = file("com.example", "MainFragment")
                 .imports(
@@ -90,7 +90,7 @@ public class FragmentInjectorTest extends BaseTest {
 
         assertFiles(input)
                 .failsToCompile()
-                .withErrorContaining(ErrorMsg.Invalid_Arg_field.toString());
+                .withErrorContaining(ErrorMsg.Invalid_field_with_annotation.toString(Arg.class.getSimpleName()));
     }
 
     @Test
@@ -122,8 +122,8 @@ public class FragmentInjectorTest extends BaseTest {
                         "           return;",
                         "       }",
                         "       BundleWrapper args = BundleWrapper.from(target.getArguments());",
-                        "       target.mExtraString = args.get(\"<Extra-mExtraString>\", target.mExtraString);",
-                        "       target.mA = args.get(\"<Extra-mA>\", target.mA);",
+                        "       target.mExtraString = args.get(\"<Arg-mExtraString>\", target.mExtraString);",
+                        "       target.mA = args.get(\"<Arg-mA>\", target.mA);",
                         "   }",
                         "",
                         "}"

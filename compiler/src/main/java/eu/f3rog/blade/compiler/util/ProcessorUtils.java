@@ -6,9 +6,11 @@ import com.sun.tools.javac.code.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
@@ -146,6 +148,21 @@ public class ProcessorUtils {
 
     public static String getParamName(final ClassName className) {
         return StringUtils.startLowerCase(className.simpleName()).replaceAll("_", "");
+    }
+
+    public static boolean hasSomeModifier(Element e, Modifier... modifiers) {
+        if (e == null) {
+            throw new IllegalStateException("Element cannot be null!");
+        }
+        Set<Modifier> m = e.getModifiers();
+        for (int i = 0; i < modifiers.length; i++) {
+            if (m.contains(modifiers[i])) return true;
+        }
+        return false;
+    }
+
+    public static boolean cannotHaveAnnotation(Element e) {
+        return hasSomeModifier(e, Modifier.PRIVATE, Modifier.PROTECTED, Modifier.FINAL);
     }
 
 }

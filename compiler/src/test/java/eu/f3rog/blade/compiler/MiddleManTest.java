@@ -14,12 +14,12 @@ import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
 
 /**
- * Class {@link InjectorTest}
+ * Class {@link MiddleManTest}
  *
  * @author FrantisekGazo
  * @version 2015-11-27
  */
-public class InjectorTest extends BaseTest {
+public class MiddleManTest extends BaseTest {
 
     @Test
     public void extra() {

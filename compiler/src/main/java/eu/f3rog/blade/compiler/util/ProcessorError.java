@@ -15,7 +15,7 @@ public class ProcessorError extends Exception {
     private final Element mElement;
 
     public ProcessorError(Element e, ErrorMsg msg, Object... args) {
-        super(String.format(msg.toString(), args));
+        super(msg.toString(args));
         mElement = e;
     }
 
