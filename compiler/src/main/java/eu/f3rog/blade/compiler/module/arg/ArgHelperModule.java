@@ -8,6 +8,7 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -39,11 +40,11 @@ public class ArgHelperModule extends BaseHelperModule {
 
     private static final String ARG_ID_FORMAT = "<Arg-%s>";
 
-    public static String getArgId(VariableElement extra) {
-        return String.format(ARG_ID_FORMAT, extra.getSimpleName().toString());
+    public static String getArgId(String arg) {
+        return String.format(ARG_ID_FORMAT, arg);
     }
 
-    private final List<VariableElement> mArgs = new ArrayList<>();
+    private final List<String> mArgs = new ArrayList<>();
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
@@ -58,13 +59,13 @@ public class ArgHelperModule extends BaseHelperModule {
             throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName());
         }
 
-        mArgs.add(e);
+        mArgs.add(e.getSimpleName().toString());
     }
 
     @Override
-    public void implement(HelperClassBuilder builder) throws ProcessorError {
+    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addInjectMethod(builder);
-        addMethodToFragmentFactory(builder);
+        addMethodToFragmentFactory(processingEnvironment, builder);
         addCall(builder);
     }
 
@@ -86,10 +87,10 @@ public class ArgHelperModule extends BaseHelperModule {
         builder.getBuilder().addMethod(method.build());
     }
 
-    private void addMethodToFragmentFactory(HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToFragmentFactory(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(FragmentFactoryBuilder.class)
-                .addMethodFor(builder.getTypeElement());
+                .addMethodFor(processingEnvironment, builder.getTypeElement());
     }
 
     private void addCall(BaseClassBuilder builder) {
@@ -98,7 +99,7 @@ public class ArgHelperModule extends BaseHelperModule {
                 .addCall(builder, METHOD_NAME_INJECT);
     }
 
-    public List<VariableElement> getArgs() {
+    public List<String> getArgs() {
         return mArgs;
     }
 }

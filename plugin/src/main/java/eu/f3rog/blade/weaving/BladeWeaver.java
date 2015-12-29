@@ -23,7 +23,7 @@ public class BladeWeaver extends AWeaver {
         String ACTIVITY = "android.app.Activity";
         String APP_COMPAT_ACTIVITY = "android.support.v7.app.AppCompatActivity";
         // generated classes
-        String INJECTOR = "blade.Injector";
+        String MIDDLE_MAN = "blade.MiddleMan";
     }
 
     private interface Method {
@@ -35,7 +35,7 @@ public class BladeWeaver extends AWeaver {
     }
 
     private static final List<String> REQUIRED_CLASSES = Arrays.asList(
-            Class.INJECTOR
+            Class.MIDDLE_MAN
     );
 
     private AfterBurner mAfterBurner;
@@ -90,7 +90,7 @@ public class BladeWeaver extends AWeaver {
 
     private boolean isSupported(CtClass classToTransform) {
         try {
-            classToTransform.getClassPool().get(Class.INJECTOR).getDeclaredMethod(Method.INJECT, new CtClass[]{classToTransform});
+            classToTransform.getClassPool().get(Class.MIDDLE_MAN).getDeclaredMethod(Method.INJECT, new CtClass[]{classToTransform});
             return true;
         } catch (NotFoundException e) {
             //log("No inject() method");
@@ -101,7 +101,7 @@ public class BladeWeaver extends AWeaver {
     private void weaveActivity(CtClass classToTransform) throws Exception {
         if (!isSupported(classToTransform)) return;
 
-        String body = String.format("{ %s.%s(this); }", Class.INJECTOR, Method.INJECT);
+        String body = String.format("{ %s.%s(this); }", Class.MIDDLE_MAN, Method.INJECT);
         // weave into method
         mAfterBurner.beforeOverrideMethod(classToTransform, Method.ON_CREATE, body);
         log("%s weaved into %s", body, Method.ON_CREATE);
@@ -110,7 +110,7 @@ public class BladeWeaver extends AWeaver {
     private void weaveFragment(CtClass classToTransform) throws Exception {
         if (!isSupported(classToTransform)) return;
 
-        String body = String.format("{ %s.%s(this); }", Class.INJECTOR, Method.INJECT);
+        String body = String.format("{ %s.%s(this); }", Class.MIDDLE_MAN, Method.INJECT);
         // weave into method
         mAfterBurner.beforeOverrideMethod(classToTransform, Method.ON_ATTACH, body);
         log("%s weaved into %s", body, Method.ON_ATTACH);

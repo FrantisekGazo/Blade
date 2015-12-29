@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
@@ -66,11 +66,11 @@ public class HelperClassBuilder
     }
 
     @Override
-    public void build(Filer filer) throws ProcessorError, IOException {
+    public void build(ProcessingEnvironment processingEnvironment) throws ProcessorError, IOException {
         for (Map.Entry<Class<? extends IHelperModule>, IHelperModule> entry : mImplementations.entrySet()) {
-            entry.getValue().implement(this);
+            entry.getValue().implement(processingEnvironment, this);
         }
-        super.build(filer);
+        super.build(processingEnvironment);
     }
 
     public TypeElement getTypeElement() {

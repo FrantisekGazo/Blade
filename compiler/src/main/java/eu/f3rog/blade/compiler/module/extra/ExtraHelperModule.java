@@ -8,6 +8,7 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -39,11 +40,11 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
-    public static String getExtraId(VariableElement extra) {
-        return String.format(EXTRA_ID_FORMAT, extra.getSimpleName().toString());
+    public static String getExtraId(String extra) {
+        return String.format(EXTRA_ID_FORMAT, extra);
     }
 
-    private List<VariableElement> mExtras = new ArrayList<>();
+    private List<String> mExtras = new ArrayList<>();
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
@@ -58,13 +59,13 @@ public class ExtraHelperModule extends BaseHelperModule {
             throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName());
         }
 
-        mExtras.add(e);
+        mExtras.add(e.getSimpleName().toString());
     }
 
     @Override
-    public void implement(HelperClassBuilder builder) throws ProcessorError {
+    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addInjectMethod(builder);
-        addMethodToActivityNavigator(builder);
+        addMethodToActivityNavigator(processingEnvironment, builder);
         addCall(builder);
     }
 
@@ -86,10 +87,10 @@ public class ExtraHelperModule extends BaseHelperModule {
         builder.getBuilder().addMethod(method.build());
     }
 
-    private void addMethodToActivityNavigator(HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToActivityNavigator(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(ActivityNavigatorBuilder.class)
-                .addMethodsFor(builder.getTypeElement());
+                .addMethodsFor(processingEnvironment, builder.getTypeElement());
     }
 
     private void addCall(BaseClassBuilder builder) {
@@ -98,7 +99,7 @@ public class ExtraHelperModule extends BaseHelperModule {
                 .addCall(builder, METHOD_NAME_INJECT);
     }
 
-    public List<VariableElement> getExtras() {
+    public List<String> getExtras() {
         return mExtras;
     }
 }

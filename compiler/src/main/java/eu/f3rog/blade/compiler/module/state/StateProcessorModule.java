@@ -2,6 +2,7 @@ package eu.f3rog.blade.compiler.module.state;
 
 import java.util.Set;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -22,14 +23,7 @@ public class StateProcessorModule
         implements ProcessorModule {
 
     @Override
-    public Class[] getSupportedAnnotations() {
-        return new Class[]{
-                State.class
-        };
-    }
-
-    @Override
-    public void process(RoundEnvironment roundEnv) throws ProcessorError {
+    public void process(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(State.class);
         for (Element e : elements) {
             ClassManager.getInstance()

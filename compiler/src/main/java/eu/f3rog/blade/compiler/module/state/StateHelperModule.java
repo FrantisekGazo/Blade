@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -35,7 +36,7 @@ public class StateHelperModule
 
     private static final String STATEFUL_ID_FORMAT = "<Stateful-%s>";
 
-    private final List<VariableElement> mStatefulFields = new ArrayList<>();
+    private final List<String> mStatefulFields = new ArrayList<>();
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
@@ -48,11 +49,11 @@ public class StateHelperModule
             throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, State.class.getSimpleName());
         }
 
-        mStatefulFields.add(e);
+        mStatefulFields.add(e.getSimpleName().toString());
     }
 
     @Override
-    public void implement(HelperClassBuilder builder) throws ProcessorError {
+    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addSaveStateMethod(builder);
         addRestoreStateMethod(builder);
     }

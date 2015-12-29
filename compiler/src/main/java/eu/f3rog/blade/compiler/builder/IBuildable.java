@@ -2,7 +2,7 @@ package eu.f3rog.blade.compiler.builder;
 
 import java.io.IOException;
 
-import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
 
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
@@ -17,6 +17,6 @@ public interface IBuildable {
     /**
      * Create java class file.
      */
-    void build(Filer filer) throws ProcessorError, IOException;
+    void build(ProcessingEnvironment processingEnvironment) throws ProcessorError, IOException;
 
 }

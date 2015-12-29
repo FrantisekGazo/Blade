@@ -1,7 +1,6 @@
 package eu.f3rog.blade.compiler.util;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -16,11 +15,10 @@ import javax.tools.Diagnostic;
 
 public abstract class BaseProcessor extends AbstractProcessor {
 
+    private ProcessingEnvironment mProcessingEnvironment;
     private Messager mMessager;
     private Filer mFiler;
     private boolean mProcessingStarted;
-
-    protected abstract Set<Class> getSupportedAnnotationClasses();
 
     /**
      * Called only once when annotation processing starts.
@@ -42,6 +40,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
         super.init(processingEnv);
         mMessager = processingEnv.getMessager();
         mFiler = processingEnv.getFiler();
+        mProcessingEnvironment = processingEnv;
         mProcessingStarted = false;
     }
 
@@ -51,28 +50,18 @@ public abstract class BaseProcessor extends AbstractProcessor {
     }
 
     @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        Set<String> supported = new HashSet<>();
-        Set<Class> annotations = getSupportedAnnotationClasses();
-        for (Class annotation : annotations) {
-            supported.add(annotation.getCanonicalName());
-        }
-        return supported;
-    }
-
-    @Override
     public final boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
             if (!mProcessingStarted) {
                 prepare(annotations, roundEnv);
                 mProcessingStarted = true;
+            } else {
+                return false; // end in 1 round
             }
 
             exec(annotations, roundEnv);
 
-            if (roundEnv.processingOver()) {
-                finish(annotations, roundEnv);
-            }
+            finish(annotations, roundEnv);
         } catch (ProcessorError pe) {
             error(pe);
         } catch (IOException e) {
@@ -88,6 +77,10 @@ public abstract class BaseProcessor extends AbstractProcessor {
 
     private void error(Element e, String msg, Object... args) {
         mMessager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
+    }
+
+    public ProcessingEnvironment getProcessingEnvironment() {
+        return mProcessingEnvironment;
     }
 
     public Filer getFiler() {
