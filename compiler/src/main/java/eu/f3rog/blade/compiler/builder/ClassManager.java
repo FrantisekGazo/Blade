@@ -47,6 +47,7 @@ public class ClassManager
         ClassName className = ClassName.get(e);
         if (!mHelpers.containsKey(className)) {
             mHelpers.put(className, new HelperClassBuilder(className, e));
+            getSpecialClass(WeaverGuideBuilder.class).addHelpedClassName(className);
         }
         return mHelpers.get(className);
     }

@@ -2,6 +2,7 @@ package eu.f3rog.blade.weaving.util;
 
 import javassist.CtClass;
 import javassist.NotFoundException;
+import javassist.bytecode.AnnotationsAttribute;
 
 /**
  * Class {@link WeavingUtil}
@@ -36,6 +37,20 @@ public class WeavingUtil {
 
         return false;
 
+    }
+
+    public static boolean implementsInterface(CtClass cls, CtClass interfaceClass) throws NotFoundException {
+        CtClass[] interfaces = cls.getInterfaces();
+        for (int i = 0; i < interfaces.length; i++) {
+            if (interfaces[i].equals(interfaceClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static AnnotationsAttribute getAnnotations(CtClass ctClass) {
+        return (AnnotationsAttribute) ctClass.getClassFile().getAttribute(AnnotationsAttribute.visibleTag);
     }
 
 }

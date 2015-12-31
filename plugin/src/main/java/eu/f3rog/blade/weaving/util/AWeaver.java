@@ -1,12 +1,8 @@
 package eu.f3rog.blade.weaving.util;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import com.github.stephanenicolas.afterburner.AfterBurner;
 
-import javassist.CtClass;
-import javassist.build.JavassistBuildException;
+import java.io.File;
 
 /**
  * Class {@link AWeaver} is used for injecting classes with bytecode dependent on other application classes.
@@ -16,22 +12,26 @@ import javassist.build.JavassistBuildException;
  */
 public abstract class AWeaver implements IWeaver {
 
-    private final Set<String> mWaitingForClasses;
-    private final Set<String> mFoundClasses;
-    private final Set<CtClass> mStack;
     private String mDestinationDir;
     private boolean mDebug;
+    private AfterBurner mAfterBurner;
 
     /**
      * Constructor
      *
-     * @param requiredClasses List of application classes that are necessary for class transformation.
+     * @param debug If <code>true</code>, than logs will be shown.
      */
-    public AWeaver(Collection<String> requiredClasses, boolean debug) {
-        this.mWaitingForClasses = new HashSet<>(requiredClasses);
-        this.mFoundClasses = new HashSet<>();
-        this.mStack = new HashSet<>();
+    public AWeaver(boolean debug) {
         this.mDebug = debug;
+        this.mAfterBurner = new AfterBurner();
+    }
+
+    public boolean isDebug() {
+        return mDebug;
+    }
+
+    public AfterBurner getAfterBurner() {
+        return mAfterBurner;
     }
 
     @Override
@@ -39,50 +39,9 @@ public abstract class AWeaver implements IWeaver {
         mDestinationDir = dst.toString();
     }
 
-    @Override
-    public final boolean shouldTransform(CtClass candidateClass) throws JavassistBuildException {
-        // stop waiting for class if it is required
-        if (mWaitingForClasses.remove(candidateClass.getName())) {
-            mFoundClasses.add(candidateClass.getName());
-        }
-        // if all required classes were processed, then transform all stacked classes
-        if (mWaitingForClasses.isEmpty() && !mStack.isEmpty()) {
-            checkStackedClasses();
-        }
-
-        boolean shouldTransform = needTransformation(candidateClass);
-
-        if (!shouldTransform) {
-            return false;
-        }
-
-        if (!mWaitingForClasses.isEmpty()) {
-            candidateClass.stopPruning(true);
-            // if not all required classes were processed, than stack this for later
-            mStack.add(candidateClass);
-            return false;
-        } else {
-            // transform current class
-            return true;
-        }
+    public String getDestinationDir() {
+        return mDestinationDir;
     }
-
-    private void checkStackedClasses() throws JavassistBuildException {
-        // transform previously stacked classes
-        for (CtClass ctClass : mStack) {
-            if (ctClass.isFrozen()) ctClass.defrost();
-            applyTransformations(ctClass);
-            try {
-                ctClass.writeFile(mDestinationDir);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new JavassistBuildException(e);
-            }
-        }
-        mStack.clear();
-    }
-
-    public abstract boolean needTransformation(CtClass candidateClass) throws JavassistBuildException;
 
     protected void log(String msg, Object... args) {
         if (mDebug) {

@@ -49,19 +49,25 @@ public abstract class BaseClassBuilder
     /**
      * Constructor
      *
-     * @param isClass         <code>true</code> if generated should be <code>class</code>. <code>false</code> if <code>interface</code>.
+     * @param builderType     Builder Type
      * @param genClassName    Name of generated class.
      * @param arg             Class name that will be used when formatting generated class name.
      * @param genPackageNames Package in which class will be generated.
      */
-    public BaseClassBuilder(boolean isClass, GCN genClassName, ClassName arg, GPN... genPackageNames) throws ProcessorError {
+    public BaseClassBuilder(BuilderType builderType, GCN genClassName, ClassName arg, GPN... genPackageNames) throws ProcessorError {
         mGenClassName = genClassName;
         mGenClassNameArg = arg;
         mGenPackageName = genPackageNames;
-        if (isClass) {
-            mBuilder = TypeSpec.classBuilder(getClassName().simpleName());
-        } else {
-            mBuilder = TypeSpec.interfaceBuilder(getClassName().simpleName());
+        switch (builderType) {
+            case CLASS:
+                mBuilder = TypeSpec.classBuilder(getClassName().simpleName());
+                break;
+            case INTERFACE:
+                mBuilder = TypeSpec.interfaceBuilder(getClassName().simpleName());
+                break;
+            case ANNOTATION:
+                mBuilder = TypeSpec.annotationBuilder(getClassName().simpleName());
+                break;
         }
         start();
     }
@@ -74,7 +80,7 @@ public abstract class BaseClassBuilder
      * @param genPackageNames Package in which class will be generated.
      */
     public BaseClassBuilder(GCN genClassName, ClassName arg, GPN... genPackageNames) throws ProcessorError {
-        this(true, genClassName, arg, genPackageNames);
+        this(BuilderType.CLASS, genClassName, arg, genPackageNames);
     }
 
     /**
@@ -84,18 +90,18 @@ public abstract class BaseClassBuilder
      * @param genPackageNames Package in which class will be generated.
      */
     public BaseClassBuilder(GCN genClassName, GPN... genPackageNames) throws ProcessorError {
-        this(true, genClassName, null, genPackageNames);
+        this(BuilderType.CLASS, genClassName, null, genPackageNames);
     }
 
     /**
      * Constructor
      *
-     * @param isClass         <code>true</code> if generated should be <code>class</code>. <code>false</code> if <code>interface</code>.
+     * @param builderType     Builder Type
      * @param genClassName    Name of generated class.
      * @param genPackageNames Package in which class will be generated.
      */
-    public BaseClassBuilder(boolean isClass, GCN genClassName, GPN... genPackageNames) throws ProcessorError {
-        this(isClass, genClassName, null, genPackageNames);
+    public BaseClassBuilder(BuilderType builderType, GCN genClassName, GPN... genPackageNames) throws ProcessorError {
+        this(builderType, genClassName, null, genPackageNames);
     }
 
     /**

@@ -1,17 +1,21 @@
 package eu.f3rog.blade.weaving;
 
-import com.github.stephanenicolas.afterburner.AfterBurner;
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import eu.f3rog.blade.weaving.util.AWeaver;
 import eu.f3rog.blade.weaving.util.WeavingUtil;
+import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
 import javassist.build.JavassistBuildException;
+import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.annotation.Annotation;
+import javassist.bytecode.annotation.ArrayMemberValue;
+import javassist.bytecode.annotation.MemberValue;
 
-import static eu.f3rog.blade.weaving.util.WeavingUtil.isSubclassOf;
+import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
+import static eu.f3rog.blade.weaving.util.WeavingUtil.implementsInterface;
 
 public class BladeWeaver extends AWeaver {
 
@@ -24,6 +28,8 @@ public class BladeWeaver extends AWeaver {
         String APP_COMPAT_ACTIVITY = "android.support.v7.app.AppCompatActivity";
         // generated classes
         String MIDDLE_MAN = "blade.MiddleMan";
+        String WEAVE_GUIDE = "blade.WeaverGuide";
+        String WEAVE = "blade.Weave";
     }
 
     private interface Method {
@@ -34,29 +40,54 @@ public class BladeWeaver extends AWeaver {
         String INJECT = "inject";
     }
 
-    private static final List<String> REQUIRED_CLASSES = Arrays.asList(
-            Class.MIDDLE_MAN
-    );
-
-    private AfterBurner mAfterBurner;
+    private List<String> mClassesToTransform = null;
 
     /**
      * Constructor
      */
     public BladeWeaver(boolean debug) {
-        super(REQUIRED_CLASSES, debug);
-        mAfterBurner = new AfterBurner();
+        super(debug);
+    }
+
+    private void loadClassesToTransform(ClassPool classPool) {
+        mClassesToTransform = new ArrayList<>();
+        CtClass cc;
+        try {
+            cc = classPool.get(Class.WEAVE_GUIDE);
+        } catch (NotFoundException e) {
+            log("NOT FOUND!");
+            return;
+        }
+
+        AnnotationsAttribute attr = getAnnotations(cc);
+        if (attr == null) {
+            log("NULL!");
+            return;
+        }
+
+        for (Annotation annotation : attr.getAnnotations()) {
+            if (!annotation.getTypeName().equals(Class.WEAVE)) {
+                continue;
+            }
+            ArrayMemberValue value = (ArrayMemberValue) annotation.getMemberValue("value");
+            MemberValue[] values = value.getValue();
+            for (MemberValue memberValue : values) {
+                String className = memberValue.toString().replaceAll("\"", "");
+                log("Require transformation: >%s<", className);
+                mClassesToTransform.add(className);
+            }
+        }
     }
 
     @Override
-    public boolean needTransformation(CtClass candidateClass) throws JavassistBuildException {
+    public boolean shouldTransform(CtClass candidateClass) throws JavassistBuildException {
+        if (mClassesToTransform == null) {
+            loadClassesToTransform(candidateClass.getClassPool());
+        }
+
         try {
             //log("needTransformation ? %s", candidateClass.getName());
-            return WeavingUtil.isSubclassOf(candidateClass,
-                    Class.ACTIVITY,
-                    Class.APP_COMPAT_ACTIVITY,
-                    Class.FRAGMENT,
-                    Class.SUPPORT_FRAGMENT);
+            return mClassesToTransform.contains(candidateClass.getName());
         } catch (Exception e) {
             log("needTransformation failed on class %s", candidateClass.getName());
             e.printStackTrace();
@@ -103,7 +134,7 @@ public class BladeWeaver extends AWeaver {
 
         String body = String.format("{ %s.%s(this); }", Class.MIDDLE_MAN, Method.INJECT);
         // weave into method
-        mAfterBurner.beforeOverrideMethod(classToTransform, Method.ON_CREATE, body);
+        getAfterBurner().beforeOverrideMethod(classToTransform, Method.ON_CREATE, body);
         log("%s weaved into %s", body, Method.ON_CREATE);
     }
 
@@ -112,7 +143,7 @@ public class BladeWeaver extends AWeaver {
 
         String body = String.format("{ %s.%s(this); }", Class.MIDDLE_MAN, Method.INJECT);
         // weave into method
-        mAfterBurner.beforeOverrideMethod(classToTransform, Method.ON_ATTACH, body);
+        getAfterBurner().beforeOverrideMethod(classToTransform, Method.ON_ATTACH, body);
         log("%s weaved into %s", body, Method.ON_ATTACH);
     }
 

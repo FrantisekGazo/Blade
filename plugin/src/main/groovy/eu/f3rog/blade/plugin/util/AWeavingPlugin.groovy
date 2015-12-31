@@ -2,7 +2,7 @@ package eu.f3rog.blade.plugin.util
 
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
-import com.darylteo.gradle.javassist.tasks.TransformationTask
+import eu.f3rog.blade.weaving.util.task.TransformationTask
 import eu.f3rog.blade.weaving.util.IWeaver
 import org.gradle.api.Plugin
 import org.gradle.api.Project
