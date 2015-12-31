@@ -1,23 +1,14 @@
 package eu.f3rog.blade.weaving;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import eu.f3rog.blade.weaving.util.AWeaver;
 import eu.f3rog.blade.weaving.util.WeavingUtil;
-import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
 import javassist.build.JavassistBuildException;
-import javassist.bytecode.AnnotationsAttribute;
-import javassist.bytecode.annotation.Annotation;
-import javassist.bytecode.annotation.ArrayMemberValue;
-import javassist.bytecode.annotation.MemberValue;
-
-import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
-import static eu.f3rog.blade.weaving.util.WeavingUtil.implementsInterface;
 
 public class BladeWeaver extends AWeaver {
+
+    private static final String HELPER_NAME_FORMAT = "%s.%s_Helper";
 
     private interface Class {
         // android classes
@@ -28,7 +19,6 @@ public class BladeWeaver extends AWeaver {
         String APP_COMPAT_ACTIVITY = "android.support.v7.app.AppCompatActivity";
         // generated classes
         String MIDDLE_MAN = "blade.MiddleMan";
-        String WEAVE_GUIDE = "blade.WeaverGuide";
         String WEAVE = "blade.Weave";
     }
 
@@ -40,8 +30,6 @@ public class BladeWeaver extends AWeaver {
         String INJECT = "inject";
     }
 
-    private List<String> mClassesToTransform = null;
-
     /**
      * Constructor
      */
@@ -49,49 +37,25 @@ public class BladeWeaver extends AWeaver {
         super(debug);
     }
 
-    private void loadClassesToTransform(ClassPool classPool) {
-        mClassesToTransform = new ArrayList<>();
-        CtClass cc;
-        try {
-            cc = classPool.get(Class.WEAVE_GUIDE);
-        } catch (NotFoundException e) {
-            log("NOT FOUND!");
-            return;
-        }
-
-        AnnotationsAttribute attr = getAnnotations(cc);
-        if (attr == null) {
-            log("NULL!");
-            return;
-        }
-
-        for (Annotation annotation : attr.getAnnotations()) {
-            if (!annotation.getTypeName().equals(Class.WEAVE)) {
-                continue;
-            }
-            ArrayMemberValue value = (ArrayMemberValue) annotation.getMemberValue("value");
-            MemberValue[] values = value.getValue();
-            for (MemberValue memberValue : values) {
-                String className = memberValue.toString().replaceAll("\"", "");
-                log("Require transformation: >%s<", className);
-                mClassesToTransform.add(className);
-            }
-        }
-    }
-
     @Override
     public boolean shouldTransform(CtClass candidateClass) throws JavassistBuildException {
-        if (mClassesToTransform == null) {
-            loadClassesToTransform(candidateClass.getClassPool());
-        }
-
         try {
             //log("needTransformation ? %s", candidateClass.getName());
-            return mClassesToTransform.contains(candidateClass.getName());
+            return hasHelper(candidateClass);
         } catch (Exception e) {
             log("needTransformation failed on class %s", candidateClass.getName());
             e.printStackTrace();
             throw new JavassistBuildException(e);
+        }
+    }
+
+    private boolean hasHelper(CtClass candidateClass) {
+        try {
+            CtClass helper = candidateClass.getClassPool()
+                    .get(String.format(HELPER_NAME_FORMAT, candidateClass.getPackageName(), candidateClass.getSimpleName()));
+            return helper != null;
+        } catch (NotFoundException e) {
+            return false;
         }
     }
 
