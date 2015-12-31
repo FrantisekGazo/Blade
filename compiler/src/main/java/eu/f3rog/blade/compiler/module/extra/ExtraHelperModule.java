@@ -15,17 +15,16 @@ import javax.lang.model.element.VariableElement;
 
 import blade.Extra;
 import eu.f3rog.blade.compiler.ErrorMsg;
-import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.ClassManager;
-import eu.f3rog.blade.compiler.builder.MiddleManBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.module.BundleUtil;
+import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.module.WeaveUtils.createWeaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 
 /**
@@ -37,6 +36,7 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 public class ExtraHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
+    private static final String WEAVE_INTO = "onCreate";
 
     private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
@@ -66,12 +66,12 @@ public class ExtraHelperModule extends BaseHelperModule {
     public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addInjectMethod(builder);
         addMethodToActivityNavigator(processingEnvironment, builder);
-        addCall(builder);
     }
 
     private void addInjectMethod(HelperClassBuilder builder) {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
+                .addAnnotation(createWeaveAnnotation(WEAVE_INTO))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
 
@@ -82,7 +82,7 @@ public class ExtraHelperModule extends BaseHelperModule {
         String extras = "extras";
         method.addStatement("$T $N = $T.from($N.getIntent().getExtras())", BundleWrapper.class, extras, BundleWrapper.class, target);
 
-        BundleUtil.getFromBundle(method, target, mExtras, EXTRA_ID_FORMAT, extras);
+        BundleUtils.getFromBundle(method, target, mExtras, EXTRA_ID_FORMAT, extras);
 
         builder.getBuilder().addMethod(method.build());
     }
@@ -91,12 +91,6 @@ public class ExtraHelperModule extends BaseHelperModule {
         ClassManager.getInstance()
                 .getSpecialClass(ActivityNavigatorBuilder.class)
                 .addMethodsFor(processingEnvironment, builder.getTypeElement());
-    }
-
-    private void addCall(BaseClassBuilder builder) {
-        ClassManager.getInstance()
-                .getSpecialClass(MiddleManBuilder.class)
-                .addCall(builder, METHOD_NAME_INJECT);
     }
 
     public List<String> getExtras() {

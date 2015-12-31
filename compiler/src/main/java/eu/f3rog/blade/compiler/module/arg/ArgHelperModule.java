@@ -17,15 +17,15 @@ import blade.Arg;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.ClassManager;
-import eu.f3rog.blade.compiler.builder.MiddleManBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.module.BundleUtil;
+import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.module.WeaveUtils.createWeaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 
 /**
@@ -37,6 +37,7 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 public class ArgHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
+    private static final String WEAVE_INTO = "onAttach";
 
     private static final String ARG_ID_FORMAT = "<Arg-%s>";
 
@@ -66,12 +67,12 @@ public class ArgHelperModule extends BaseHelperModule {
     public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addInjectMethod(builder);
         addMethodToFragmentFactory(processingEnvironment, builder);
-        addCall(builder);
     }
 
     private void addInjectMethod(BaseClassBuilder builder) {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
+                .addAnnotation(createWeaveAnnotation(WEAVE_INTO))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
 
@@ -82,7 +83,7 @@ public class ArgHelperModule extends BaseHelperModule {
         String args = "args";
         method.addStatement("$T $N = $T.from($N.getArguments())", BundleWrapper.class, args, BundleWrapper.class, target);
 
-        BundleUtil.getFromBundle(method, target, mArgs, ARG_ID_FORMAT, args);
+        BundleUtils.getFromBundle(method, target, mArgs, ARG_ID_FORMAT, args);
 
         builder.getBuilder().addMethod(method.build());
     }
@@ -91,12 +92,6 @@ public class ArgHelperModule extends BaseHelperModule {
         ClassManager.getInstance()
                 .getSpecialClass(FragmentFactoryBuilder.class)
                 .addMethodFor(processingEnvironment, builder.getTypeElement());
-    }
-
-    private void addCall(BaseClassBuilder builder) {
-        ClassManager.getInstance()
-                .getSpecialClass(MiddleManBuilder.class)
-                .addCall(builder, METHOD_NAME_INJECT);
     }
 
     public List<String> getArgs() {

@@ -7,6 +7,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Arg;
+import blade.core.WeaveInto;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;
@@ -112,11 +113,13 @@ public class FragmentInjectorTest extends BaseTest {
         JavaFileObject expected = generatedFile("com.example", "MainFragment_Helper")
                 .imports(
                         input, "I",
-                        BundleWrapper.class
+                        BundleWrapper.class,
+                        WeaveInto.class
                 )
                 .body(
                         "public final class $T {",
                         "",
+                        "   @WeaveInto(\"onAttach\")",
                         "   public static void inject($I target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",

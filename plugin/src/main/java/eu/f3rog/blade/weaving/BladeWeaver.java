@@ -1,34 +1,19 @@
 package eu.f3rog.blade.weaving;
 
+import blade.core.WeaveInto;
 import eu.f3rog.blade.weaving.util.AWeaver;
-import eu.f3rog.blade.weaving.util.WeavingUtil;
 import javassist.CtClass;
+import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.build.JavassistBuildException;
+import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.annotation.Annotation;
+
+import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
 
 public class BladeWeaver extends AWeaver {
 
     private static final String HELPER_NAME_FORMAT = "%s.%s_Helper";
-
-    private interface Class {
-        // android classes
-        String FRAGMENT = "android.app.Fragment";
-        String SUPPORT_FRAGMENT = "android.support.v4.app.Fragment";
-        // android classes
-        String ACTIVITY = "android.app.Activity";
-        String APP_COMPAT_ACTIVITY = "android.support.v7.app.AppCompatActivity";
-        // generated classes
-        String MIDDLE_MAN = "blade.MiddleMan";
-        String WEAVE = "blade.Weave";
-    }
-
-    private interface Method {
-        // android classes
-        String ON_CREATE = "onCreate";
-        String ON_ATTACH = "onAttach";
-        // generated classes
-        String INJECT = "inject";
-    }
 
     /**
      * Constructor
@@ -49,32 +34,31 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private boolean hasHelper(CtClass candidateClass) {
-        try {
-            CtClass helper = candidateClass.getClassPool()
-                    .get(String.format(HELPER_NAME_FORMAT, candidateClass.getPackageName(), candidateClass.getSimpleName()));
-            return helper != null;
-        } catch (NotFoundException e) {
-            return false;
-        }
-    }
-
     @Override
     public void applyTransformations(CtClass classToTransform) throws JavassistBuildException {
         log("Applying transformation to %s", classToTransform.getName());
         try {
-            // ACTIVITY
-            if (WeavingUtil.isSubclassOf(classToTransform, Class.ACTIVITY, Class.APP_COMPAT_ACTIVITY)) {
-                weaveActivity(classToTransform);
+            CtClass helper = getHelper(classToTransform);
+
+            for (CtMethod method : helper.getDeclaredMethods()) {
+                log("method %s", method.getName());
+
+                String where = loadWeaveInto(method);
+                if (where == null) { // nowhere
+                    log(" -> nowhere");
+                    continue;
+                } else if (where.isEmpty()) { // into constructor
+                    log(" -> into constructor");
+                    // TODO : weave
+                    throw new IllegalStateException("Weaving into constructor is not implemented yet!");
+                } else {
+                    String body = String.format("{ %s.%s(this); }", helper.getName(), method.getName());
+                    // weave into method
+                    getAfterBurner().beforeOverrideMethod(classToTransform, where, body);
+                    log(" -> %s weaved into %s", body, where);
+                }
             }
-            // FRAGMENT
-            else if (WeavingUtil.isSubclassOf(classToTransform, Class.FRAGMENT, Class.SUPPORT_FRAGMENT)) {
-                weaveFragment(classToTransform);
-            }
-            // nothing done
-            else {
-                log("Nothing changed");
-            }
+
             log("Transformation done");
         } catch (Exception e) {
             log("Transformation failed!");
@@ -83,32 +67,31 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private boolean isSupported(CtClass classToTransform) {
+    private CtClass getHelper(CtClass cls) throws NotFoundException {
+        return cls.getClassPool()
+                .get(String.format(HELPER_NAME_FORMAT, cls.getPackageName(), cls.getSimpleName()));
+    }
+
+    private boolean hasHelper(CtClass cls) {
         try {
-            classToTransform.getClassPool().get(Class.MIDDLE_MAN).getDeclaredMethod(Method.INJECT, new CtClass[]{classToTransform});
-            return true;
+            return getHelper(cls) != null;
         } catch (NotFoundException e) {
-            //log("No inject() method");
             return false;
         }
     }
 
-    private void weaveActivity(CtClass classToTransform) throws Exception {
-        if (!isSupported(classToTransform)) return;
+    private String loadWeaveInto(CtMethod method) {
+        AnnotationsAttribute attr = getAnnotations(method);
+        if (attr == null) {
+            return null;
+        }
 
-        String body = String.format("{ %s.%s(this); }", Class.MIDDLE_MAN, Method.INJECT);
-        // weave into method
-        getAfterBurner().beforeOverrideMethod(classToTransform, Method.ON_CREATE, body);
-        log("%s weaved into %s", body, Method.ON_CREATE);
-    }
+        Annotation a = attr.getAnnotation(WeaveInto.class.getName());
+        if (a == null) {
+            return null;
+        }
 
-    private void weaveFragment(CtClass classToTransform) throws Exception {
-        if (!isSupported(classToTransform)) return;
-
-        String body = String.format("{ %s.%s(this); }", Class.MIDDLE_MAN, Method.INJECT);
-        // weave into method
-        getAfterBurner().beforeOverrideMethod(classToTransform, Method.ON_ATTACH, body);
-        log("%s weaved into %s", body, Method.ON_ATTACH);
+        return a.getMemberValue("value").toString().replaceAll("\"", "");
     }
 
 }

@@ -16,7 +16,7 @@ import blade.State;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.module.BundleUtil;
+import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
@@ -72,7 +72,7 @@ public class StateHelperModule
                 .endControlFlow()
                 .addStatement("$T $N = $T.from($N)", BundleWrapper.class, bundleWrapper, BundleWrapper.class, state);
 
-        BundleUtil.putToBundle(method, target, mStatefulFields, STATEFUL_ID_FORMAT, bundleWrapper);
+        BundleUtils.putToBundle(method, target, mStatefulFields, STATEFUL_ID_FORMAT, bundleWrapper);
 
         builder.getBuilder().addMethod(method.build());
     }
@@ -91,7 +91,7 @@ public class StateHelperModule
                 .endControlFlow()
                 .addStatement("$T $N = $T.from($N)", BundleWrapper.class, bundleWrapper, BundleWrapper.class, state);
 
-        BundleUtil.getFromBundle(method, target, mStatefulFields, STATEFUL_ID_FORMAT, bundleWrapper);
+        BundleUtils.getFromBundle(method, target, mStatefulFields, STATEFUL_ID_FORMAT, bundleWrapper);
 
         builder.getBuilder().addMethod(method.build());
     }

@@ -14,7 +14,6 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.TypeElement;
 
 import eu.f3rog.blade.compiler.builder.ClassManager;
-import eu.f3rog.blade.compiler.builder.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.arg.ArgProcessorModule;
 import eu.f3rog.blade.compiler.module.extra.ExtraProcessorModule;
 import eu.f3rog.blade.compiler.module.state.StateProcessorModule;
@@ -40,8 +39,6 @@ public class BladeProcessor extends BaseProcessor {
     @Override
     protected void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
         ClassManager.init();
-
-        new WeaveBuilder().build(getProcessingEnvironment());
     }
 
     @Override

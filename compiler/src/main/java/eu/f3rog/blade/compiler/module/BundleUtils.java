@@ -5,12 +5,12 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.List;
 
 /**
- * Class {@link BundleUtil}
+ * Class {@link BundleUtils}
  *
  * @author FrantisekGazo
  * @version 2015-12-19
  */
-public class BundleUtil {
+public class BundleUtils {
 
     public static void getFromBundle(MethodSpec.Builder method,
                                      String targetName,
