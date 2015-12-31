@@ -1,6 +1,6 @@
 package eu.f3rog.blade.weaving;
 
-import blade.core.WeaveInto;
+import eu.f3rog.blade.core.WeaveInto;
 import eu.f3rog.blade.weaving.util.AWeaver;
 import javassist.CtClass;
 import javassist.CtMethod;

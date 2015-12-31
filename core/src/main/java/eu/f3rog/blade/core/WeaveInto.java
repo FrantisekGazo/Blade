@@ -1,4 +1,4 @@
-package blade.core;
+package eu.f3rog.blade.core;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

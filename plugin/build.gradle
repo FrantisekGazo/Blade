@@ -19,6 +19,7 @@ dependencies {
     compile 'com.google.android:android:4.0.1.2'
     /* Knight */
     compile project(':annotations')
+    compile project(':core')
 }
 
 publish {

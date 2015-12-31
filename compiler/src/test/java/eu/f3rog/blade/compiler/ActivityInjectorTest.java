@@ -7,7 +7,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Extra;
-import blade.core.WeaveInto;
+import eu.f3rog.blade.core.WeaveInto;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;

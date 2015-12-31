@@ -2,7 +2,7 @@ package eu.f3rog.blade.compiler.module;
 
 import com.squareup.javapoet.AnnotationSpec;
 
-import blade.core.WeaveInto;
+import eu.f3rog.blade.core.WeaveInto;
 
 /**
  * Class {@link WeaveUtils}
