@@ -10,6 +10,7 @@ Android library for boilerplate destruction - "Just code what is worth coding"
 Available annotations:
 * [@Arg](https://github.com/FrantisekGazo/Blade#arg)
 * [@Extra](https://github.com/FrantisekGazo/Blade#extra)
+* [@State](https://github.com/FrantisekGazo/Blade#state)
 
 ## @Arg
 Annotation for generating `newInstance()` methods for your [Fragment](http://developer.android.com/reference/android/app/Fragment.html) classes.
@@ -66,7 +67,7 @@ So you can easily create new fragment by calling:
 ```Java
 F.newMyFragment("some-string", new MyData());
 ```
-And given values will be set to coresponding attributes annotated with `@Arg`.
+And given values will be set to corresponding attributes annotated with `@Arg`.
 
 ## @Extra
 Annotation for generating `newIntent()` methods for your [Activity](http://developer.android.com/reference/android/app/Activity.html) classes.
@@ -122,7 +123,59 @@ So you can easily start new Activity by calling:
 ```Java
 I.startMyActivity("some-string", new MyData());
 ```
-And given values will be set to coresponding attributes annotated with `@Extra`.
+And given values will be set to corresponding attributes annotated with `@Extra`.
+
+## @State
+Annotation for simplifying state management.
+
+For each class containing attributes annotated with `@State` Blade will generate helper class named NameOfClass`_Helper` with 2 static methods for state management:
+* `saveState(Bundle)`
+* `restoreState(Bundle)`
+
+Classes extending from `Fragment`, `Activity` or `View` are managed automatically, so you don't need to call `saveState(Bundle)` or `restoreState(Bundle)`.
+But other classes has to call these 2 generated methods when needed. 
+
+Without using this library you would have to write this:
+
+```Java
+public class MyActivity extends Activity {
+
+    private static final String EXTRA_TEXT = "extra_text";
+    private static final String EXTRA_DATA = "arg_data";
+
+    private String mText;
+    private MyData mData;
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(EXTRA_DATA, mData);
+        outState.putString(EXTRA_TEXT, mText);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mData = savedInstanceState.getParcelable(EXTRA_DATA);
+        mText = (MyData) savedInstanceState.getString(EXTRA_TEXT);
+    }   
+    
+}
+```
+
+But with this library you can write this:
+
+```Java
+public class MyActivity extends Activity {
+
+    @State 
+    String mText;
+    @State
+    MyData mData;
+  
+}
+```
+
 
 # Download
 
@@ -135,7 +188,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.3.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:1.0.0'
+        classpath 'eu.f3rog.blade:plugin:1.1.0'
     }
 }
 

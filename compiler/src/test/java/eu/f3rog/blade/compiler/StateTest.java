@@ -173,7 +173,7 @@ public class StateTest extends BaseTest {
                         "   }",
                         "",
                         "   @Weave(into = \"onRestoreInstanceState\", args = {\"android.os.Parcelable\"}, ",
-                        "       statement = \"if ($1 instanceof android.os.Bundle) {android.os.Bundle bundle = (android.os.Bundle) $1;com.example.$T.restoreState(this, bundle);super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));} else {super.onRestoreInstanceState($1);}\")",
+                        "       statement = \"if ($1 instanceof android.os.Bundle) {android.os.Bundle bundle = (android.os.Bundle) $1;com.example.$T.restoreState(this, bundle);super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));} else {super.onRestoreInstanceState($1);}return;\")",
                         "   public static void restoreState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",

@@ -18,8 +18,7 @@ public class ShowTextActivity extends AppCompatActivity {
     String mInitText;
 
     @State
-    String somethingStateful;
-
+    int number;
 
     @Bind(android.R.id.text1)
     TextView mShownText;
@@ -43,6 +42,8 @@ public class ShowTextActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_text);
         ButterKnife.bind(this);
         mShownText.setText(mInitText);
+
+        number++;
     }
 
 }
