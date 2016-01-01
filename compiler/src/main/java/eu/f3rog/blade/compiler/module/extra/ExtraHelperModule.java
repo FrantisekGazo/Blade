@@ -27,6 +27,7 @@ import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 
 /**
  * Class {@link ExtraHelperModule}
@@ -72,7 +73,9 @@ public class ExtraHelperModule extends BaseHelperModule {
     private void addInjectMethod(HelperClassBuilder builder) {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addAnnotation(WeaveBuilder.into(WEAVE_INTO, Bundle.class).build())
+                .addAnnotation(WeaveBuilder.into(WEAVE_INTO, Bundle.class)
+                        .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                        .build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
 

@@ -120,7 +120,7 @@ public class FragmentInjectorTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   @Weave(into=\"onAttach\", args = {\"android.content.Context\"})",
+                        "   @Weave(into=\"onAttach\", args = {\"android.content.Context\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",

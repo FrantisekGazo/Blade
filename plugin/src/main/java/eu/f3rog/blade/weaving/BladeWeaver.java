@@ -20,7 +20,7 @@ public class BladeWeaver extends AWeaver {
 
         String into;
         CtClass[] args;
-        int[] use;
+        String statement;
 
     }
 
@@ -60,17 +60,12 @@ public class BladeWeaver extends AWeaver {
                     continue;
                 }
 
-                if (metadata.into.isEmpty()) { // into constructor
+                if (metadata.into.length() == 0) { // into constructor
                     log(" -> into constructor");
                     // TODO : weave
                     throw new IllegalStateException("Weaving into constructor is not implemented yet!");
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < metadata.use.length; i++) {
-                        sb.append(", $").append(metadata.use[i]);
-                    }
-
-                    String body = String.format("{ %s.%s(this%s); }", helper.getName(), method.getName(), sb.toString());
+                    String body = "{ " + metadata.statement + " }";
                     // weave into method
                     getAfterBurner().beforeOverrideMethod(body, classToTransform, metadata.into, metadata.args);
                     log(" -> %s weaved into %s", body, metadata.into);
@@ -124,18 +119,9 @@ public class BladeWeaver extends AWeaver {
         } else {
             metadata.args = new CtClass[0];
         }
-        // get USED ARGS
-        arrayMemberValue = (ArrayMemberValue) a.getMemberValue("use");
-        if (arrayMemberValue != null) {
-            MemberValue[] values = arrayMemberValue.getValue();
-            metadata.use = new int[values.length];
-            for (int i = 0; i < values.length; i++) {
-                int num = Integer.valueOf(values[i].toString());
-                metadata.use[i] = num;
-            }
-        } else {
-            metadata.use = new int[0];
-        }
+        // get STATEMENT
+        metadata.statement = a.getMemberValue("statement").toString().replaceAll("\"", "");
+        metadata.statement = metadata.statement.replaceAll("'", "\"");
 
         return metadata;
     }

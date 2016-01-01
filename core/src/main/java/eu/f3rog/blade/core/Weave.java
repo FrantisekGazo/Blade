@@ -14,6 +14,6 @@ public @interface Weave {
 
     String[] args() default {};
 
-    int[] use() default {};
+    String statement();
 
 }

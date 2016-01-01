@@ -19,6 +19,7 @@ import eu.f3rog.blade.compiler.module.extra.ExtraProcessorModule;
 import eu.f3rog.blade.compiler.module.state.StateProcessorModule;
 import eu.f3rog.blade.compiler.util.BaseProcessor;
 import eu.f3rog.blade.compiler.util.ProcessorError;
+import eu.f3rog.blade.compiler.util.ProcessorUtils;
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes({"*"})
@@ -38,6 +39,7 @@ public class BladeProcessor extends BaseProcessor {
 
     @Override
     protected void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
+        ProcessorUtils.setProcessingEnvironment(getProcessingEnvironment());
         ClassManager.init();
     }
 

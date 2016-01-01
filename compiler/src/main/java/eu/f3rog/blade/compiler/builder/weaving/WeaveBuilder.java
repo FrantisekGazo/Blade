@@ -12,46 +12,58 @@ import eu.f3rog.blade.core.Weave;
  */
 public final class WeaveBuilder {
 
-    public static IWeaveUse into(String methodName, Class... args) {
+    public static IWeaveStatement into(String methodName, Class... args) {
         Implementation implementation = new Implementation();
         return implementation.into(methodName, args);
     }
 
+    public interface IWeaveInto extends IWeaveBuild {
+
+        IWeaveStatement into(String methodName, Class... args);
+
+    }
+
+    public interface IWeaveStatement extends IWeaveBuild {
+
+        IWeaveStatement addStatement(String statement, Object... args);
+
+    }
+
+    public interface IWeaveBuild {
+
+        AnnotationSpec build();
+
+    }
+
     private static final class Implementation
-            implements IWeaveInto, IWeaveUse {
+            implements IWeaveInto, IWeaveStatement {
 
         private String mInto;
         private String[] mIntoArgs;
-        private Integer[] mUse;
+        private StringBuilder mStatement = new StringBuilder();
 
         @Override
-        public IWeaveUse into(String methodName, Class... args) {
+        public IWeaveStatement into(String methodName, Class... args) {
             mInto = methodName;
             mIntoArgs = toString(args);
             return this;
         }
 
         @Override
-        public IWeaveBuild use(Integer... argNumbers) {
-            mUse = argNumbers;
+        public IWeaveStatement addStatement(String statement, Object... args) {
+            mStatement.append(String.format(statement, args));
             return this;
         }
 
         @Override
         public AnnotationSpec build() {
-            if (mUse == null) {
-                mUse = new Integer[0];
-            }
-
             AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class)
                     .addMember("into", "$S", mInto);
 
             if (mIntoArgs != null && mIntoArgs.length > 0) {
                 a.addMember("args", formatFor("$S", mIntoArgs.length), mIntoArgs);
             }
-            if (mUse != null && mUse.length > 0) {
-                a.addMember("use", formatFor("$L", mUse.length), mUse);
-            }
+            a.addMember("statement", "$S", mStatement.toString());
 
             return a.build();
         }

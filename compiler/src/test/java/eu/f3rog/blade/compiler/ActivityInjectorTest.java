@@ -120,7 +120,7 @@ public class ActivityInjectorTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"})",
+                        "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",
                         "       if (target.getIntent() == null || target.getIntent().getExtras() == null) {",
                         "           return;",
