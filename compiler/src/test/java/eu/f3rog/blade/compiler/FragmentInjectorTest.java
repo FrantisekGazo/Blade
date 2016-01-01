@@ -7,7 +7,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Arg;
-import eu.f3rog.blade.core.WeaveInto;
+import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;
@@ -114,12 +114,12 @@ public class FragmentInjectorTest extends BaseTest {
                 .imports(
                         input, "I",
                         BundleWrapper.class,
-                        WeaveInto.class
+                        Weave.class
                 )
                 .body(
                         "public final class $T {",
                         "",
-                        "   @WeaveInto(\"onAttach\")",
+                        "   @Weave(into=\"onAttach\", intoArgs = {}, with = {})",
                         "   public static void inject($I target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",

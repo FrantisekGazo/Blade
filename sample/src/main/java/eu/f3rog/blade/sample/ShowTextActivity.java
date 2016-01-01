@@ -5,8 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import blade.F;
 import blade.Extra;
+import blade.F;
+import blade.State;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -15,6 +16,10 @@ public class ShowTextActivity extends AppCompatActivity {
 
     @Extra
     String mInitText;
+
+    @State
+    String somethingStateful;
+
 
     @Bind(android.R.id.text1)
     TextView mShownText;

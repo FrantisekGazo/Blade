@@ -1,6 +1,8 @@
 package eu.f3rog.blade.compiler.module.arg;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.os.Bundle;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -19,13 +21,13 @@ import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
-import static eu.f3rog.blade.compiler.module.WeaveUtils.createWeaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 
 /**
@@ -72,7 +74,7 @@ public class ArgHelperModule extends BaseHelperModule {
     private void addInjectMethod(BaseClassBuilder builder) {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addAnnotation(createWeaveAnnotation(WEAVE_INTO))
+                .addAnnotation(WeaveBuilder.into(WEAVE_INTO, Context.class).build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
 

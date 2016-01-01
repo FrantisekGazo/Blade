@@ -7,7 +7,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Extra;
-import eu.f3rog.blade.core.WeaveInto;
+import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;
@@ -114,12 +114,12 @@ public class ActivityInjectorTest extends BaseTest {
                 .imports(
                         input, "I",
                         BundleWrapper.class,
-                        WeaveInto.class
+                        Weave.class
                 )
                 .body(
                         "public final class $T {",
                         "",
-                        "   @WeaveInto(\"onCreate\")",
+                        "   @Weave(into = \"onCreate\", intoArgs = {}, with = {})",
                         "   public static void inject($I target) {",
                         "       if (target.getIntent() == null || target.getIntent().getExtras() == null) {",
                         "           return;",

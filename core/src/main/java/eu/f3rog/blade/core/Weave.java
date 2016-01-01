@@ -8,7 +8,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target(METHOD)
 @Retention(RUNTIME)
-public @interface WeaveInto {
+public @interface Weave {
 
-    String value() default "";
+    String into();
+
+    String[] args();
+
 }

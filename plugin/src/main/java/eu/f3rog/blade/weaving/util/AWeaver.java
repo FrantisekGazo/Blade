@@ -1,6 +1,6 @@
 package eu.f3rog.blade.weaving.util;
 
-import com.github.stephanenicolas.afterburner.AfterBurner;
+import eu.f3rog.afterburner.AfterBurner;
 
 import java.io.File;
 

@@ -16,6 +16,7 @@ import blade.State;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
@@ -33,6 +34,9 @@ public class StateHelperModule
 
     private static final String METHOD_NAME_SAVE_SATE = "saveState";
     private static final String METHOD_NAME_RESTORE_SATE = "restoreState";
+
+    private static final String WEAVE_SAVE_INTO = "onSaveInstanceState";
+    private static final String WEAVE_RESTORE_INTO = "onCreate";
 
     private static final String STATEFUL_ID_FORMAT = "<Stateful-%s>";
 
@@ -62,6 +66,7 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
+                .addAnnotation(WeaveBuilder.into(WEAVE_SAVE_INTO, Bundle.class).build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
                 .addParameter(Bundle.class, state);
@@ -81,6 +86,7 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
+                .addAnnotation(WeaveBuilder.into(WEAVE_RESTORE_INTO, Bundle.class).build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
                 .addParameter(Bundle.class, state);

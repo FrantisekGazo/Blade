@@ -1,17 +1,27 @@
 package eu.f3rog.blade.weaving;
 
-import eu.f3rog.blade.core.WeaveInto;
+import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.weaving.util.AWeaver;
+import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.build.JavassistBuildException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.Annotation;
+import javassist.bytecode.annotation.ArrayMemberValue;
+import javassist.bytecode.annotation.MemberValue;
 
 import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
 
 public class BladeWeaver extends AWeaver {
+
+    private static class Metadata {
+
+        String into;
+        CtClass[] args;
+
+    }
 
     private static final String HELPER_NAME_FORMAT = "%s.%s_Helper";
 
@@ -41,21 +51,31 @@ public class BladeWeaver extends AWeaver {
             CtClass helper = getHelper(classToTransform);
 
             for (CtMethod method : helper.getDeclaredMethods()) {
-                log("method %s", method.getName());
+                log("method named \"%s\"", method.getName());
 
-                String where = loadWeaveInto(method);
-                if (where == null) { // nowhere
+                Metadata metadata = loadMetadata(classToTransform.getClassPool(), method);
+                if (metadata == null) { // nowhere
                     log(" -> nowhere");
                     continue;
-                } else if (where.isEmpty()) { // into constructor
+                }
+
+                CtClass[] params = method.getParameterTypes();
+
+                if (metadata.into.isEmpty()) { // into constructor
                     log(" -> into constructor");
                     // TODO : weave
                     throw new IllegalStateException("Weaving into constructor is not implemented yet!");
                 } else {
-                    String body = String.format("{ %s.%s(this); }", helper.getName(), method.getName());
+                    String body;
+                    if (params.length > 1) {
+                        // TODO : ARG X - NOT GOOD :)
+                        body = String.format("{ %s.%s(this, $1); }", helper.getName(), method.getName());
+                    } else {
+                        body = String.format("{ %s.%s(this); }", helper.getName(), method.getName());
+                    }
                     // weave into method
-                    getAfterBurner().beforeOverrideMethod(classToTransform, where, body);
-                    log(" -> %s weaved into %s", body, where);
+                    getAfterBurner().beforeOverrideMethod(body, classToTransform, metadata.into, metadata.args);
+                    log(" -> %s weaved into %s", body, metadata.into);
                 }
             }
 
@@ -80,18 +100,30 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private String loadWeaveInto(CtMethod method) {
+    private Metadata loadMetadata(ClassPool classPool, CtMethod method) throws NotFoundException {
         AnnotationsAttribute attr = getAnnotations(method);
         if (attr == null) {
             return null;
         }
 
-        Annotation a = attr.getAnnotation(WeaveInto.class.getName());
+        Annotation a = attr.getAnnotation(Weave.class.getName());
         if (a == null) {
             return null;
         }
 
-        return a.getMemberValue("value").toString().replaceAll("\"", "");
+        Metadata metadata = new Metadata();
+        // get INTO
+        metadata.into = a.getMemberValue("into").toString().replaceAll("\"", "");
+        // get INTO ARGS
+        ArrayMemberValue with = (ArrayMemberValue) a.getMemberValue("args");
+        MemberValue[] values = with.getValue();
+        metadata.args = new CtClass[values.length];
+        for (int i = 0; i < values.length; i++) {
+            String className = values[i].toString().replaceAll("\"", "");
+            metadata.args[i] = classPool.get(className);
+        }
+
+        return metadata;
     }
 
 }
