@@ -43,11 +43,17 @@ public final class WeaveBuilder {
                 mUse = new Integer[0];
             }
 
-            return AnnotationSpec.builder(Weave.class)
-                    .addMember("into", "$S", mInto)
-                    .addMember("args", formatFor("$S", mIntoArgs.length), mIntoArgs)
-                    .addMember("use", formatFor("$L", mUse.length), mUse)
-                    .build();
+            AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class)
+                    .addMember("into", "$S", mInto);
+
+            if (mIntoArgs != null && mIntoArgs.length > 0) {
+                a.addMember("args", formatFor("$S", mIntoArgs.length), mIntoArgs);
+            }
+            if (mUse != null && mUse.length > 0) {
+                a.addMember("use", formatFor("$L", mUse.length), mUse);
+            }
+
+            return a.build();
         }
 
         private String[] toString(final Class... classes) {

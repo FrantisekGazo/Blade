@@ -114,19 +114,27 @@ public class BladeWeaver extends AWeaver {
         metadata.into = a.getMemberValue("into").toString().replaceAll("\"", "");
         // get INTO ARGS
         ArrayMemberValue arrayMemberValue = (ArrayMemberValue) a.getMemberValue("args");
-        MemberValue[] values = arrayMemberValue.getValue();
-        metadata.args = new CtClass[values.length];
-        for (int i = 0; i < values.length; i++) {
-            String className = values[i].toString().replaceAll("\"", "");
-            metadata.args[i] = classPool.get(className);
+        if (arrayMemberValue != null) {
+            MemberValue[] values = arrayMemberValue.getValue();
+            metadata.args = new CtClass[values.length];
+            for (int i = 0; i < values.length; i++) {
+                String className = values[i].toString().replaceAll("\"", "");
+                metadata.args[i] = classPool.get(className);
+            }
+        } else {
+            metadata.args = new CtClass[0];
         }
         // get USED ARGS
         arrayMemberValue = (ArrayMemberValue) a.getMemberValue("use");
-        values = arrayMemberValue.getValue();
-        metadata.use = new int[values.length];
-        for (int i = 0; i < values.length; i++) {
-            int num = Integer.valueOf(values[i].toString());
-            metadata.use[i] = num;
+        if (arrayMemberValue != null) {
+            MemberValue[] values = arrayMemberValue.getValue();
+            metadata.use = new int[values.length];
+            for (int i = 0; i < values.length; i++) {
+                int num = Integer.valueOf(values[i].toString());
+                metadata.use[i] = num;
+            }
+        } else {
+            metadata.use = new int[0];
         }
 
         return metadata;
