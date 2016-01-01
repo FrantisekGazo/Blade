@@ -1,6 +1,7 @@
 package eu.f3rog.blade.compiler;
 
 import android.app.Fragment;
+import android.content.Context;
 
 import org.junit.Test;
 
@@ -119,7 +120,7 @@ public class FragmentInjectorTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   @Weave(into=\"onAttach\", intoArgs = {}, with = {})",
+                        "   @Weave(into=\"onAttach\", args = {\"android.content.Context\"}, use = {})",
                         "   public static void inject($I target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",

@@ -8,6 +8,7 @@ import javax.tools.JavaFileObject;
 
 import blade.State;
 import eu.f3rog.blade.core.BundleWrapper;
+import eu.f3rog.blade.core.Weave;
 
 import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
@@ -91,11 +92,13 @@ public class StateTest extends BaseTest {
                         input, "I",
                         Bundle.class,
                         BundleWrapper.class,
-                        IllegalArgumentException.class, "E"
+                        IllegalArgumentException.class, "E",
+                        Weave.class
                 )
                 .body(
                         "public final class $T {",
                         "",
+                        "   @Weave(into = \"onSaveInstanceState\", args = {\"android.os.Bundle\"}, use = {1})",
                         "   public static void saveState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
@@ -105,6 +108,7 @@ public class StateTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
+                        "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, use = {1})",
                         "   public static void restoreState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",

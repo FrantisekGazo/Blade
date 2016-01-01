@@ -8,6 +8,6 @@ package eu.f3rog.blade.compiler.builder.weaving;
  */
 public interface IWeaveInto extends IWeaveBuild {
 
-    IWeaveBuild into(String methodName, Class... args);
+    IWeaveUse into(String methodName, Class... args);
 
 }

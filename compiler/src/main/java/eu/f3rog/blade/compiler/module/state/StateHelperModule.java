@@ -66,7 +66,7 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
-                .addAnnotation(WeaveBuilder.into(WEAVE_SAVE_INTO, Bundle.class).build())
+                .addAnnotation(WeaveBuilder.into(WEAVE_SAVE_INTO, Bundle.class).use(1).build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
                 .addParameter(Bundle.class, state);
@@ -86,7 +86,7 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
-                .addAnnotation(WeaveBuilder.into(WEAVE_RESTORE_INTO, Bundle.class).build())
+                .addAnnotation(WeaveBuilder.into(WEAVE_RESTORE_INTO, Bundle.class).use(1).build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
                 .addParameter(Bundle.class, state);

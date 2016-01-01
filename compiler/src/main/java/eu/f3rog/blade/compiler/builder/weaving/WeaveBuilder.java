@@ -12,29 +12,41 @@ import eu.f3rog.blade.core.Weave;
  */
 public final class WeaveBuilder {
 
-    public static IWeaveBuild into(String methodName, Class... args) {
+    public static IWeaveUse into(String methodName, Class... args) {
         Implementation implementation = new Implementation();
         return implementation.into(methodName, args);
     }
 
     private static final class Implementation
-            implements IWeaveInto {
+            implements IWeaveInto, IWeaveUse {
 
         private String mInto;
         private String[] mIntoArgs;
+        private Integer[] mUse;
 
         @Override
-        public IWeaveBuild into(String methodName, Class... args) {
+        public IWeaveUse into(String methodName, Class... args) {
             mInto = methodName;
             mIntoArgs = toString(args);
             return this;
         }
 
         @Override
+        public IWeaveBuild use(Integer... argNumbers) {
+            mUse = argNumbers;
+            return this;
+        }
+
+        @Override
         public AnnotationSpec build() {
+            if (mUse == null) {
+                mUse = new Integer[0];
+            }
+
             return AnnotationSpec.builder(Weave.class)
                     .addMember("into", "$S", mInto)
-                    .addMember("args", formatFor(mIntoArgs.length), mIntoArgs)
+                    .addMember("args", formatFor("$S", mIntoArgs.length), mIntoArgs)
+                    .addMember("use", formatFor("$L", mUse.length), mUse)
                     .build();
         }
 
@@ -46,14 +58,14 @@ public final class WeaveBuilder {
             return array;
         }
 
-        private String formatFor(final int count) {
+        private String formatFor(String f, final int count) {
             StringBuilder format = new StringBuilder();
             format.append("{");
             for (int i = 0; i < count; i++) {
                 if (i > 0) {
                     format.append(", ");
                 }
-                format.append("$S");
+                format.append(f);
             }
             format.append("}");
             return format.toString();

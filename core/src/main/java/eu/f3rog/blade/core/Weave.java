@@ -12,6 +12,8 @@ public @interface Weave {
 
     String into();
 
-    String[] args();
+    String[] args() default {};
+
+    int[] use() default {};
 
 }

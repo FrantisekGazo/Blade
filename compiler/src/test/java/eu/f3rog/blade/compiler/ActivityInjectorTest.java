@@ -1,6 +1,7 @@
 package eu.f3rog.blade.compiler;
 
 import android.app.Activity;
+import android.os.Bundle;
 
 import org.junit.Test;
 
@@ -119,7 +120,7 @@ public class ActivityInjectorTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   @Weave(into = \"onCreate\", intoArgs = {}, with = {})",
+                        "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, use = {})",
                         "   public static void inject($I target) {",
                         "       if (target.getIntent() == null || target.getIntent().getExtras() == null) {",
                         "           return;",

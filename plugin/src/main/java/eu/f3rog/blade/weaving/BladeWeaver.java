@@ -20,6 +20,7 @@ public class BladeWeaver extends AWeaver {
 
         String into;
         CtClass[] args;
+        int[] use;
 
     }
 
@@ -59,20 +60,17 @@ public class BladeWeaver extends AWeaver {
                     continue;
                 }
 
-                CtClass[] params = method.getParameterTypes();
-
                 if (metadata.into.isEmpty()) { // into constructor
                     log(" -> into constructor");
                     // TODO : weave
                     throw new IllegalStateException("Weaving into constructor is not implemented yet!");
                 } else {
-                    String body;
-                    if (params.length > 1) {
-                        // TODO : ARG X - NOT GOOD :)
-                        body = String.format("{ %s.%s(this, $1); }", helper.getName(), method.getName());
-                    } else {
-                        body = String.format("{ %s.%s(this); }", helper.getName(), method.getName());
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < metadata.use.length; i++) {
+                        sb.append(", $").append(metadata.use[i]);
                     }
+
+                    String body = String.format("{ %s.%s(this%s); }", helper.getName(), method.getName(), sb.toString());
                     // weave into method
                     getAfterBurner().beforeOverrideMethod(body, classToTransform, metadata.into, metadata.args);
                     log(" -> %s weaved into %s", body, metadata.into);
@@ -115,12 +113,20 @@ public class BladeWeaver extends AWeaver {
         // get INTO
         metadata.into = a.getMemberValue("into").toString().replaceAll("\"", "");
         // get INTO ARGS
-        ArrayMemberValue with = (ArrayMemberValue) a.getMemberValue("args");
-        MemberValue[] values = with.getValue();
+        ArrayMemberValue arrayMemberValue = (ArrayMemberValue) a.getMemberValue("args");
+        MemberValue[] values = arrayMemberValue.getValue();
         metadata.args = new CtClass[values.length];
         for (int i = 0; i < values.length; i++) {
             String className = values[i].toString().replaceAll("\"", "");
             metadata.args[i] = classPool.get(className);
+        }
+        // get USED ARGS
+        arrayMemberValue = (ArrayMemberValue) a.getMemberValue("use");
+        values = arrayMemberValue.getValue();
+        metadata.use = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            int num = Integer.valueOf(values[i].toString());
+            metadata.use[i] = num;
         }
 
         return metadata;
