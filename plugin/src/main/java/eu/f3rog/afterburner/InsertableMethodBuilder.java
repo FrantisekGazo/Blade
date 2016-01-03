@@ -1,6 +1,7 @@
 package eu.f3rog.afterburner;
 
 import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
+import eu.f3rog.afterburner.inserts.CtMethodJavaWriter;
 import eu.f3rog.afterburner.inserts.InsertableMethod;
 import eu.f3rog.afterburner.inserts.SimpleInsertableMethod;
 import javassist.CannotCompileException;
@@ -27,14 +28,14 @@ public class InsertableMethodBuilder {
     protected String insertionBeforeMethod;
     protected String insertionAfterMethod;
     private AfterBurner afterBurner;
-    private eu.f3rog.afterburner.inserts.CtMethodJavaWriter signatureExtractor;
+    private CtMethodJavaWriter signatureExtractor;
 
     public InsertableMethodBuilder(AfterBurner afterBurner) {
         this(afterBurner, null);
     }
 
     public InsertableMethodBuilder(AfterBurner afterBurner,
-                                   eu.f3rog.afterburner.inserts.CtMethodJavaWriter signatureExtractor) {
+                                   CtMethodJavaWriter signatureExtractor) {
         this.afterBurner = afterBurner;
         this.signatureExtractor = signatureExtractor;
     }
@@ -60,10 +61,8 @@ public class InsertableMethodBuilder {
     }
 
     protected void checkFields() throws AfterBurnerImpossibleException {
-        boolean hasInsertionMethod = insertionBeforeMethod != null
-                || insertionAfterMethod != null;
         if (classToInsertInto == null || targetMethod == null
-                || !hasInsertionMethod || body == null || fullMethod == null) {
+                || body == null || fullMethod == null) {
             throw new AfterBurnerImpossibleException(
                     "Builder was not used as intended. A field is null.");
         }
@@ -79,6 +78,25 @@ public class InsertableMethodBuilder {
             InsertableMethodBuilder.this.targetMethod = targetMethod;
             InsertableMethodBuilder.this.targetMethodParams = targetMethodParams;
             return new StateTargetMethodSet();
+        }
+
+        public StateInsertionPointAndFullMethodSet atBeginningOfOverrideMethod(String targetMethod, CtClass... targetMethodParams) throws NotFoundException {
+            InsertableMethodBuilder.this.targetMethod = targetMethod;
+            InsertableMethodBuilder.this.targetMethodParams = targetMethodParams;
+            // set no insertion method ! (it will be insert at the beginning)
+            CtMethod overridenMethod = findTargetMethod(targetMethod, targetMethodParams);
+            if (overridenMethod == null) {
+                throw new NotFoundException(String.format("Class %s doesn't contain any method named %s", classToInsertInto.getName(), targetMethod));
+            }
+            fullMethod = signatureExtractor
+                    .createJavaSignature(overridenMethod)
+                    + " { \n"
+                    + InsertableMethod.BODY_TAG
+                    + "\n"
+                    + ((!overridenMethod.getReturnType().toString().equals("void")) ? "return " : "")
+                    + signatureExtractor.invokeSuper(overridenMethod) + "}\n";
+            log.info("Creating override " + fullMethod);
+            return new StateInsertionPointAndFullMethodSet();
         }
 
         public StateInsertionPointAndFullMethodSet beforeOverrideMethod(String targetMethod, CtClass... targetMethodParams) throws NotFoundException {

@@ -49,14 +49,16 @@ public class AfterBurner {
         if (targetMethod != null) {
             InsertableMethodInjectorEditor injectorEditor = new InsertableMethodInjectorEditor(
                     classToTransform, insertableMethod);
-            targetMethod.instrument(injectorEditor);
-            if (!injectorEditor.isSuccessful) {
-                throw new CannotCompileException("Transformation failed. Insertion method not found.: " + targetMethodName);
-            }
+            injectorEditor.edit(targetMethod);
         } else {
             classToTransform.addMethod(CtNewMethod.make(
                     insertableMethod.getFullMethod(), classToTransform));
         }
+    }
+
+    public void atBeginningOfOverrideMethod(String body, CtClass targetClass, String targetMethodName, CtClass... targetMethodParams) throws CannotCompileException, AfterBurnerImpossibleException, NotFoundException {
+        InsertableMethod insertableMethod = new InsertableMethodBuilder(this, signatureExtractor).insertIntoClass(targetClass).atBeginningOfOverrideMethod(targetMethodName, targetMethodParams).withBody(body).createInsertableMethod();
+        addOrInsertMethod(insertableMethod);
     }
 
     /**
@@ -167,17 +169,15 @@ public class AfterBurner {
                     .getInsertionAfterMethod();
             String insertionBeforeMethod = insertableMethod
                     .getInsertionBeforeMethod();
-            if (insertionBeforeMethod == null && insertionAfterMethod == null) {
-                throw new AfterBurnerImpossibleException(
-                        "Error in class "
-                                + insertableMethod.getClass()
-                                + " both insertionBeforeMethod && insertionAfterMethod are null.");
-            } else if (insertionBeforeMethod != null) {
+            if (insertionBeforeMethod != null) {
                 insertionMethod = insertionBeforeMethod;
                 insertAfter = false;
-            } else {
+            } else if (insertionAfterMethod != null) {
                 insertionMethod = insertionAfterMethod;
                 insertAfter = true;
+            } else { // no insertion point
+                insertionMethod = null;
+                insertAfter = false;
             }
             bodyToInsert = insertableMethod.getBody();
         }
@@ -197,6 +197,17 @@ public class AfterBurner {
                 log.info("Class " + classToTransform.getName() + " has been enhanced.");
                 m.replace(origMethodCall);
                 isSuccessful = true;
+            }
+        }
+
+        public void edit(CtMethod targetMethod) throws CannotCompileException {
+            if (insertionMethod != null) {
+                targetMethod.instrument(this);
+                if (!isSuccessful) {
+                    throw new CannotCompileException("Transformation failed. Insertion method not found.: " + targetMethod.getName());
+                }
+            } else { // if no insertion method was set, insert at the beginning
+                targetMethod.insertBefore(bodyToInsert);
             }
         }
     }

@@ -67,7 +67,7 @@ public class BladeWeaver extends AWeaver {
                 } else {
                     String body = "{ " + metadata.statement + " }";
                     // weave into method
-                    getAfterBurner().beforeOverrideMethod(body, classToTransform, metadata.into, metadata.args);
+                    getAfterBurner().atBeginningOfOverrideMethod(body, classToTransform, metadata.into, metadata.args);
                     log(" -> %s weaved into %s", body, metadata.into);
                 }
             }
