@@ -99,8 +99,11 @@ public class StateHelperModule
 
     @Override
     public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addSaveStateMethod(builder);
-        addRestoreStateMethod(builder);
+        if (!mStatefulFields.isEmpty()) {
+            // add methods only if there is something stateful
+            addSaveStateMethod(builder);
+            addRestoreStateMethod(builder);
+        }
     }
 
     private void addSaveStateMethod(HelperClassBuilder builder) {

@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import javax.tools.JavaFileObject;
 
+import blade.Blade;
 import blade.Extra;
 import eu.f3rog.blade.core.BundleWrapper;
 import eu.f3rog.blade.core.Weave;
@@ -99,7 +100,34 @@ public final class ExtraTest extends BaseTest {
     }
 
     @Test
-    public void oneActivity() {
+    public void activityNone() {
+        JavaFileObject input = file("com.example", "MainActivity")
+                .imports(
+                        Blade.class, "B",
+                        Activity.class
+                )
+                .body(
+                        "@$B",
+                        "public class $T extends Activity {}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MainActivity_Helper")
+                .imports(
+                )
+                .body(
+                        "public final class $T {",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void activityOne() {
         JavaFileObject input = file("com.example", "MainActivity")
                 .imports(
                         Extra.class, "E",
@@ -145,7 +173,7 @@ public final class ExtraTest extends BaseTest {
     }
 
     @Test
-    public void oneService() {
+    public void serviceOne() {
         JavaFileObject input = file("com.example", "SomeService")
                 .imports(
                         Extra.class, "E",
@@ -196,7 +224,7 @@ public final class ExtraTest extends BaseTest {
     }
 
     @Test
-    public void oneIntentService() {
+    public void intentServiceOne() {
         JavaFileObject input = file("com.example", "SomeService")
                 .imports(
                         Extra.class, "E",

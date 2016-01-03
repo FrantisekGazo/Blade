@@ -7,6 +7,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Arg;
+import blade.Blade;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;
@@ -19,6 +20,42 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  * @version 2015-11-27
  */
 public final class FragmentFactoryTest extends BaseTest {
+
+    @Test
+    public void none() {
+        JavaFileObject input = file("com.example", "SomeFragment")
+                .imports(
+                        Fragment.class,
+                        Blade.class, "B"
+                )
+                .body(
+                        "@$B",
+                        "public class $T extends Fragment {}"
+                );
+
+        JavaFileObject expected = generatedFile("blade", "F")
+                .imports(
+                        input, "I",
+                        BundleWrapper.class, "BW"
+                )
+                .body(
+                        "public final class $T {",
+                        "",
+                        "   public static $I new$I() {",
+                        "       $I fragment = new $I();",
+                        "       $BW args = new $BW();",
+                        "       fragment.setArguments(args.getBundle());",
+                        "       return fragment;",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
 
     @Test
     public void one() {

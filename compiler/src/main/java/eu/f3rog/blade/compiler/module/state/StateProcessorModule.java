@@ -23,6 +23,11 @@ public class StateProcessorModule
         implements ProcessorModule {
 
     @Override
+    public void process(ProcessingEnvironment processingEnvironment, TypeElement bladeElement) throws ProcessorError {
+        // do nothing
+    }
+
+    @Override
     public void process(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(State.class);
         for (Element e : elements) {

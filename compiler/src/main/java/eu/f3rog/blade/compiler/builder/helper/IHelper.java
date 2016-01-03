@@ -16,6 +16,8 @@ public interface IHelper {
      */
     <T extends IHelperModule> T getModule(Class<T> cls) throws ProcessorError;
 
+    <T extends IHelperModule> T tryGetModule(Class<T> cls) throws ProcessorError;
+
     <T extends IHelperModule> T getModuleIfExists(Class<T> cls) throws ProcessorError;
 
 }

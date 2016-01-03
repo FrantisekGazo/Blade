@@ -68,7 +68,10 @@ public class ArgHelperModule extends BaseHelperModule {
 
     @Override
     public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addInjectMethod(builder);
+        if (!mArgs.isEmpty()) {
+            // add inject() only if there is something
+            addInjectMethod(builder);
+        }
         addMethodToFragmentFactory(processingEnvironment, builder);
     }
 

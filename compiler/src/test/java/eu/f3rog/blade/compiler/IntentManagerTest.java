@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import javax.tools.JavaFileObject;
 
+import blade.Blade;
 import blade.Extra;
 import eu.f3rog.blade.core.BundleWrapper;
 
@@ -23,7 +24,49 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
 public final class IntentManagerTest extends BaseTest {
 
     @Test
-    public void one() {
+    public void activityNone() {
+        JavaFileObject input = file("com.example", "SomeActivity")
+                .imports(
+                        Blade.class, "B",
+                        Activity.class
+                )
+                .body(
+                        "@$B",
+                        "public class $T extends Activity {}"
+                );
+
+        JavaFileObject expected = generatedFile("blade", "I")
+                .imports(
+                        input, "A",
+                        BundleWrapper.class, "BW",
+                        Intent.class,
+                        Context.class
+                )
+                .body(
+                        "public final class $T {",
+                        "",
+                        "   public static Intent for$A(Context context) {",
+                        "       Intent intent = new Intent(context, $A.class);",
+                        "       $BW extras = new $BW();",
+                        "       intent.putExtras(extras.getBundle());",
+                        "       return intent;",
+                        "   }",
+                        "",
+                        "   public static void start$A(Context context) {",
+                        "       context.startActivity(for$A(context));",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void activityOne() {
         JavaFileObject input = file("com.example", "SomeActivity")
                 .imports(
                         Extra.class, "E",
@@ -70,7 +113,7 @@ public final class IntentManagerTest extends BaseTest {
     }
 
     @Test
-    public void more() {
+    public void activityMore() {
         JavaFileObject input1 = file("com.example", "FirstActivity")
                 .imports(
                         Extra.class, "E",
@@ -146,7 +189,7 @@ public final class IntentManagerTest extends BaseTest {
     }
 
     @Test
-    public void inherit() {
+    public void activityInheritance() {
         JavaFileObject base = file("com.example", "BaseActivity")
                 .imports(
                         Extra.class, "E",
@@ -219,7 +262,7 @@ public final class IntentManagerTest extends BaseTest {
     }
 
     @Test
-    public void inheritanceFromAbstract() {
+    public void activityInheritanceFromAbstract() {
         JavaFileObject base = file("com.example", "BaseActivity")
                 .imports(
                         Extra.class, "E",

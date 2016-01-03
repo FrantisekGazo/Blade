@@ -22,6 +22,13 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
 public class ExtraProcessorModule implements ProcessorModule {
 
     @Override
+    public void process(ProcessingEnvironment processingEnvironment, TypeElement bladeElement) throws ProcessorError {
+        ClassManager.getInstance()
+                .getHelper(bladeElement)
+                .tryGetModule(ExtraHelperModule.class);
+    }
+
+    @Override
     public void process(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Extra.class);
         for (Element e : elements) {

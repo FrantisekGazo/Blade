@@ -11,8 +11,11 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
+import blade.Blade;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.module.arg.ArgProcessorModule;
 import eu.f3rog.blade.compiler.module.extra.ExtraProcessorModule;
@@ -45,6 +48,16 @@ public class BladeProcessor extends BaseProcessor {
 
     @Override
     protected void exec(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
+        for (Element e : roundEnv.getElementsAnnotatedWith(Blade.class)) {
+            if (e.getKind() == ElementKind.CLASS) {
+                Blade a = e.getAnnotation(Blade.class);
+                ClassManager.getInstance().getHelper((TypeElement) e).setBlade(a);
+                for (int i = 0; i < mModules.size(); i++) {
+                    mModules.get(i).process(getProcessingEnvironment(), (TypeElement) e);
+                }
+            }
+        }
+
         for (int i = 0; i < mModules.size(); i++) {
             mModules.get(i).process(getProcessingEnvironment(), roundEnv);
         }

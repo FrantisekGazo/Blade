@@ -7,8 +7,9 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.Arg;
-import eu.f3rog.blade.core.Weave;
+import blade.Blade;
 import eu.f3rog.blade.core.BundleWrapper;
+import eu.f3rog.blade.core.Weave;
 
 import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
@@ -128,6 +129,33 @@ public final class ArgTest extends BaseTest {
                         "       target.mExtraString = args.get(\"<Arg-mExtraString>\", target.mExtraString);",
                         "       target.mA = args.get(\"<Arg-mA>\", target.mA);",
                         "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void none() {
+        JavaFileObject input = file("com.example", "MainFragment")
+                .imports(
+                        Blade.class, "B",
+                        Fragment.class
+                )
+                .body(
+                        "@$B",
+                        "public class $T extends Fragment {}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MainFragment_Helper")
+                .imports(
+                )
+                .body(
+                        "public final class $T {",
                         "",
                         "}"
                 );
