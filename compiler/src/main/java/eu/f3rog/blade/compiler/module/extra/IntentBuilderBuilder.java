@@ -1,5 +1,7 @@
 package eu.f3rog.blade.compiler.module.extra;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -62,11 +64,19 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
             }
         }
 
-        integrate(ClassName.get(typeElement), extras, isSubClassOf(typeElement, Service.class));
+        ClassName className = ClassName.get(typeElement);
+        boolean isService = isSubClassOf(typeElement, Service.class);
+
+        addMethodFor(className, extras);
+        addMethodStart(className, extras, isService);
+        if (!isService) {
+            addMethodStartForResult(className, extras, Activity.class);
+            addMethodStartForResult(className, extras, Fragment.class);
+        }
     }
 
-    private void integrate(ClassName activityClassName, List<VariableElement> allExtras, boolean isService) throws ProcessorError {
-        String forName = getMethodName(METHOD_NAME_FOR, activityClassName);
+    private void addMethodFor(ClassName className, List<VariableElement> allExtras) throws ProcessorError {
+        String forName = getMethodName(METHOD_NAME_FOR, className);
         String context = "context";
         String intent = "intent";
         String extras = "extras";
@@ -75,31 +85,74 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context.class, context)
                 .returns(Intent.class);
-        // build START method
-        MethodSpec.Builder startMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START, activityClassName))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(Context.class, context);
 
-        forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, activityClassName)
+        forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, className)
                 .addStatement("$T $N = new $T()", BundleWrapper.class, extras, BundleWrapper.class);
-        startMethod.addCode("$N.$N($N($N", context,
-                (isService) ? "startService" : "startActivity",
-                forName, context);
+
         for (VariableElement extra : allExtras) {
             TypeName typeName = ClassName.get(extra.asType());
             String name = extra.getSimpleName().toString();
+
             forMethod.addParameter(typeName, name);
             forMethod.addStatement("$N.put($S, $N)", extras, ExtraHelperModule.getExtraId(name), name);
+        }
+        forMethod.addStatement("$N.putExtras($N.getBundle())", intent, extras)
+                .addStatement("return $N", intent);
+
+        // add methods
+        getBuilder().addMethod(forMethod.build());
+    }
+
+    private void addMethodStart(ClassName className, List<VariableElement> allExtras, boolean isService) throws ProcessorError {
+        String forName = getMethodName(METHOD_NAME_FOR, className);
+        String context = "context";
+        // build START method
+        MethodSpec.Builder startMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START, className))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(Context.class, context);
+
+        startMethod.addCode("$N.$N($N($N", context,
+                (isService) ? "startService" : "startActivity",
+                forName, context);
+
+        for (VariableElement extra : allExtras) {
+            TypeName typeName = ClassName.get(extra.asType());
+            String name = extra.getSimpleName().toString();
 
             startMethod.addParameter(typeName, name);
             startMethod.addCode(", $N", name);
         }
-        forMethod.addStatement("$N.putExtras($N.getBundle())", intent, extras)
-                .addStatement("return $N", intent);
         startMethod.addCode("));\n");
+
         // add methods
-        getBuilder().addMethod(forMethod.build());
         getBuilder().addMethod(startMethod.build());
+    }
+
+    private void addMethodStartForResult(ClassName className, List<VariableElement> allExtras, Class fromClass) throws ProcessorError {
+        String forName = getMethodName(METHOD_NAME_FOR, className);
+        String from = (fromClass == Activity.class) ? "activity" : "fragment";
+        String requestCode = "requestCode";
+        // build START FOR RESULT method
+        MethodSpec.Builder startForResultMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START_FOR_RESULT, className))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(fromClass, from)
+                .addParameter(int.class, requestCode);
+
+        startForResultMethod.addCode("$N.startActivityForResult($N($N", from, forName, from);
+        if (fromClass == Fragment.class) {
+            startForResultMethod.addCode(".getActivity()");
+        }
+        for (VariableElement extra : allExtras) {
+            TypeName typeName = ClassName.get(extra.asType());
+            String name = extra.getSimpleName().toString();
+
+            startForResultMethod.addParameter(typeName, name);
+            startForResultMethod.addCode(", $N", name);
+        }
+        startForResultMethod.addCode("), $N);\n", requestCode);
+
+        // add methods
+        getBuilder().addMethod(startForResultMethod.build());
     }
 
     private String getMethodName(String format, ClassName activityName) {

@@ -1,6 +1,7 @@
 package eu.f3rog.blade.compiler;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 
@@ -43,7 +44,9 @@ public final class IntentManagerTest extends BaseTest {
                         BundleWrapper.class, "BW",
                         String.class,
                         Intent.class,
-                        Context.class
+                        Context.class,
+                        Activity.class,
+                        Fragment.class
                 )
                 .body(
                         "public final class $T {",
@@ -58,6 +61,14 @@ public final class IntentManagerTest extends BaseTest {
                         "",
                         "   public static void start$A(Context context, String mText) {",
                         "       context.startActivity(for$A(context, mText));",
+                        "   }",
+                        "",
+                        "   public static void start$AForResult(Activity activity, int requestCode, String mText) {",
+                        "       activity.startActivityForResult(for$A(activity, mText), requestCode);",
+                        "   }",
+                        "",
+                        "   public static void start$AForResult(Fragment fragment, int requestCode, String mText) {",
+                        "       fragment.startActivityForResult(for$A(fragment.getActivity(), mText), requestCode);",
                         "   }",
                         "",
                         "}"
@@ -105,7 +116,9 @@ public final class IntentManagerTest extends BaseTest {
                         BundleWrapper.class, "BW",
                         String.class,
                         Intent.class,
-                        Context.class
+                        Context.class,
+                        Activity.class,
+                        Fragment.class
                 )
                 .body(
                         "public final class $T {",
@@ -122,6 +135,14 @@ public final class IntentManagerTest extends BaseTest {
                         "       context.startActivity(for$A1(context, number));",
                         "   }",
                         "",
+                        "   public static void start$A1ForResult(Activity activity, int requestCode, int number) {",
+                        "       activity.startActivityForResult(for$A1(activity, number), requestCode);",
+                        "   }",
+                        "",
+                        "   public static void start$A1ForResult(Fragment fragment, int requestCode, int number) {",
+                        "       fragment.startActivityForResult(for$A1(fragment.getActivity(), number), requestCode);",
+                        "   }",
+                        "",
                         "   public static Intent for$A2(Context context, String text, boolean flag, double number) {",
                         "       Intent intent = new Intent(context, $A2.class);",
                         "       $BW extras = new $BW();",
@@ -134,6 +155,14 @@ public final class IntentManagerTest extends BaseTest {
                         "",
                         "   public static void start$A2(Context context, String text, boolean flag, double number) {",
                         "       context.startActivity(for$A2(context, text, flag, number));",
+                        "   }",
+                        "",
+                        "   public static void start$A2ForResult(Activity activity, int requestCode, String text, boolean flag, double number) {",
+                        "       activity.startActivityForResult(for$A2(activity, text, flag, number), requestCode);",
+                        "   }",
+                        "",
+                        "   public static void start$A2ForResult(Fragment fragment, int requestCode, String text, boolean flag, double number) {",
+                        "       fragment.startActivityForResult(for$A2(fragment.getActivity(), text, flag, number), requestCode);",
                         "   }",
                         "",
                         "}"
@@ -179,7 +208,9 @@ public final class IntentManagerTest extends BaseTest {
                         BundleWrapper.class, "BW",
                         String.class,
                         Intent.class,
-                        Context.class
+                        Context.class,
+                        Activity.class,
+                        Fragment.class
                 )
                 .body(
                         "public final class $T {",
@@ -196,6 +227,14 @@ public final class IntentManagerTest extends BaseTest {
                         "       context.startActivity(for$B(context, number));",
                         "   }",
                         "",
+                        "   public static void start$BForResult(Activity activity, int requestCode, int number) {",
+                        "       activity.startActivityForResult(for$B(activity, number), requestCode);",
+                        "   }",
+                        "",
+                        "   public static void start$BForResult(Fragment fragment, int requestCode, int number) {",
+                        "       fragment.startActivityForResult(for$B(fragment.getActivity(), number), requestCode);",
+                        "   }",
+                        "",
                         "   public static Intent for$A(Context context, int number, String text) {",
                         "       Intent intent = new Intent(context, $A.class);",
                         "       $BW extras = new $BW();",
@@ -207,6 +246,14 @@ public final class IntentManagerTest extends BaseTest {
                         "",
                         "   public static void start$A(Context context, int number, String text) {",
                         "       context.startActivity(for$A(context, number, text));",
+                        "   }",
+                        "",
+                        "   public static void start$AForResult(Activity activity, int requestCode, int number, String text) {",
+                        "       activity.startActivityForResult(for$A(activity, number, text), requestCode);",
+                        "   }",
+                        "",
+                        "   public static void start$AForResult(Fragment fragment, int requestCode, int number, String text) {",
+                        "       fragment.startActivityForResult(for$A(fragment.getActivity(), number, text), requestCode);",
                         "   }",
                         "",
                         "}"
@@ -251,7 +298,9 @@ public final class IntentManagerTest extends BaseTest {
                         BundleWrapper.class, "BW",
                         String.class,
                         Intent.class,
-                        Context.class
+                        Context.class,
+                        Activity.class,
+                        Fragment.class
                 )
                 .body(
                         "public final class $T {",
@@ -267,6 +316,14 @@ public final class IntentManagerTest extends BaseTest {
                         "",
                         "   public static void start$A(Context context, int number, String text) {",
                         "       context.startActivity(for$A(context, number, text));",
+                        "   }",
+                        "",
+                        "   public static void start$AForResult(Activity activity, int requestCode, int number, String text) {",
+                        "       activity.startActivityForResult(for$A(activity, number, text), requestCode);",
+                        "   }",
+                        "",
+                        "   public static void start$AForResult(Fragment fragment, int requestCode, int number, String text) {",
+                        "       fragment.startActivityForResult(for$A(fragment.getActivity(), number, text), requestCode);",
                         "   }",
                         "",
                         "}"
