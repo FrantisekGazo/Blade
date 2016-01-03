@@ -15,12 +15,12 @@ import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
 
 /**
- * Class {@link ActivityNavigatorTest}
+ * Class {@link IntentManagerTest}
  *
  * @author FrantisekGazo
  * @version 2015-11-27
  */
-public class ActivityNavigatorTest extends BaseTest {
+public final class IntentManagerTest extends BaseTest {
 
     @Test
     public void one() {

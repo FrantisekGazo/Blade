@@ -18,7 +18,7 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  * @author FrantisekGazo
  * @version 2015-11-27
  */
-public class FragmentFactoryTest extends BaseTest {
+public final class FragmentFactoryTest extends BaseTest {
 
     @Test
     public void one() {

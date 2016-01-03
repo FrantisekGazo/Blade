@@ -1,7 +1,6 @@
 package eu.f3rog.blade.compiler;
 
 import android.app.Fragment;
-import android.content.Context;
 
 import org.junit.Test;
 
@@ -15,12 +14,12 @@ import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
 
 /**
- * Class {@link FragmentInjectorTest}
+ * Class {@link ArgTest}
  *
  * @author FrantisekGazo
  * @version 2015-11-27
  */
-public class FragmentInjectorTest extends BaseTest {
+public final class ArgTest extends BaseTest {
 
     @Test
     public void invalidCLass() {

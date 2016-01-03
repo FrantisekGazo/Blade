@@ -13,7 +13,7 @@ import blade.State;
 public enum ErrorMsg {
 
     Invalid_place("Annotation not allowed here."),
-    Invalid_class_with_Extra("Only Activity subclass can contain @" + Extra.class.getSimpleName() + " annotations."),
+    Invalid_class_with_Extra("Only Activity or Service subclass can contain @" + Extra.class.getSimpleName() + " annotations."),
     Invalid_class_with_Arg("Only Fragment subclass can contain @" + Arg.class.getSimpleName() + " annotations."),
     Invalid_field_with_annotation("Field annotated with @%s cannot be private, protected nor final"),
     View_cannot_implement_state_methods("View subclass containing @" + State.class.getSimpleName()

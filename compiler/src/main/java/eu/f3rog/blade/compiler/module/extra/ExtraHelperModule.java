@@ -1,8 +1,12 @@
 package eu.f3rog.blade.compiler.module.extra;
 
 import android.app.Activity;
+import android.app.IntentService;
+import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 
@@ -37,8 +41,11 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
  */
 public class ExtraHelperModule extends BaseHelperModule {
 
+    private enum Injected {
+        ACTIVITY, SERVICE, INTENT_SERVICE
+    }
+
     private static final String METHOD_NAME_INJECT = "inject";
-    private static final String WEAVE_INTO = "onCreate";
 
     private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
@@ -47,10 +54,17 @@ public class ExtraHelperModule extends BaseHelperModule {
     }
 
     private List<String> mExtras = new ArrayList<>();
+    private Injected mInjected;
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (!ProcessorUtils.isSubClassOf(e, EClass.AppCompatActivity.getName(), ClassName.get(Activity.class))) {
+        if (ProcessorUtils.isSubClassOf(e, EClass.AppCompatActivity.getName(), ClassName.get(Activity.class))) {
+            mInjected = Injected.ACTIVITY;
+        } else if (ProcessorUtils.isSubClassOf(e, IntentService.class)) {
+            mInjected = Injected.INTENT_SERVICE;
+        } else if (ProcessorUtils.isSubClassOf(e, Service.class)) {
+            mInjected = Injected.SERVICE;
+        } else {
             throw new ProcessorError(e, ErrorMsg.Invalid_class_with_Extra);
         }
     }
@@ -67,37 +81,58 @@ public class ExtraHelperModule extends BaseHelperModule {
     @Override
     public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addInjectMethod(builder);
-        addMethodToActivityNavigator(processingEnvironment, builder);
+        addMethodToIntentManager(processingEnvironment, builder);
     }
 
     private void addInjectMethod(HelperClassBuilder builder) {
         String target = "target";
+        String intent = "intent";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addAnnotation(WeaveBuilder.into(WEAVE_INTO, Bundle.class)
-                        .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
-                        .build())
+                .addAnnotation(weaveAnnotation(builder))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
 
-        method.beginControlFlow("if ($N.getIntent() == null || $N.getIntent().getExtras() == null)", target, target)
+        if (mInjected == Injected.ACTIVITY) {
+            method.addStatement("$T $N = $N.getIntent()", Intent.class, intent, target);
+        } else {
+            method.addParameter(Intent.class, intent);
+        }
+
+        method.beginControlFlow("if ($N == null || $N.getExtras() == null)", intent, intent)
                 .addStatement("return")
                 .endControlFlow();
 
         String extras = "extras";
-        method.addStatement("$T $N = $T.from($N.getIntent().getExtras())", BundleWrapper.class, extras, BundleWrapper.class, target);
+        method.addStatement("$T $N = $T.from($N.getExtras())", BundleWrapper.class, extras, BundleWrapper.class, intent);
 
         BundleUtils.getFromBundle(method, target, mExtras, EXTRA_ID_FORMAT, extras);
 
         builder.getBuilder().addMethod(method.build());
     }
 
-    private void addMethodToActivityNavigator(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    private AnnotationSpec weaveAnnotation(HelperClassBuilder builder) {
+        switch (mInjected) {
+            case ACTIVITY:
+                return WeaveBuilder.into("onCreate", Bundle.class)
+                        .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                        .build();
+            case SERVICE:
+                return WeaveBuilder.into("onStartCommand", Intent.class, int.class, int.class)
+                        .addStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                        .build();
+            case INTENT_SERVICE:
+                return WeaveBuilder.into("onHandleIntent", Intent.class)
+                        .addStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                        .build();
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    private void addMethodToIntentManager(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
-                .getSpecialClass(ActivityNavigatorBuilder.class)
+                .getSpecialClass(IntentBuilderBuilder.class)
                 .addMethodsFor(processingEnvironment, builder.getTypeElement());
     }
 
-    public List<String> getExtras() {
-        return mExtras;
-    }
 }

@@ -10,13 +10,9 @@ import com.squareup.javapoet.ClassName;
  */
 public enum GCN {
 
-    WEAVE("Weave"),
-    WEAVER_GUIDE("WeaverGuide"),
-    MIDDLE_MAN("MiddleMan"),
     HELPER("%s_Helper"),
     FRAGMENT_FACTORY("F"),
-    ACTIVITY_NAVIGATOR("I"),
-    STATE_MANAGER("StateManager"),
+    INTENT_MANAGER("I"),
     ;
 
     private String mName;

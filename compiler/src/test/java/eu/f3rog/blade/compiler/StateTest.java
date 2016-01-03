@@ -23,7 +23,7 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  * @author FrantisekGazo
  * @version 2015-11-27
  */
-public class StateTest extends BaseTest {
+public final class StateTest extends BaseTest {
 
     @Test
     public void invalidField() {

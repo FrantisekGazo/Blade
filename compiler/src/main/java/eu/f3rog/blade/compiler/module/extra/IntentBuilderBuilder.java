@@ -1,5 +1,6 @@
 package eu.f3rog.blade.compiler.module.extra;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 
@@ -23,19 +24,22 @@ import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
+
 /**
- * Class {@link ActivityNavigatorBuilder}
+ * Class {@link IntentBuilderBuilder}
  *
  * @author FrantisekGazo
  * @version 2015-10-21
  */
-public class ActivityNavigatorBuilder extends BaseClassBuilder {
+public class IntentBuilderBuilder extends BaseClassBuilder {
 
     private static final String METHOD_NAME_FOR = "for%s";
     private static final String METHOD_NAME_START = "start%s";
+    private static final String METHOD_NAME_START_FOR_RESULT = "start%sForResult"; // TODO
 
-    public ActivityNavigatorBuilder() throws ProcessorError {
-        super(GCN.ACTIVITY_NAVIGATOR, GPN.BLADE);
+    public IntentBuilderBuilder() throws ProcessorError {
+        super(GCN.INTENT_MANAGER, GPN.BLADE);
     }
 
     @Override
@@ -58,10 +62,10 @@ public class ActivityNavigatorBuilder extends BaseClassBuilder {
             }
         }
 
-        integrate(ClassName.get(typeElement), extras);
+        integrate(ClassName.get(typeElement), extras, isSubClassOf(typeElement, Service.class));
     }
 
-    private void integrate(ClassName activityClassName, List<VariableElement> allExtras) throws ProcessorError {
+    private void integrate(ClassName activityClassName, List<VariableElement> allExtras, boolean isService) throws ProcessorError {
         String forName = getMethodName(METHOD_NAME_FOR, activityClassName);
         String context = "context";
         String intent = "intent";
@@ -78,7 +82,9 @@ public class ActivityNavigatorBuilder extends BaseClassBuilder {
 
         forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, activityClassName)
                 .addStatement("$T $N = new $T()", BundleWrapper.class, extras, BundleWrapper.class);
-        startMethod.addCode("$N.startActivity($N($N", context, forName, context);
+        startMethod.addCode("$N.$N($N($N", context,
+                (isService) ? "startService" : "startActivity",
+                forName, context);
         for (VariableElement extra : allExtras) {
             TypeName typeName = ClassName.get(extra.asType());
             String name = extra.getSimpleName().toString();
