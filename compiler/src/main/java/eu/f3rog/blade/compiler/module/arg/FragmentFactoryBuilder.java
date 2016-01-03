@@ -37,7 +37,7 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
     @Override
     public void start() throws ProcessorError {
         super.start();
-        getBuilder().addModifiers(Modifier.FINAL, Modifier.PUBLIC);
+        getBuilder().addModifiers(Modifier.PUBLIC);
     }
 
     public void addMethodFor(ProcessingEnvironment processingEnvironment, TypeElement typeElement) throws ProcessorError {

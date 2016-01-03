@@ -36,7 +36,6 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
 
     private static final String METHOD_NAME_FOR = "for%s";
     private static final String METHOD_NAME_START = "start%s";
-    private static final String METHOD_NAME_START_FOR_RESULT = "start%sForResult"; // TODO
 
     public IntentBuilderBuilder() throws ProcessorError {
         super(GCN.INTENT_MANAGER, GPN.BLADE);
@@ -45,7 +44,7 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
     @Override
     public void start() throws ProcessorError {
         super.start();
-        getBuilder().addModifiers(Modifier.FINAL, Modifier.PUBLIC);
+        getBuilder().addModifiers(Modifier.PUBLIC);
     }
 
     public void addMethodsFor(ProcessingEnvironment processingEnvironment, TypeElement typeElement) throws ProcessorError {
