@@ -10,9 +10,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
-import blade.Blade;
-import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
+import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
 /**
@@ -27,19 +26,10 @@ public class HelperClassBuilder
 
     private final TypeElement mTypeElement;
     private final Map<Class<? extends IHelperModule>, IHelperModule> mImplementations = new HashMap<>();
-    private Blade mBlade;
 
     public HelperClassBuilder(ClassName className, TypeElement e) throws ProcessorError {
         super(GCN.HELPER, className);
         mTypeElement = e;
-    }
-
-    public void setBlade(Blade blade) {
-        mBlade = blade;
-    }
-
-    public Blade getBlade() {
-        return mBlade;
     }
 
     @Override

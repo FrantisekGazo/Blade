@@ -43,7 +43,7 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static Intent for$A(Context context) {",
                         "       Intent intent = new Intent(context, $A.class);",
@@ -89,7 +89,7 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static Intent for$A(Context context, String mText) {",
                         "       Intent intent = new Intent(context, $A.class);",
@@ -151,7 +151,7 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static Intent for$A1(Context context, int number) {",
                         "       Intent intent = new Intent(context, $A1.class);",
@@ -225,7 +225,7 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static Intent for$B(Context context, int number) {",
                         "       Intent intent = new Intent(context, $B.class);",
@@ -297,7 +297,7 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static Intent for$A(Context context, int number, String text) {",
                         "       Intent intent = new Intent(context, $A.class);",

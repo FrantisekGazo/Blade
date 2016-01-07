@@ -2,5 +2,6 @@
     <string name="app_name">Automat</string>
     <string name="show_text">Initializing text:</string>
     <string name="goto_1">Show text</string>
+    <string name="goto_2">Show dialog</string>
     <string name="show_fragment">Show in fragment</string>
 </resources>

@@ -1,7 +1,6 @@
 package eu.f3rog.blade.compiler.module.arg;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 
 import com.squareup.javapoet.ClassName;
@@ -40,7 +39,6 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 public class ArgHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
-    private static final String WEAVE_INTO = "onAttach";
 
     private static final String ARG_ID_FORMAT = "<Arg-%s>";
 
@@ -78,7 +76,7 @@ public class ArgHelperModule extends BaseHelperModule {
     private void addInjectMethod(BaseClassBuilder builder) {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addAnnotation(WeaveBuilder.into(WEAVE_INTO, Context.class)
+                .addAnnotation(WeaveBuilder.into("onCreate", Bundle.class)
                         .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -102,7 +100,4 @@ public class ArgHelperModule extends BaseHelperModule {
                 .addMethodFor(processingEnvironment, builder.getTypeElement());
     }
 
-    public List<String> getArgs() {
-        return mArgs;
-    }
 }

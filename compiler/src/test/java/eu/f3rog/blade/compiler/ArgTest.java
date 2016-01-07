@@ -120,7 +120,7 @@ public final class ArgTest extends BaseTest {
                 .body(
                         "public final class $T {",
                         "",
-                        "   @Weave(into=\"onAttach\", args = {\"android.content.Context\"}, statement = \"com.example.$T.inject(this);\")",
+                        "   @Weave(into=\"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",

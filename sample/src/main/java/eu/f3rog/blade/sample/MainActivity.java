@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 
+import blade.F;
 import blade.I;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_2)
     public void b2() {
-
+        F.newSampleDialogFragment("Hello mate :)").show(getSupportFragmentManager(), "some-tag");
     }
 
     @Override

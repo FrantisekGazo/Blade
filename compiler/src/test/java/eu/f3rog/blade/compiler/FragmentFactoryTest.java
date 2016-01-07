@@ -39,7 +39,7 @@ public final class FragmentFactoryTest extends BaseTest {
                         BundleWrapper.class, "BW"
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static $I new$I() {",
                         "       $I fragment = new $I();",
@@ -79,7 +79,7 @@ public final class FragmentFactoryTest extends BaseTest {
                         String.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static $I new$I(String mText) {",
                         "       $I fragment = new $I();",
@@ -135,7 +135,7 @@ public final class FragmentFactoryTest extends BaseTest {
                         String.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static $I1 new$I1(int number) {",
                         "       $I1 fragment = new $I1();",
@@ -199,7 +199,7 @@ public final class FragmentFactoryTest extends BaseTest {
                         String.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static $B new$B(int number) {",
                         "       $B fragment = new $B();",
@@ -261,7 +261,7 @@ public final class FragmentFactoryTest extends BaseTest {
                         String.class
                 )
                 .body(
-                        "public final class $T {",
+                        "public class $T {",
                         "",
                         "   public static $A new$A(int number, String text) {",
                         "       $A fragment = new $A();",
