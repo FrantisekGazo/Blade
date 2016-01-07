@@ -61,7 +61,7 @@ public class MyFragment extends Fragment {
 }
 ```
 
-Class named `F` (= Fragment) is automatically generated for you. 
+Class `blade.F` (= Fragment) is automatically generated for you. 
 This class contains 1 method for each `Fragment`class with annotated arguments:
 * ` X newX(Context c, T1 arg1[, T2 arg2, ...]) ` - Creates new instance of class `X`.
 
@@ -73,7 +73,7 @@ F.newMyFragment("some-string", new MyData());
 ```
 And given values will be set to corresponding attributes annotated with `@Arg` at the beginning of `onCreate(Bundle)` method.
 
-Class `F` is not `final` so that you can extend it and add more methods.
+Class `blade.F` is not `final` so that you can extend it and add more methods.
 
 ## @Extra
 Annotation for generating `newIntent()` methods for your [Activity](http://developer.android.com/reference/android/app/Activity.html) or [Service](http://developer.android.com/reference/android/app/Service.html) classes.
@@ -119,7 +119,7 @@ public class MyActivity extends Activity {
 }
 ```
 
-Class named `I` (= Intent) is automatically generated for you. 
+Class `blade.I` (= Intent) is automatically generated for you. 
 This class contains 2 methods for each `Activity` class with annotated arguments:
 * ` Intent forX(Context c, T1 extra1[, T2 extra2, ...]) ` - Creates new `Intent` which can be used for starting new activity. This lets you add additional flags to this intent.
 * ` void startX(Context c, T1 extra1[, T2 extra2, ...]) ` - Creates new `Intent` and starts new activity. 
@@ -132,7 +132,7 @@ I.startMyActivity("some-string", new MyData());
 And given values will be set to corresponding attributes annotated with `@Extra` at the beginning of `onCreate(Bundle)` method 
 (in `Service`/`IntentService` at the beginning of `onStartCommand(Intent, int, int)`/`onHandleIntent(Intent)`).
 
-Class `I` is not `final` so that you can extend it and add more methods. 
+Class `blade.I` is not `final` so that you can extend it and add more methods. 
 
 ## @State
 Annotation for simplifying state management.
@@ -187,7 +187,7 @@ public class MyActivity extends Activity {
 
 
 ## @Blade
-If you do not use any `@Extra` inside your class, but you want the library to generate methods in `I` for this class, 
+If you do not use any `@Extra` inside your class, but you want the library to generate methods in `blade.I` for this class, 
 then just annotate the class with `@Blade`, like this:
 
 ```Java
