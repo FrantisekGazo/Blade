@@ -12,6 +12,10 @@ Available annotations:
 * [@Extra](https://github.com/FrantisekGazo/Blade#extra)
 * [@State](https://github.com/FrantisekGazo/Blade#state)
 
+Special annotation:
+* [@Blade](https://github.com/FrantisekGazo/Blade#blade)
+
+
 ## @Arg
 Annotation for generating `newInstance()` methods for your [Fragment](http://developer.android.com/reference/android/app/Fragment.html) classes.
 
@@ -67,10 +71,12 @@ So you can easily create new fragment by calling:
 ```Java
 F.newMyFragment("some-string", new MyData());
 ```
-And given values will be set to corresponding attributes annotated with `@Arg`.
+And given values will be set to corresponding attributes annotated with `@Arg` at the beginning of `onCreate(Bundle)` method.
+
+Class `F` is not `final` so that you can extend it and add more methods.
 
 ## @Extra
-Annotation for generating `newIntent()` methods for your [Activity](http://developer.android.com/reference/android/app/Activity.html) classes.
+Annotation for generating `newIntent()` methods for your [Activity](http://developer.android.com/reference/android/app/Activity.html) or [Service](http://developer.android.com/reference/android/app/Service.html) classes.
 
 Without using this library you would have to write this:
 
@@ -123,7 +129,10 @@ So you can easily start new Activity by calling:
 ```Java
 I.startMyActivity("some-string", new MyData());
 ```
-And given values will be set to corresponding attributes annotated with `@Extra`.
+And given values will be set to corresponding attributes annotated with `@Extra` at the beginning of `onCreate(Bundle)` method 
+(in `Service`/`IntentService` at the beginning of `onStartCommand(Intent, int, int)`/`onHandleIntent(Intent)`).
+
+Class `I` is not `final` so that you can extend it and add more methods. 
 
 ## @State
 Annotation for simplifying state management.
@@ -177,6 +186,20 @@ public class MyActivity extends Activity {
 ```
 
 
+## @Blade
+If you do not use any `@Extra` inside your class, but you want the library to generate methods in `I` for this class, 
+then just annotate the class with `@Blade`, like this:
+
+```Java
+@Blade
+public class MyActivity extends Activity {
+    // no attributes with @Extra
+}
+```
+
+Same applies for `@Arg`.
+
+
 # Download
 
 Gradle plugin:
@@ -188,7 +211,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.3.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:1.1.0'
+        classpath 'eu.f3rog.blade:plugin:1.2.0'
     }
 }
 
