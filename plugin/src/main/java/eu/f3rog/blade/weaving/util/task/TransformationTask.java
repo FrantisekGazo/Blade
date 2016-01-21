@@ -92,7 +92,7 @@ public class TransformationTask extends DefaultTask {
             classPath.add(this.getProject().file(classesDir));
         }
 
-        boolean workDone = new eu.f3rog.blade.weaving.util.task.TransformationAction(
+        boolean workDone = new TransformationAction(
                 this.getDestinationDir(),
                 this.getSources().getFiles(),
                 classPath,

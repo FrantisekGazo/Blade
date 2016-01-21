@@ -31,8 +31,8 @@ public class BladePlugin extends AWeavingPlugin {
         }
         project.dependencies {
             // library
-            compile 'eu.f3rog.blade:core:1.2.0'
-            apt 'eu.f3rog.blade:compiler:1.2.0'
+            compile 'eu.f3rog.blade:core:1.2.1'
+            apt 'eu.f3rog.blade:compiler:1.2.1'
         }
     }
 

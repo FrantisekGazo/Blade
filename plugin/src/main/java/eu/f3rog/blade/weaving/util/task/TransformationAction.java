@@ -25,7 +25,6 @@ class TransformationAction {
     private IClassTransformer transformation;
 
     private List<File> sources = new LinkedList<>();
-    private List<CtClass> loadedClasses = new LinkedList<>();
     private Collection<File> classpath = new LinkedList<>();
 
     public TransformationAction(File destinationDir, Collection<File> sources, Collection<File> classpath, IClassTransformer transformation) {
@@ -53,9 +52,9 @@ class TransformationAction {
         }
 
         try {
-            final ClassPool pool = createPool();
+            final List<CtClass> loadedClasses = preloadClasses();
 
-            this.process(pool, this.loadedClasses);
+            this.process(loadedClasses);
         } catch (Exception e) {
             throw new GradleException("Could not execute transformation", e);
         }
@@ -63,7 +62,8 @@ class TransformationAction {
         return true;
     }
 
-    private ClassPool createPool() throws NotFoundException, IOException {
+    private List<CtClass> preloadClasses() throws NotFoundException, IOException {
+        final List<CtClass> loadedClasses = new LinkedList<CtClass>();
         final ClassPool pool = new AnnotationLoadingClassPool();
 
         // set up the classpath for the classpool
@@ -79,16 +79,16 @@ class TransformationAction {
                 loadedClasses.add(loadClassFile(pool, f));
             }
         }
-        return pool;
+        return loadedClasses;
     }
 
-    public void process(ClassPool pool, Collection<CtClass> classes) {
+    public void process(Collection<CtClass> classes) {
         for (CtClass clazz : classes) {
-            processFile(pool, clazz);
+            processClass(clazz);
         }
     }
 
-    public void processFile(ClassPool pool, CtClass clazz) {
+    public void processClass(CtClass clazz) {
         try {
             if (transformation.shouldTransform(clazz)) {
                 clazz.defrost();
