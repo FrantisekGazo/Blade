@@ -1,5 +1,6 @@
-# Bl@De
-Android library for boilerplate destruction - "Just code what is worth coding"
+![](website/static/logo_small.png)
+----------------------------
+Android library for boilerplate destruction - *"Just code what is worth coding"*
 
 * Generates boilerplate code based on used annotations and lets you focus on what matters.
 * Generated code is fully traceable.
