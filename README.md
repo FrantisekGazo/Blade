@@ -64,7 +64,7 @@ public class MyFragment extends Fragment {
 
 Class `blade.F` (= Fragment) is automatically generated for you. 
 This class contains 1 method for each `Fragment`class with annotated arguments:
-* ` X newX(Context c, T1 arg1[, T2 arg2, ...]) ` - Creates new instance of class `X`.
+* ` X newX(T1 arg1[, T2 arg2, ...]) ` - Creates new instance of class `X`.
 
 
 e.g. for `MyFragment` class it contains method named `newMyFragment` with 2 parameters: `String` and `MyData`. 
@@ -128,7 +128,7 @@ This class contains 2 methods for each `Activity` class with annotated arguments
 e.g. for `MyActivity` class it contains methods named `forMyActivity` and `startMyActivity` with 2 parameters: `String` and `MyData`. 
 So you can easily start new Activity by calling:
 ```Java
-I.startMyActivity("some-string", new MyData());
+I.startMyActivity(context, "some-string", new MyData());
 ```
 And given values will be set to corresponding attributes annotated with `@Extra` at the beginning of `onCreate(Bundle)` method 
 (in `Service`/`IntentService` at the beginning of `onStartCommand(Intent, int, int)`/`onHandleIntent(Intent)`).
