@@ -1,6 +1,7 @@
 package eu.f3rog.blade.compiler.util;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.sun.tools.javac.code.Symbol;
 
@@ -17,6 +18,8 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 /**
  * Class {@link ProcessorUtils}.
@@ -32,12 +35,29 @@ public class ProcessorUtils {
         sProcessingEnvironment = processingEnvironment;
     }
 
+    public static Elements getElementUtils() {
+        return sProcessingEnvironment.getElementUtils();
+    }
+
+    public static Types getTypeUtils() {
+        return sProcessingEnvironment.getTypeUtils();
+    }
+
     public interface IGetter<A, T> {
         T get(A obj);
     }
 
     public static String fullName(ClassName className) {
-        return String.format("%s.%s", className.packageName(), className.simpleName());
+        //return String.format("%s.%s", className.packageName(), className.simpleName());
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(className.packageName());
+
+        for (int i = 0; i < className.simpleNames().size(); i++) {
+            String name = className.simpleNames().get(i);
+            sb.append(".").append(name);
+        }
+        return sb.toString();
     }
 
     /**
@@ -107,16 +127,29 @@ public class ProcessorUtils {
         return className;
     }
 
-    public static boolean inplements(final TypeElement element, final Class cls) {
-        return inplements(element, ClassName.get(cls));
+    public static boolean inplements(final TypeName typeName, final Class interfaceClass) {
+        return inplements(getTypeElement(typeName), ClassName.get(interfaceClass));
     }
 
-    public static boolean inplements(final TypeElement element, final ClassName cls) {
+    public static boolean inplements(final TypeElement element, final Class interfaceClass) {
+        return inplements(element, ClassName.get(interfaceClass));
+    }
+
+    public static boolean inplements(final TypeElement element, final ClassName interfaceClassName) {
         TypeElement superClass = element;
         while (superClass != null) {
             for (int i = 0; i < superClass.getInterfaces().size(); i++) {
-                if (ClassName.get(superClass.getInterfaces().get(i)).equals(cls)) {
-                    return true;
+                TypeMirror interfaceType = superClass.getInterfaces().get(i);
+                TypeName typeName = ClassName.get(interfaceType);
+                if (typeName instanceof ParameterizedTypeName) {
+                    ParameterizedTypeName ptn = (ParameterizedTypeName) typeName;
+                    if (ptn.rawType.equals(interfaceClassName)) {
+                        return true;
+                    }
+                } else {
+                    if (typeName.equals(interfaceClassName)) {
+                        return true;
+                    }
                 }
             }
             superClass = getSuperClass(superClass);
@@ -174,6 +207,44 @@ public class ProcessorUtils {
 
     public static boolean cannotHaveAnnotation(Element e) {
         return hasSomeModifier(e, Modifier.PRIVATE, Modifier.PROTECTED, Modifier.FINAL);
+    }
+
+    public static TypeElement getTypeElement(TypeName typeName) {
+        String className;
+        if (typeName instanceof ParameterizedTypeName) {
+            className = ((ParameterizedTypeName) typeName).rawType.toString();
+        } else {
+            className = typeName.toString();
+        }
+        return sProcessingEnvironment.getElementUtils().getTypeElement(className);
+    }
+
+    /**
+     * Finds requested supertype (can be also interface) of given type.
+     */
+    public static TypeName getSuperType(TypeMirror inspectedType, TypeName lookupType) {
+        List<? extends TypeMirror> superTypes = ProcessorUtils.getTypeUtils().directSupertypes(inspectedType);
+
+        for (TypeMirror typeMirror : superTypes) {
+            TypeName tn = ClassName.get(typeMirror);
+            if (tn instanceof ParameterizedTypeName) {
+                ParameterizedTypeName paramTypeName = (ParameterizedTypeName) tn;
+                if (paramTypeName.rawType.equals(lookupType)) {
+                    return paramTypeName;
+                }
+            } else if (tn.equals(lookupType)) {
+                return tn;
+            }
+        }
+
+        for (TypeMirror typeMirror : superTypes) {
+            TypeName tn = getSuperType(typeMirror, lookupType);
+            if (tn != null) {
+                return tn;
+            }
+        }
+
+        return null;
     }
 
 }

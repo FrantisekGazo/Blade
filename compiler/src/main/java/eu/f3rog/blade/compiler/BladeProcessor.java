@@ -19,6 +19,7 @@ import blade.Blade;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.module.arg.ArgProcessorModule;
 import eu.f3rog.blade.compiler.module.extra.ExtraProcessorModule;
+import eu.f3rog.blade.compiler.module.mvp.MvpProcessorModule;
 import eu.f3rog.blade.compiler.module.state.StateProcessorModule;
 import eu.f3rog.blade.compiler.util.BaseProcessor;
 import eu.f3rog.blade.compiler.util.ProcessorError;
@@ -36,7 +37,8 @@ public class BladeProcessor extends BaseProcessor {
         mModules = Arrays.asList(
                 new ArgProcessorModule(),
                 new ExtraProcessorModule(),
-                new StateProcessorModule()
+                new StateProcessorModule(),
+                new MvpProcessorModule()
         );
     }
 

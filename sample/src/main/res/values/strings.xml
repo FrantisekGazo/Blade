@@ -1,7 +1,23 @@
 <resources>
-    <string name="app_name">Automat</string>
-    <string name="show_text">Initializing text:</string>
-    <string name="goto_1">Show text</string>
-    <string name="goto_2">Show dialog</string>
+    <string name="app_name">Bl@de</string>
+
+    <string name="goto_extra">\@Extra</string>
+    <string name="goto_arg">\@Arg</string>
+    <string name="goto_state">\@State</string>
+    <string name="goto_mvp">\@Presenter</string>
+
+    <string name="show_text">Show text</string>
+    <string name="show_dialog">Show dialog</string>
     <string name="show_fragment">Show in fragment</string>
+
+    <string name="enter_number">Enter Number</string>
+    <string name="enter_text">Enter Text</string>
+
+    <string name="value_int">integer:</string>
+    <string name="value_string">text:</string>
+    <string name="value_double">double:</string>
+
+    <string name="rotation_message">Now you can rotate your device, the loading is running in presenter, which will update the view when done.</string>
+    <string name="value_is">Value is:</string>
+
 </resources>

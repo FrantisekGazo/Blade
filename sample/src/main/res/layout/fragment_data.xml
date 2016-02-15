@@ -1,28 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="horizontal">
+<GridLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="2"
+    android:padding="15dp"
+    android:rowCount="3">
 
     <TextView
-        android:id="@android:id/text1"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_columnSpan="1"
         android:gravity="center"
-        android:textSize="20sp"
+        android:paddingRight="15dp"
+        android:text="@string/value_int"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/txt_value_int"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="1"
+        android:gravity="center"
         android:textColor="@color/red"
+        android:textSize="20sp"
         android:textStyle="bold"
-        tools:text="5"/>
+        tools:text="0"/>
 
     <TextView
-        android:id="@android:id/text2"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_columnSpan="1"
         android:gravity="center"
-        android:textSize="20sp"
-        tools:text="Some text"/>
+        android:paddingRight="15dp"
+        android:text="@string/value_string"
+        android:textSize="20sp"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/txt_value_string"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="1"
+        android:gravity="center"
+        android:textColor="@color/red"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        tools:text="empty"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="1"
+        android:gravity="center"
+        android:paddingRight="15dp"
+        android:text="@string/value_double"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/txt_value_double"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="1"
+        android:gravity="center"
+        android:textColor="@color/red"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        tools:text="0.0"/>
+
+</GridLayout>

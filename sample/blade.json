@@ -1,0 +1,6 @@
+{
+  "debug": true,
+  "modules": [
+    "mvp"
+  ]
+}

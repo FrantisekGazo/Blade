@@ -1,47 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/activity_vertical_margin"
-    tools:context="eu.f3rog.blade.sample.ShowTextActivity">
+    android:padding="5dp">
 
-    <TextView
+    <Button
+        android:id="@+id/btn_show_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/show_text"
-        android:textSize="23sp"
-        android:textStyle="bold"/>
+        android:text="@string/show_dialog"/>
 
-    <TextView
-        android:id="@android:id/text1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@android:color/darker_gray"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="15dp">
 
         <EditText
-            android:id="@+id/et_num"
+            android:id="@+id/edt_num"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:hint="@string/enter_number"/>
 
         <EditText
-            android:id="@+id/et_text"
+            android:id="@+id/edt_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:hint="@string/enter_text"/>
 
     </LinearLayout>
 
     <Button
-        android:id="@+id/show_fragment"
+        android:id="@+id/btn_show_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/show_fragment"/>

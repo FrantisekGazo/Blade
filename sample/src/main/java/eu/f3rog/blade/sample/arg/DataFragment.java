@@ -1,4 +1,4 @@
-package eu.f3rog.blade.sample;
+package eu.f3rog.blade.sample.arg;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 import blade.Arg;
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import eu.f3rog.blade.sample.R;
 
 /**
  * Class {@link DataFragment}
@@ -22,10 +23,12 @@ public class DataFragment extends BaseFragment {
     @Arg
     Data data;
 
-    @Bind(android.R.id.text1)
-    TextView mTextViewNumber;
-    @Bind(android.R.id.text2)
-    TextView mTextViewText;
+    @Bind(R.id.txt_value_int)
+    TextView mTxtInteger;
+    @Bind(R.id.txt_value_string)
+    TextView mTxtString;
+    @Bind(R.id.txt_value_double)
+    TextView mTxtDouble;
 
     @Nullable
     @Override
@@ -39,8 +42,9 @@ public class DataFragment extends BaseFragment {
 
         ButterKnife.bind(this, view);
 
-        mTextViewNumber.setText(String.valueOf(data.getNumber()));
-        mTextViewText.setText(data.getText() + number);
+        mTxtInteger.setText(String.valueOf(data.getNumber()));
+        mTxtString.setText(data.getText());
+        mTxtDouble.setText(String.valueOf(number));
     }
 
 }

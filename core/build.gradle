@@ -6,8 +6,10 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    /* Android 4.0.x (http://mvnrepository.com/artifact/com.google.android/android) */
-    compile 'com.google.android:android:4.0.1.2'
+
+    compile deps.android
+    compile deps.javax_annotations
+    
     compile project(':annotations')
 }
 

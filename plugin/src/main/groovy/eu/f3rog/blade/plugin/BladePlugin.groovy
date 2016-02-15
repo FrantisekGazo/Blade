@@ -3,6 +3,7 @@ package eu.f3rog.blade.plugin
 import eu.f3rog.blade.plugin.util.AWeavingPlugin
 import eu.f3rog.blade.weaving.BladeWeaver
 import eu.f3rog.blade.weaving.util.IWeaver
+import groovy.json.JsonSlurper
 import org.gradle.api.Project
 
 /**
@@ -13,17 +14,29 @@ import org.gradle.api.Project
  */
 public class BladePlugin extends AWeavingPlugin {
 
-    public static final String NAME = "blade"
+    private static class BladeConfig {
+        boolean debug;
+        String[] modules;
+    }
+
+    public static final String PLUGIN_NAME = "blade"
+    public static final String PACKAGE_NAME = "eu.f3rog.blade"
+    public static final String CONFIG_FILE_NAME = "blade.json"
+    public static final String VERSION = "1.3.0"
+
+    private BladeConfig mConfig;
 
     @Override
     public IWeaver[] getTransformers(Project project) {
         return [
-                new BladeWeaver(project.blade.debug)
+                new BladeWeaver(mConfig.debug)
         ]
     }
 
     @Override
     protected void configure(Project project) {
+        parseConfiguration(project)
+
         project.android {
             packagingOptions {
                 exclude 'META-INF/services/javax.annotation.processing.Processor'
@@ -31,8 +44,12 @@ public class BladePlugin extends AWeavingPlugin {
         }
         project.dependencies {
             // library
-            compile 'eu.f3rog.blade:core:1.2.1'
-            apt 'eu.f3rog.blade:compiler:1.2.1'
+            compile "$PACKAGE_NAME:core:$VERSION"
+            apt "$PACKAGE_NAME:compiler:$VERSION"
+
+            for (String moduleName : mConfig.modules) {
+                compile "$PACKAGE_NAME:$moduleName:$VERSION"
+            }
         }
     }
 
@@ -43,7 +60,33 @@ public class BladePlugin extends AWeavingPlugin {
 
     @Override
     protected String getExtension() {
-        return NAME
+        return PLUGIN_NAME
+    }
+
+    private void parseConfiguration(Project project) {
+        mConfig = new BladeConfig();
+
+        File configFile = new File(project.projectDir.getAbsolutePath() + File.separator + CONFIG_FILE_NAME)
+
+        if (!configFile.exists()) {
+            return;
+        }
+
+        Map json = new JsonSlurper().parseText(configFile.text)
+
+        json.each { key, value ->
+            switch (key) {
+                case "debug":
+                    mConfig.debug = value
+                    break;
+                case "modules":
+                    mConfig.modules = value
+                    break;
+                default:
+                    throw new IllegalStateException("'$key' is not supported in $CONFIG_FILE_NAME.")
+            }
+        }
+
     }
 
 }

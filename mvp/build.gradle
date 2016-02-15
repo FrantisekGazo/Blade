@@ -6,6 +6,10 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile project(':core')
+
+    compile deps.android
 }
 
 publish {

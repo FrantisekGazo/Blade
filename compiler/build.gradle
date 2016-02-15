@@ -6,21 +6,19 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    /* Android 4.0.x (http://mvnrepository.com/artifact/com.google.android/android) */
-    compile 'com.google.android:android:4.0.1.2'
-
-    /* Project Core */
-    compile project(':core')
-
-    /* Annotation Processor */
-    compile 'com.google.auto.service:auto-service:1.0-rc2'
-    compile 'com.squareup:javapoet:1.4.0'
-
-    /* Testing */
     compile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
-    testCompile group: 'com.google.guava', name: 'guava', version: '18.0'
-    testCompile group: 'com.google.truth', name: 'truth', version: '0.27'
-    testCompile group: 'com.google.testing.compile', name: 'compile-testing', version: '0.7'
+
+    compile project(':core')
+    compile project(':mvp')
+
+    compile deps.android
+    compile deps.javapoet
+    compile deps.autoservice
+    compile deps.autocommon
+
+    testCompile deps.guava
+    testCompile deps.truth
+    testCompile deps.compiletesting
 }
 
 publish {

@@ -1,4 +1,4 @@
-package eu.f3rog.blade.sample;
+package eu.f3rog.blade.sample.arg;
 
 import java.io.Serializable;
 

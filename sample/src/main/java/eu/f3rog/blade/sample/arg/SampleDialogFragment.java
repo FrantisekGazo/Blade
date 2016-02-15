@@ -1,4 +1,4 @@
-package eu.f3rog.blade.sample;
+package eu.f3rog.blade.sample.arg;
 
 import android.app.Activity;
 import android.app.AlertDialog;

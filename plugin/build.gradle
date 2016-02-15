@@ -16,9 +16,9 @@ dependencies {
     /* needed to create a processor based on afterburner *
     compile 'com.github.stephanenicolas.afterburner:afterburner-library:1.0.2' */
     compile 'org.projectlombok:lombok:1.14.2'
-    /* Android */
-    compile 'com.google.android:android:4.0.1.2'
-    /* Knight */
+
+    compile deps.android
+
     compile project(':annotations')
     compile project(':core')
 }
