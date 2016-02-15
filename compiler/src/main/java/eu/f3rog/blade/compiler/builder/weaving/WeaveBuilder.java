@@ -12,34 +12,41 @@ import eu.f3rog.blade.core.Weave;
  */
 public final class WeaveBuilder {
 
+    public static AnnotationSpec forField(String statement, Object... args) {
+        AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class);
+        if (statement != null) {
+            a.addMember("statement", "$S", String.format(statement, args));
+        }
+        return a.build();
+    }
+
     public static IWeaveStatement into(String methodName, Class... args) {
         Implementation implementation = new Implementation();
         return implementation.into(methodName, args);
     }
 
+    public static IWeaveStatement intoConstructor(Class... args) {
+        Implementation implementation = new Implementation();
+        return implementation.into("", args);
+    }
+
     public interface IWeaveInto extends IWeaveBuild {
-
         IWeaveStatement into(String methodName, Class... args);
-
     }
 
     public interface IWeaveStatement extends IWeaveBuild {
-
         IWeaveStatement addStatement(String statement, Object... args);
-
     }
 
     public interface IWeaveBuild {
-
         AnnotationSpec build();
-
     }
 
     private static final class Implementation
             implements IWeaveInto, IWeaveStatement {
 
         private String mInto;
-        private String[] mIntoArgs;
+        private Object[] mIntoArgs;
         private StringBuilder mStatement = new StringBuilder();
 
         @Override
@@ -75,19 +82,19 @@ public final class WeaveBuilder {
             }
             return array;
         }
+    }
 
-        private String formatFor(String f, final int count) {
-            StringBuilder format = new StringBuilder();
-            format.append("{");
-            for (int i = 0; i < count; i++) {
-                if (i > 0) {
-                    format.append(", ");
-                }
-                format.append(f);
+    private static String formatFor(String f, final int count) {
+        StringBuilder format = new StringBuilder();
+        format.append("{");
+        for (int i = 0; i < count; i++) {
+            if (i > 0) {
+                format.append(", ");
             }
-            format.append("}");
-            return format.toString();
+            format.append(f);
         }
+        format.append("}");
+        return format.toString();
     }
 
 }

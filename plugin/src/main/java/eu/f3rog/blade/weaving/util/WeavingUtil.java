@@ -1,6 +1,7 @@
 package eu.f3rog.blade.weaving.util;
 
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
@@ -56,6 +57,10 @@ public class WeavingUtil {
 
     public static AnnotationsAttribute getAnnotations(CtMethod ctMethod) {
         return (AnnotationsAttribute) ctMethod.getMethodInfo().getAttribute(AnnotationsAttribute.visibleTag);
+    }
+
+    public static AnnotationsAttribute getAnnotations(CtField ctField) {
+        return (AnnotationsAttribute) ctField.getFieldInfo().getAttribute(AnnotationsAttribute.visibleTag);
     }
 
 }
