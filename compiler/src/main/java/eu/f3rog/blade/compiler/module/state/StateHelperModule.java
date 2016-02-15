@@ -28,11 +28,11 @@ import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
-import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
  * Class {@link StateHelperModule}
@@ -62,10 +62,10 @@ public class StateHelperModule
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
         // support any class
-        if (ProcessorUtils.isSubClassOf(e, ClassName.get(Fragment.class), EClass.SupportFragment.getName(),
-                ClassName.get(Activity.class), EClass.AppCompatActivity.getName())) {
+        if (isSubClassOf(e, Fragment.class) || isSubClassOf(e, EClass.SupportFragment.getName())
+                || isSubClassOf(e, Activity.class) || isSubClassOf(e, EClass.AppCompatActivity.getName())) {
             mHelpedClassType = HelpedClassType.ACTIVITY_OR_FRAGMENT;
-        } else if (ProcessorUtils.isSubClassOf(e, View.class)) {
+        } else if (isSubClassOf(e, View.class)) {
             mHelpedClassType = HelpedClassType.VIEW;
             if (hasViewImplementedStateMethod(e)) {
                 throw new ProcessorError(e, ErrorMsg.View_cannot_implement_state_methods);

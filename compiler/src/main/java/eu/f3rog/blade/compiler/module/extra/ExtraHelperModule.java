@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
  * Class {@link ExtraHelperModule}
@@ -58,7 +58,7 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (ProcessorUtils.isSubClassOf(e, EClass.AppCompatActivity.getName(), ClassName.get(Activity.class))) {
+        if (isSubClassOf(e, Activity.class) || isSubClassOf(e, EClass.AppCompatActivity.getName())) {
             mInjected = Injected.ACTIVITY;
         } else if (ProcessorUtils.isSubClassOf(e, IntentService.class)) {
             mInjected = Injected.INTENT_SERVICE;

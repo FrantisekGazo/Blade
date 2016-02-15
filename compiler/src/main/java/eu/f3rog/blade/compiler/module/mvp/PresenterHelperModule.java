@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -30,6 +32,7 @@ import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.getTypeElement;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
  * Class {@link PresenterHelperModule}
@@ -50,8 +53,7 @@ public class PresenterHelperModule extends BaseHelperModule {
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (!ProcessorUtils.isSubClassOf(e, View.class)
-                || !ProcessorUtils.inplements(e, IView.class)) {
+        if (!isSubClassOf(e, View.class) || !isSubClassOf(e, IView.class)) {
             throw new ProcessorError(e, ErrorMsg.Invalid_class_with_Presenter);
         }
     }
@@ -72,6 +74,10 @@ public class PresenterHelperModule extends BaseHelperModule {
 
         if (!presenterTypeElement.getTypeParameters().isEmpty()) {
             throw new ProcessorError(e, ErrorMsg.Presenter_class_cannot_be_parametrized);
+        }
+
+        if (!hasDefaultConstructor(presenterTypeElement)) {
+            throw new ProcessorError(presenterTypeElement, ErrorMsg.Presenter_class_missing_default_constructor);
         }
 
         TypeName dataType = getPresenterDataType(presenterTypeElement);
@@ -178,13 +184,25 @@ public class PresenterHelperModule extends BaseHelperModule {
     }
 
     private static TypeName getPresenterDataType(TypeElement presenterTypeElement) {
-        TypeName interfaceTypeName = ProcessorUtils.getSuperType(presenterTypeElement.asType(), ClassName.get(IPresenter.class));
+        TypeName interfaceTypeName = ProcessorUtils.getSuperType(presenterTypeElement, ClassName.get(IPresenter.class));
         if (interfaceTypeName != null) {
             ParameterizedTypeName ptn = (ParameterizedTypeName) interfaceTypeName;
             return ptn.typeArguments.get(DATA_ARG);
         } else {
             return null;
         }
+    }
+
+    private boolean hasDefaultConstructor(TypeElement presenterTypeElement) {
+        for (Element e : presenterTypeElement.getEnclosedElements()) {
+            if (e.getKind() == ElementKind.CONSTRUCTOR) {
+                ExecutableElement constructor = (ExecutableElement) e;
+                if (constructor.getParameters().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -3,7 +3,6 @@ package eu.f3rog.blade.compiler.module.arg;
 import android.app.Fragment;
 import android.os.Bundle;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 
 import java.util.ArrayList;
@@ -24,11 +23,11 @@ import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
-import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
  * Class {@link ArgHelperModule}
@@ -50,7 +49,7 @@ public class ArgHelperModule extends BaseHelperModule {
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (!ProcessorUtils.isSubClassOf(e, EClass.SupportFragment.getName(), ClassName.get(Fragment.class))) {
+        if (!isSubClassOf(e, Fragment.class) && !isSubClassOf(e, EClass.SupportFragment.getName())) {
             throw new ProcessorError(e, ErrorMsg.Invalid_class_with_Arg);
         }
     }

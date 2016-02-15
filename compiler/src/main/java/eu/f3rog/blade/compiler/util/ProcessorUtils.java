@@ -3,7 +3,6 @@ package eu.f3rog.blade.compiler.util;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import com.sun.tools.javac.code.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +28,10 @@ import javax.lang.model.util.Types;
  */
 public class ProcessorUtils {
 
+    public interface IGetter<A, T> {
+        T get(A obj);
+    }
+
     private static ProcessingEnvironment sProcessingEnvironment;
 
     public static void setProcessingEnvironment(ProcessingEnvironment processingEnvironment) {
@@ -41,10 +44,6 @@ public class ProcessorUtils {
 
     public static Types getTypeUtils() {
         return sProcessingEnvironment.getTypeUtils();
-    }
-
-    public interface IGetter<A, T> {
-        T get(A obj);
     }
 
     public static String fullName(ClassName className) {
@@ -127,74 +126,11 @@ public class ProcessorUtils {
         return className;
     }
 
-    public static boolean inplements(final TypeName typeName, final Class interfaceClass) {
-        return inplements(getTypeElement(typeName), ClassName.get(interfaceClass));
-    }
-
-    public static boolean inplements(final TypeElement element, final Class interfaceClass) {
-        return inplements(element, ClassName.get(interfaceClass));
-    }
-
-    public static boolean inplements(final TypeElement element, final ClassName interfaceClassName) {
-        TypeElement superClass = element;
-        while (superClass != null) {
-            for (int i = 0; i < superClass.getInterfaces().size(); i++) {
-                TypeMirror interfaceType = superClass.getInterfaces().get(i);
-                TypeName typeName = ClassName.get(interfaceType);
-                if (typeName instanceof ParameterizedTypeName) {
-                    ParameterizedTypeName ptn = (ParameterizedTypeName) typeName;
-                    if (ptn.rawType.equals(interfaceClassName)) {
-                        return true;
-                    }
-                } else {
-                    if (typeName.equals(interfaceClassName)) {
-                        return true;
-                    }
-                }
-            }
-            superClass = getSuperClass(superClass);
-        }
-        return false;
-    }
-
-    public static boolean isSubClassOf(final TypeElement element, final Class cls) {
-        return isSubClassOf(element, ClassName.get(cls));
-    }
-
-    public static boolean isSubClassOf(final TypeElement element, final ClassName cls) {
-        TypeElement superClass = element;
-        do {
-            superClass = getSuperClass(superClass);
-            if (superClass != null && ClassName.get(superClass).equals(cls)) {
-                return true;
-            }
-        } while (superClass != null);
-        return false;
-    }
-
-    public static boolean isSubClassOf(final TypeElement element, final ClassName... classes) {
-        TypeElement superClass = element;
-        do {
-            superClass = getSuperClass(superClass);
-            for (ClassName cls : classes) {
-                if (superClass != null && ClassName.get(superClass).equals(cls)) {
-                    return true;
-                }
-            }
-        } while (superClass != null);
-        return false;
-    }
-
-    public static TypeElement getSuperClass(final TypeElement element) {
-        if (element == null) return null;
-        return (TypeElement) ((Symbol.ClassSymbol) element).getSuperclass().asElement();
-    }
-
     public static String getParamName(final ClassName className) {
         return StringUtils.startLowerCase(className.simpleName()).replaceAll("_", "");
     }
 
-    public static boolean hasSomeModifier(Element e, Modifier... modifiers) {
+    private static boolean hasSomeModifier(Element e, Modifier... modifiers) {
         if (e == null) {
             throw new IllegalStateException("Element cannot be null!");
         }
@@ -219,10 +155,26 @@ public class ProcessorUtils {
         return sProcessingEnvironment.getElementUtils().getTypeElement(className);
     }
 
+    public static boolean isSubClassOf(TypeElement inspectedType, Class lookupClass) {
+        return getSuperType(inspectedType, lookupClass) != null;
+    }
+
+    public static boolean isSubClassOf(TypeElement inspectedType, TypeName lookupType) {
+        return getSuperType(inspectedType, lookupType) != null;
+    }
+
     /**
      * Finds requested supertype (can be also interface) of given type.
      */
-    public static TypeName getSuperType(TypeMirror inspectedType, TypeName lookupType) {
+    public static TypeName getSuperType(TypeElement inspectedType, Class lookupClass) {
+        return getSuperType(inspectedType.asType(), ClassName.get(lookupClass));
+    }
+
+    public static TypeName getSuperType(TypeElement inspectedType, TypeName lookupType) {
+        return getSuperType(inspectedType.asType(), lookupType);
+    }
+
+    private static TypeName getSuperType(TypeMirror inspectedType, TypeName lookupType) {
         List<? extends TypeMirror> superTypes = ProcessorUtils.getTypeUtils().directSupertypes(inspectedType);
 
         for (TypeMirror typeMirror : superTypes) {

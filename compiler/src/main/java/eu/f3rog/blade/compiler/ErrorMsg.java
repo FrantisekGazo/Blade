@@ -25,7 +25,8 @@ public enum ErrorMsg {
     Invalid_class_with_Presenter("Only View subclass that implements " + IView.class.getCanonicalName() + " can contain @" + Presenter.class.getSimpleName() + "."),
     Invalid_Presenter_class("@" + Presenter.class.getSimpleName() + " has to be non-abstract class that implements " + IPresenter.class.getCanonicalName()),
     Inconsistent_Presenter_parameter_classes("All @" + Presenter.class.getSimpleName() + "s has to implement " + IPresenter.class.getCanonicalName() + " with the same parameter type."),
-    Presenter_class_cannot_be_parametrized("@" + Presenter.class.getSimpleName() + " class cannot e parametrized.");
+    Presenter_class_cannot_be_parametrized("@" + Presenter.class.getSimpleName() + " class cannot e parametrized."),
+    Presenter_class_missing_default_constructor("Presenter class has to contain default constructor.");
 
     private String mMessage;
 
