@@ -3,7 +3,6 @@ package eu.f3rog.blade.sample.arg;
 import android.support.v4.app.Fragment;
 
 import blade.Arg;
-import blade.State;
 
 /**
  * Class {@link BaseFragment}
@@ -15,8 +14,5 @@ public abstract class BaseFragment extends Fragment {
 
     @Arg
     double number;
-
-    @State
-    String somethingStateful;
 
 }

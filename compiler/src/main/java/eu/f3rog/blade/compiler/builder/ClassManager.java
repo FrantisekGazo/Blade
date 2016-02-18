@@ -27,7 +27,7 @@ public class ClassManager
 
     private static ClassManager sInstance;
 
-    public static void init() throws ProcessorError {
+    public static void init() {
         sInstance = new ClassManager();
     }
 
@@ -38,7 +38,7 @@ public class ClassManager
     private final Map<Class, BaseClassBuilder> mSpecialClasses;
     private final Map<ClassName, HelperClassBuilder> mHelpers;
 
-    private ClassManager() throws ProcessorError {
+    private ClassManager() {
         mSpecialClasses = new HashMap<>();
         mHelpers = new HashMap<>();
     }

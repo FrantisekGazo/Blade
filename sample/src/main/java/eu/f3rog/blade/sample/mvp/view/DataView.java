@@ -60,7 +60,7 @@ public class DataView extends LinearLayout implements IDataView {
         mProgressBar.setVisibility(GONE);
 
         // random data (normally they would be send via constructor from activity)
-        Data data = new Data(5, "Loaded Text");
+        Data data = new Data(123, 5, "Loaded Text");
 
         setTag(data);
     }

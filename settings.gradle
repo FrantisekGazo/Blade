@@ -1,1 +1,1 @@
-include ':sample', ':compiler', ':annotations', ':plugin', ':core', ':mvp'
+include ':sample', ':compiler', ':plugin', ':core', ':module-mvp', ':module-mvp-compiler', ':module-arg-compiler', ':module-extra-compiler', ':module-state-compiler', ':compiler-test', ':module-arg', ':module-extra', ':module-state'

@@ -15,8 +15,8 @@ import org.gradle.api.Project
 public class BladePlugin extends AWeavingPlugin {
 
     private static class BladeConfig {
-        boolean debug;
-        String[] modules;
+        boolean debug = false;
+        String[] modules = ["arg", "extra", "state"];
     }
 
     public static final String PLUGIN_NAME = "blade"
@@ -45,10 +45,10 @@ public class BladePlugin extends AWeavingPlugin {
         project.dependencies {
             // library
             compile "$PACKAGE_NAME:core:$VERSION"
-            apt "$PACKAGE_NAME:compiler:$VERSION"
 
             for (String moduleName : mConfig.modules) {
-                compile "$PACKAGE_NAME:$moduleName:$VERSION"
+                compile "$PACKAGE_NAME:module-$moduleName:$VERSION"
+                apt "$PACKAGE_NAME:module-$moduleName-compiler:$VERSION"
             }
         }
     }

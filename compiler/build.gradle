@@ -9,16 +9,11 @@ dependencies {
     compile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
 
     compile project(':core')
-    compile project(':mvp')
 
     compile deps.android
     compile deps.javapoet
     compile deps.autoservice
     compile deps.autocommon
-
-    testCompile deps.guava
-    testCompile deps.truth
-    testCompile deps.compiletesting
 }
 
 publish {

@@ -19,7 +19,6 @@ dependencies {
 
     compile deps.android
 
-    compile project(':annotations')
     compile project(':core')
 }
 

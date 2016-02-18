@@ -9,11 +9,17 @@ package eu.f3rog.blade.sample.mvp.model;
 public class Data {
 
     private int mWait;
+    private long mId;
     private String mText;
 
-    public Data(int wait, String text) {
+    public Data(long id, int wait, String text) {
+        mId = id;
         mWait = wait;
         mText = text;
+    }
+
+    public long getId() {
+        return mId;
     }
 
     public int getWait() {
@@ -27,7 +33,7 @@ public class Data {
     // data has to have custom toString() method so that tag can be created correctly
     @Override
     public String toString() {
-        return mText;
+        return String.valueOf(mId);
     }
 
 }

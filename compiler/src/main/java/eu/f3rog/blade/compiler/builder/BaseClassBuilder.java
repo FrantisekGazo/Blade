@@ -10,7 +10,6 @@ import java.io.IOException;
 import javax.annotation.Generated;
 import javax.annotation.processing.ProcessingEnvironment;
 
-import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.util.ProcessorError;
@@ -150,7 +149,7 @@ public abstract class BaseClassBuilder
         // add @Generated
         getBuilder().addAnnotation(
                 AnnotationSpec.builder(Generated.class)
-                        .addMember("value", "$S", BladeProcessor.class.getName())
+                        .addMember("value", "$S", "by Bl@de")
                         .build()
         );
     }

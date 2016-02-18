@@ -9,8 +9,6 @@ dependencies {
 
     compile deps.android
     compile deps.javax_annotations
-    
-    compile project(':annotations')
 }
 
 publish {
