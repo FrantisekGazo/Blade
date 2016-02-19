@@ -15,6 +15,8 @@ import java.util.Map;
  */
 public class PresenterManager {
 
+    private static final String ACTIVITY_ID = "ACTIVITY-ID";
+
     public static void put(IView view, Object tagObject, IPresenter presenter) {
         assert view != null;
         assert tagObject != null;
@@ -40,7 +42,7 @@ public class PresenterManager {
     public static void removePresentersFor(Activity activity) {
         assert activity != null;
 
-        String activityId = buildActivityId(activity);
+        Object activityId = buildActivityId(activity);
         getInstance().removeActivityPresenters(activityId);
     }
 
@@ -49,20 +51,23 @@ public class PresenterManager {
     private static ActivityPresenterManager forParentActivity(IView view) {
         assert view != null;
 
-        String activityId = buildActivityId((Activity) view.getContext());
+        Object activityId = buildActivityId((Activity) view.getContext());
         return getInstance().getActivityPresenters(activityId);
     }
 
     private static ActivityPresenterManager forActivity(Activity activity) {
         assert activity != null;
 
-        String activityId = buildActivityId(activity);
+        Object activityId = buildActivityId(activity);
         return getInstance().getActivityPresenters(activityId);
     }
 
-    private static String buildActivityId(Activity activity) {
-        // TODO : return activity.getString(BladeActivity.ACTIVITY_ID);
-        return "ACTIVITY-ID";
+    private static Object buildActivityId(Activity activity) {
+        Object id = activity.getSystemService(ACTIVITY_ID);
+        if (id == null) {
+            throw new IllegalStateException("Activity is missing @Blade annotation.");
+        }
+        return activity.getClass().getCanonicalName() + ":" + id;
     }
 
 
@@ -75,13 +80,13 @@ public class PresenterManager {
         return sInstance;
     }
 
-    private final Map<String, ActivityPresenterManager> mActivityPresenters;
+    private final Map<Object, ActivityPresenterManager> mActivityPresenters;
 
     private PresenterManager() {
         mActivityPresenters = new HashMap<>();
     }
 
-    private ActivityPresenterManager getActivityPresenters(String activityId) {
+    private ActivityPresenterManager getActivityPresenters(Object activityId) {
         assert activityId != null;
 
         if (!mActivityPresenters.containsKey(activityId)) {
@@ -91,7 +96,7 @@ public class PresenterManager {
         return mActivityPresenters.get(activityId);
     }
 
-    private void removeActivityPresenters(String activityId) {
+    private void removeActivityPresenters(Object activityId) {
         ActivityPresenterManager apm = mActivityPresenters.remove(activityId);
         apm.removeAll();
     }

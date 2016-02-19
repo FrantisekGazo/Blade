@@ -149,15 +149,15 @@ public class StateHelperModule
     private AnnotationSpec weaveSave(ClassName helperName) {
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
-                return WeaveBuilder.into(WEAVE_onSaveInstanceState, Bundle.class)
-                        .addStatement("%s.%s(this, $1);", fullName(helperName), METHOD_NAME_SAVE_SATE)
+                return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState, Bundle.class)
+                        .withStatement("%s.%s(this, $1);", fullName(helperName), METHOD_NAME_SAVE_SATE)
                         .build();
             case VIEW:
-                return WeaveBuilder.into(WEAVE_onSaveInstanceState)
-                        .addStatement("%s bundle = new %s();", Bundle.class.getName(), Bundle.class.getName())
-                        .addStatement("bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());")
-                        .addStatement("%s.%s(this, bundle);", fullName(helperName), METHOD_NAME_SAVE_SATE)
-                        .addStatement("return bundle;")
+                return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState)
+                        .withStatement("%s bundle = new %s();", Bundle.class.getName(), Bundle.class.getName())
+                        .withStatement("bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());")
+                        .withStatement("%s.%s(this, bundle);", fullName(helperName), METHOD_NAME_SAVE_SATE)
+                        .withStatement("return bundle;")
                         .build();
             default:
                 throw new IllegalStateException();
@@ -167,19 +167,19 @@ public class StateHelperModule
     private AnnotationSpec weaveRestore(ClassName helperName) {
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
-                return WeaveBuilder.into(WEAVE_onCreate, Bundle.class)
-                        .addStatement("%s.%s(this, $1);", fullName(helperName), METHOD_NAME_RESTORE_SATE)
+                return WeaveBuilder.weave().method(WEAVE_onCreate, Bundle.class)
+                        .withStatement("%s.%s(this, $1);", fullName(helperName), METHOD_NAME_RESTORE_SATE)
                         .build();
             case VIEW:
-                return WeaveBuilder.into(WEAVE_onRestoreInstanceState, Parcelable.class)
-                        .addStatement("if ($1 instanceof %s) {", Bundle.class.getName())
-                        .addStatement("%s bundle = (%s) $1;", Bundle.class.getName(), Bundle.class.getName())
-                        .addStatement("%s.%s(this, bundle);", fullName(helperName), METHOD_NAME_RESTORE_SATE)
-                        .addStatement("super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));")
-                        .addStatement("} else {")
-                        .addStatement("super.onRestoreInstanceState($1);")
-                        .addStatement("}")
-                        .addStatement("return;")
+                return WeaveBuilder.weave().method(WEAVE_onRestoreInstanceState, Parcelable.class)
+                        .withStatement("if ($1 instanceof %s) {", Bundle.class.getName())
+                        .withStatement("%s bundle = (%s) $1;", Bundle.class.getName(), Bundle.class.getName())
+                        .withStatement("%s.%s(this, bundle);", fullName(helperName), METHOD_NAME_RESTORE_SATE)
+                        .withStatement("super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));")
+                        .withStatement("} else {")
+                        .withStatement("super.onRestoreInstanceState($1);")
+                        .withStatement("}")
+                        .withStatement("return;")
                         .build();
             default:
                 throw new IllegalStateException();

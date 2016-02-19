@@ -75,8 +75,8 @@ public class ArgHelperModule extends BaseHelperModule {
     private void addInjectMethod(BaseClassBuilder builder) {
         String target = "target";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addAnnotation(WeaveBuilder.into("onCreate", Bundle.class)
-                        .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                .addAnnotation(WeaveBuilder.weave().method("onCreate", Bundle.class)
+                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);

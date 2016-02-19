@@ -23,6 +23,9 @@ public class MvpProcessorModule implements ProcessorModule {
 
     @Override
     public void process(ProcessingEnvironment processingEnvironment, TypeElement bladeElement) throws ProcessorError {
+        ClassManager.getInstance()
+                .getHelper(bladeElement)
+                .tryGetModule(PresenterScopeHelperModule.class);
     }
 
     @Override

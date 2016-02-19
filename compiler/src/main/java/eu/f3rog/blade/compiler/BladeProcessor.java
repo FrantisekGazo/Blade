@@ -58,7 +58,6 @@ public class BladeProcessor extends BaseProcessor {
     protected void exec(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
         for (Element e : roundEnv.getElementsAnnotatedWith(Blade.class)) {
             if (e.getKind() == ElementKind.CLASS) {
-                ClassManager.getInstance().getHelper((TypeElement) e);
                 for (int i = 0; i < mModules.size(); i++) {
                     mModules.get(i).process(getProcessingEnvironment(), (TypeElement) e);
                 }

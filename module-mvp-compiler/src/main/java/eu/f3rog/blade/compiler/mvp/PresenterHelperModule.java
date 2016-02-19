@@ -110,8 +110,8 @@ public class PresenterHelperModule extends BaseHelperModule {
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_CREATE_PRESENTERS)
                 .addAnnotation(
-                        WeaveBuilder.into("setTag", Object.class)
-                                .addStatement("String tag = %s.%s(this, $1); super.setTag(tag); return;",
+                        WeaveBuilder.weave().method("setTag", Object.class)
+                                .withStatement("String tag = %s.%s(this, $1); super.setTag(tag); return;",
                                         fullName(builder.getClassName()), METHOD_NAME_CREATE_PRESENTERS)
                                 .build()
                 )
@@ -165,8 +165,8 @@ public class PresenterHelperModule extends BaseHelperModule {
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_UNBIND_PRESENTERS)
                 .addAnnotation(
-                        WeaveBuilder.into("onDetachedFromWindow")
-                                .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
+                        WeaveBuilder.weave().method("onDetachedFromWindow")
+                                .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
                                 .build()
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

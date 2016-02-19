@@ -116,16 +116,16 @@ public class ExtraHelperModule extends BaseHelperModule {
     private AnnotationSpec weaveAnnotation(HelperClassBuilder builder) {
         switch (mInjected) {
             case ACTIVITY:
-                return WeaveBuilder.into("onCreate", Bundle.class)
-                        .addStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                return WeaveBuilder.weave().method("onCreate", Bundle.class)
+                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build();
             case SERVICE:
-                return WeaveBuilder.into("onStartCommand", Intent.class, int.class, int.class)
-                        .addStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                return WeaveBuilder.weave().method("onStartCommand", Intent.class, int.class, int.class)
+                        .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build();
             case INTENT_SERVICE:
-                return WeaveBuilder.into("onHandleIntent", Intent.class)
-                        .addStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                return WeaveBuilder.weave().method("onHandleIntent", Intent.class)
+                        .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build();
             default:
                 throw new IllegalStateException();
