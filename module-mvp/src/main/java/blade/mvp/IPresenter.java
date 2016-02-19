@@ -13,7 +13,7 @@ public interface IPresenter<V extends IView, D> {
 
     void destroy();
 
-    <T extends V> void bind(T view);
+    void bind(V view);
 
     void unbind();
 

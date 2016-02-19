@@ -1,7 +1,5 @@
 package blade.mvp;
 
-import java.lang.ref.WeakReference;
-
 /**
  * Class {@link BasePresenter}
  *
@@ -11,25 +9,23 @@ import java.lang.ref.WeakReference;
 public abstract class BasePresenter<V extends IView, D>
         implements IPresenter<V, D> {
 
-    private WeakReference<V> mView;
+    private V mView;
 
     public V getView() {
-        return (mView != null) ? mView.get() : null;
+        return mView;
     }
 
     @Override
     public void create(D data) {
-
     }
 
     @Override
     public void destroy() {
-
     }
 
     @Override
-    public <T extends V> void bind(T view) {
-        mView = new WeakReference<V>(view);
+    public void bind(V view) {
+        mView = view;
     }
 
     @Override
