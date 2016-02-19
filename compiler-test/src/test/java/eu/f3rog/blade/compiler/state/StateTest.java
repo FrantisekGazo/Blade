@@ -11,6 +11,7 @@ import javax.tools.JavaFileObject;
 
 import blade.State;
 import eu.f3rog.blade.compiler.BaseTest;
+import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.BundleWrapper;
 import eu.f3rog.blade.core.Weave;
@@ -41,6 +42,7 @@ public final class StateTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, State.class.getSimpleName()));
 
@@ -57,6 +59,7 @@ public final class StateTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, State.class.getSimpleName()));
 
@@ -73,6 +76,7 @@ public final class StateTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, State.class.getSimpleName()));
     }
@@ -128,6 +132,7 @@ public final class StateTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -188,6 +193,7 @@ public final class StateTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);

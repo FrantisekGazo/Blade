@@ -84,10 +84,14 @@ public class HelperClassBuilder
 
     @Override
     public void build(ProcessingEnvironment processingEnvironment) throws ProcessorError, IOException {
+        boolean hasSomething = false;
         for (Map.Entry<Class<? extends IHelperModule>, IHelperModule> entry : mImplementations.entrySet()) {
-            entry.getValue().implement(processingEnvironment, this);
+            hasSomething |= entry.getValue().implement(processingEnvironment, this);
         }
-        super.build(processingEnvironment);
+        // do not build empty helper class
+        if (hasSomething) {
+            super.build(processingEnvironment);
+        }
     }
 
     public TypeElement getTypeElement() {

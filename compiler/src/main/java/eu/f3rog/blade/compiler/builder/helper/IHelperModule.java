@@ -28,8 +28,10 @@ public interface IHelperModule {
 
     /**
      * Implements into given builder.
+     *
+     * @return <code>true</code> if something was added to the helper builder.
      */
-    void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError;
+    boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError;
 
 }
 

@@ -99,9 +99,10 @@ public class PresenterHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addSetPresenterMethod(builder);
         addUnbindPresenterMethod(builder);
+        return true;
     }
 
     private void addSetPresenterMethod(HelperClassBuilder builder) {

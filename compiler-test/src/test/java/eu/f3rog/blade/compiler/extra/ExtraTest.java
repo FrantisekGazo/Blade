@@ -9,10 +9,12 @@ import android.os.IBinder;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 import blade.Blade;
 import blade.Extra;
 import eu.f3rog.blade.compiler.BaseTest;
+import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.BundleWrapper;
 import eu.f3rog.blade.core.Weave;
@@ -43,6 +45,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .failsToCompile()
                 .withErrorContaining(ExtraErrorMsg.Invalid_class_with_Extra);
     }
@@ -63,6 +66,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName()));
 
@@ -80,6 +84,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName()));
 
@@ -97,6 +102,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName()));
     }
@@ -113,19 +119,11 @@ public final class ExtraTest extends BaseTest {
                         "public class $T extends Activity {}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainActivity_Helper")
-                .imports(
-                )
-                .body(
-                        "public final class $T {",
-                        "",
-                        "}"
-                );
-
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
-                .generatesSources(expected);
+                .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "blade", "I.class");
     }
 
     @Test
@@ -169,6 +167,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -220,6 +219,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -272,6 +272,7 @@ public final class ExtraTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);

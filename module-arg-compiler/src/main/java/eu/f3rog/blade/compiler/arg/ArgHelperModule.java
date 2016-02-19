@@ -64,12 +64,14 @@ public class ArgHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+        addMethodToFragmentFactory(processingEnvironment, builder);
         if (!mArgs.isEmpty()) {
             // add inject() only if there is something
             addInjectMethod(builder);
+            return true;
         }
-        addMethodToFragmentFactory(processingEnvironment, builder);
+        return false;
     }
 
     private void addInjectMethod(BaseClassBuilder builder) {

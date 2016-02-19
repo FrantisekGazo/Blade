@@ -8,6 +8,7 @@ import javax.tools.JavaFileObject;
 
 import blade.Blade;
 import eu.f3rog.blade.compiler.BaseTest;
+import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
 
@@ -57,6 +58,7 @@ public final class PresenterScopeTest extends BaseTest {
                 );
 
         assertFiles(activity)
+                .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);

@@ -7,10 +7,8 @@ import com.google.testing.compile.JavaSourcesSubjectFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.processing.Processor;
 import javax.tools.JavaFileObject;
 
 /**
@@ -21,22 +19,37 @@ import javax.tools.JavaFileObject;
  */
 public abstract class BaseTest {
 
-    protected Iterable<? extends Processor> getProcessors() {
-        return Collections.singletonList(new BladeProcessor());
-    }
-
-    protected CompileTester assertFiles(JavaFileObject... f) {
+    protected ITruthWrapper assertFiles(JavaFileObject... f) {
         List<JavaFileObject> files = new ArrayList<>();
         files.addAll(Arrays.asList(f));
 
-        return Truth.assert_()
-                .about(JavaSourcesSubjectFactory.javaSources())
-                .that(files)
-                .processedWith(getProcessors());
+        return new TruthWrapper(files);
     }
 
     protected static String join(String... lines) {
         return Joiner.on("\n").join(lines);
+    }
+
+    public interface ITruthWrapper {
+        CompileTester with(BladeProcessor.Module... processorModules);
+    }
+
+    private static class TruthWrapper implements ITruthWrapper {
+
+        private Iterable<JavaFileObject> mFiles;
+
+        public TruthWrapper(Iterable<JavaFileObject> files) {
+            mFiles = files;
+        }
+
+        @Override
+        public CompileTester with(BladeProcessor.Module... processorModules) {
+            return Truth.assert_()
+                    .about(JavaSourcesSubjectFactory.javaSources())
+                    .that(mFiles)
+                    .processedWith(new BladeProcessor(processorModules));
+        }
+
     }
 
 }

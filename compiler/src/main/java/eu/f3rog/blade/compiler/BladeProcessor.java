@@ -24,27 +24,37 @@ import eu.f3rog.blade.compiler.util.ProcessorUtils;
 @SupportedAnnotationTypes({"*"})
 public class BladeProcessor extends BaseProcessor {
 
-    public static final String[] MODULE_CLASS_NAMES = {
-            "eu.f3rog.blade.compiler.arg.ArgProcessorModule",
-            "eu.f3rog.blade.compiler.extra.ExtraProcessorModule",
-            "eu.f3rog.blade.compiler.state.StateProcessorModule",
-            "eu.f3rog.blade.compiler.mvp.MvpProcessorModule"
-    };
+    public enum Module {
+
+        ARG("eu.f3rog.blade.compiler.arg.ArgProcessorModule"),
+        EXTRA("eu.f3rog.blade.compiler.extra.ExtraProcessorModule"),
+        STATE("eu.f3rog.blade.compiler.state.StateProcessorModule"),
+        MVP("eu.f3rog.blade.compiler.mvp.MvpProcessorModule");
+
+        private String mPath;
+
+        Module(String path) {
+            mPath = path;
+        }
+
+        @Override
+        public String toString() {
+            return mPath;
+        }
+
+    }
 
     private List<ProcessorModule> mModules;
 
-    @Override
-    protected void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
-        ProcessorUtils.setProcessingEnvironment(getProcessingEnvironment());
-        ClassManager.init();
-        initModules();
+    public BladeProcessor() {
+        this(Module.values()); // try all modules
     }
 
-    private void initModules() {
+    public BladeProcessor(Module... tryModuleClassNames) {
         mModules = new ArrayList<>();
-        for (String moduleClassName : MODULE_CLASS_NAMES) {
+        for (Module moduleClassName : tryModuleClassNames) {
             try {
-                Class<ProcessorModule> moduleClass = (Class<ProcessorModule>) Class.forName(moduleClassName);
+                Class<ProcessorModule> moduleClass = (Class<ProcessorModule>) Class.forName(moduleClassName.toString());
                 ProcessorModule module = moduleClass.newInstance();
                 mModules.add(module);
                 //System.out.println("> APT using " + moduleClass.getSimpleName());
@@ -52,6 +62,12 @@ public class BladeProcessor extends BaseProcessor {
                 // module is not accessible
             }
         }
+    }
+
+    @Override
+    protected void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
+        ProcessorUtils.setProcessingEnvironment(getProcessingEnvironment());
+        ClassManager.init();
     }
 
     @Override

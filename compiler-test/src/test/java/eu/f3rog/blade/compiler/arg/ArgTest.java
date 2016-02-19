@@ -5,10 +5,12 @@ import android.app.Fragment;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 import blade.Arg;
 import blade.Blade;
 import eu.f3rog.blade.compiler.BaseTest;
+import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.BundleWrapper;
 import eu.f3rog.blade.core.Weave;
@@ -39,6 +41,7 @@ public final class ArgTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .failsToCompile()
                 .withErrorContaining(ArgErrorMsg.Invalid_class_with_Arg);
     }
@@ -59,6 +62,7 @@ public final class ArgTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName()));
 
@@ -76,6 +80,7 @@ public final class ArgTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName()));
 
@@ -93,6 +98,7 @@ public final class ArgTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName()));
     }
@@ -136,6 +142,7 @@ public final class ArgTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -153,19 +160,11 @@ public final class ArgTest extends BaseTest {
                         "public class $T extends Fragment {}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainFragment_Helper")
-                .imports(
-                )
-                .body(
-                        "public final class $T {",
-                        "",
-                        "}"
-                );
-
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
-                .generatesSources(expected);
+                .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "blade", "F.class");
     }
 
 }

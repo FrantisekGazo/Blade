@@ -98,12 +98,14 @@ public class StateHelperModule
     }
 
     @Override
-    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         if (!mStatefulFields.isEmpty()) {
             // add methods only if there is something stateful
             addSaveStateMethod(builder);
             addRestoreStateMethod(builder);
+            return true;
         }
+        return false;
     }
 
     private void addSaveStateMethod(HelperClassBuilder builder) {

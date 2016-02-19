@@ -9,6 +9,7 @@ import javax.tools.JavaFileObject;
 import blade.Arg;
 import blade.Blade;
 import eu.f3rog.blade.compiler.BaseTest;
+import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.File.file;
@@ -53,6 +54,7 @@ public final class FragmentFactoryTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -94,6 +96,7 @@ public final class FragmentFactoryTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -160,6 +163,7 @@ public final class FragmentFactoryTest extends BaseTest {
                 );
 
         assertFiles(input1, input2)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -223,6 +227,7 @@ public final class FragmentFactoryTest extends BaseTest {
                 );
 
         assertFiles(base, activity)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -277,6 +282,7 @@ public final class FragmentFactoryTest extends BaseTest {
                 );
 
         assertFiles(base, activity)
+                .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);

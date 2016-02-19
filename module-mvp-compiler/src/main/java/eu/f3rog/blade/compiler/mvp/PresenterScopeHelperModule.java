@@ -39,11 +39,7 @@ public class PresenterScopeHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        // TODO : add mActivityId field
-        // TODO : override getString(int) for param ACTIVITY_ID
-        // TODO : save to / restore from state mActivityId field
-
+    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         FieldSpec field = FieldSpec.builder(String.class, FIELD_NAME_ACTIVITY_ID, Modifier.PRIVATE)
                 .addAnnotation(
                         WeaveBuilder.weave()
@@ -68,8 +64,9 @@ public class PresenterScopeHelperModule extends BaseHelperModule {
                 )
                 .build();
 
-
         builder.getBuilder().addField(field);
+
+        return true;
     }
 
 }

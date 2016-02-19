@@ -79,12 +79,14 @@ public class ExtraHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public void implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+        addMethodToIntentManager(processingEnvironment, builder);
         if (!mExtras.isEmpty()) {
             // add inject() only if there is something
             addInjectMethod(builder);
+            return true;
         }
-        addMethodToIntentManager(processingEnvironment, builder);
+        return false;
     }
 
     private void addInjectMethod(HelperClassBuilder builder) {

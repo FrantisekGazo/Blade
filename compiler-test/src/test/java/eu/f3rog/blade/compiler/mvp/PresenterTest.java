@@ -13,6 +13,7 @@ import blade.mvp.IPresenter;
 import blade.mvp.IView;
 import blade.mvp.PresenterManager;
 import eu.f3rog.blade.compiler.BaseTest;
+import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.Weave;
 
@@ -50,6 +51,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Invalid_class_with_Presenter);
 
@@ -67,6 +69,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Invalid_class_with_Presenter);
     }
@@ -91,6 +94,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Presenter.class.getSimpleName()));
 
@@ -112,6 +116,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Presenter.class.getSimpleName()));
 
@@ -133,6 +138,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Presenter.class.getSimpleName()));
     }
@@ -157,6 +163,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Invalid_Presenter_class);
     }
@@ -213,6 +220,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(t1, t2, a, b, presenter1, presenter2, input)
+                .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Inconsistent_Presenter_parameter_classes);
     }
@@ -297,6 +305,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(presenter, view)
+                .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
@@ -380,6 +389,7 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(presenter, view)
+                .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);

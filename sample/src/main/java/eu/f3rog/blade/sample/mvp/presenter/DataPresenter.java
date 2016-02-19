@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import java.util.concurrent.TimeUnit;
 
+import blade.Blade;
 import blade.mvp.BasePresenter;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.view.IDataView;
@@ -14,6 +15,7 @@ import eu.f3rog.blade.sample.mvp.view.IDataView;
  * @author FrantisekGazo
  * @version 2016-02-08
  */
+@Blade
 public class DataPresenter extends BasePresenter<IDataView, Data> {
 
     private Data mData;
