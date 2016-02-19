@@ -1,6 +1,7 @@
 package blade.mvp;
 
 import android.app.Activity;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,20 +18,20 @@ public class PresenterManager {
 
     private static final String ACTIVITY_ID = "ACTIVITY-ID";
 
-    public static void put(IView view, Object tagObject, IPresenter presenter) {
+    public static <V extends IView, D> void put(V view, D data, IPresenter<V, D> presenter) {
         assert view != null;
-        assert tagObject != null;
+        assert data != null;
         assert presenter != null;
 
-        forParentActivity(view).put(view, tagObject, presenter);
+        forParentActivity(view).put(view, data, presenter);
     }
 
-    public static IPresenter get(IView view, Object tagObject, Class presenterClass) {
+    public static IPresenter get(IView view, Object data, Class presenterClass) {
         assert view != null;
-        assert tagObject != null;
+        assert data != null;
         assert presenterClass != null;
 
-        return forParentActivity(view).get(view, tagObject, presenterClass);
+        return forParentActivity(view).get(view, data, presenterClass);
     }
 
     public static void removePresentersFor(IView view) {
@@ -44,6 +45,24 @@ public class PresenterManager {
 
         Object activityId = buildActivityId(activity);
         getInstance().removeActivityPresenters(activityId);
+    }
+
+    public static void savePresentersFor(Activity activity, Bundle state) {
+        assert activity != null;
+        assert state != null;
+
+        Object activityId = buildActivityId(activity);
+        ActivityPresenterManager presenters = getInstance().getActivityPresenters(activityId);
+        presenters.saveInto(state);
+    }
+
+    public static void restorePresentersFor(Activity activity, Bundle state) {
+        assert activity != null;
+        assert state != null;
+
+        Object activityId = buildActivityId(activity);
+        ActivityPresenterManager presenters = getInstance().getActivityPresenters(activityId);
+        presenters.restoreFrom(state);
     }
 
     // ------------------------------------------------------------------------------------
@@ -98,33 +117,46 @@ public class PresenterManager {
 
     private void removeActivityPresenters(Object activityId) {
         ActivityPresenterManager apm = mActivityPresenters.remove(activityId);
-        apm.removeAll();
+        if (apm != null) {
+            apm.removeAll();
+        }
     }
 
     private static class ActivityPresenterManager {
 
         private final Map<String, IPresenter> mPresenters;
+        private Bundle mState;
 
         private ActivityPresenterManager() {
             mPresenters = new HashMap<>();
+            mState = null;
         }
 
-        public void put(IView view, Object tagObject, IPresenter presenter) {
+        public <V extends IView, D> void put(V view, D data, IPresenter<V, D> presenter) {
             assert view != null;
-            assert tagObject != null;
+            assert data != null;
             assert presenter != null;
 
-            String id = buildId(view, tagObject, presenter.getClass());
+            String id = buildId(view, data, presenter.getClass());
 
             mPresenters.put(id, presenter);
+            boolean restored = false;
+            if (mState != null) {
+                Bundle presenterState = mState.getBundle(id);
+                if (presenterState != null) {
+                    presenter.restoreState(presenterState);
+                    restored = true;
+                }
+            }
+            presenter.create(data, restored);
         }
 
-        public IPresenter get(IView view, Object tagObject, Class presenterClass) {
+        public IPresenter get(IView view, Object data, Class presenterClass) {
             assert view != null;
-            assert tagObject != null;
+            assert data != null;
             assert presenterClass != null;
 
-            String id = buildId(view, tagObject, presenterClass);
+            String id = buildId(view, data, presenterClass);
 
             return mPresenters.get(id);
         }
@@ -160,6 +192,20 @@ public class PresenterManager {
             }
             mPresenters.clear();
         }
+
+        public void saveInto(Bundle state) {
+            for (String key : mPresenters.keySet()) {
+                Bundle presenterState = new Bundle();
+                mPresenters.get(key).saveState(presenterState);
+                state.putBundle(key, presenterState);
+            }
+            mState = state;
+        }
+
+        public void restoreFrom(Bundle state) {
+            mState = state;
+        }
+
     }
 
 }

@@ -54,12 +54,16 @@ public class PresenterScopeHelperModule extends BaseHelperModule {
                                         PresenterManager.class.getCanonicalName())
                                 .and()
                                 .method("onCreate", Bundle.class)
-                                .withStatement("if ($1 != null) { this.%s = $1.getString('%s'); } else { this.%s = %s.randomUUID().toString(); }",
-                                        FIELD_NAME_ACTIVITY_ID, SAVE_TAG_ACTIVITY_ID, FIELD_NAME_ACTIVITY_ID, UUID.class.getCanonicalName())
+                                .withStatement("if ($1 != null) {")
+                                .withStatement(" this.%s = $1.getString('%s');", FIELD_NAME_ACTIVITY_ID, SAVE_TAG_ACTIVITY_ID)
+                                .withStatement(" %s.restorePresentersFor(this, $1);", PresenterManager.class.getCanonicalName())
+                                .withStatement(" } else {")
+                                .withStatement(" this.%s = %s.randomUUID().toString();", FIELD_NAME_ACTIVITY_ID, UUID.class.getCanonicalName())
+                                .withStatement(" }")
                                 .and()
                                 .method("onSaveInstanceState", Bundle.class)
-                                .withStatement("$1.putString('%s', this.%s);",
-                                        SAVE_TAG_ACTIVITY_ID, FIELD_NAME_ACTIVITY_ID)
+                                .withStatement("$1.putString('%s', this.%s);", SAVE_TAG_ACTIVITY_ID, FIELD_NAME_ACTIVITY_ID)
+                                .withStatement(" %s.savePresentersFor(this, $1);", PresenterManager.class.getCanonicalName())
                                 .build()
                 )
                 .build();

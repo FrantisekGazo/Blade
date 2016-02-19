@@ -9,7 +9,7 @@ package blade.mvp;
  */
 public interface IPresenter<V extends IView, D> {
 
-    void create(D data);
+    void create(D data, boolean wasRestored);
 
     void destroy();
 
@@ -17,8 +17,18 @@ public interface IPresenter<V extends IView, D> {
 
     void unbind();
 
-    void saveState(Object bundle);
+    /**
+     * Saves state to given state object.
+     * <p/>
+     * Normally this would be an instance of android's Bundle class, but in order to allow unit testing there is just Object as parameter type.
+     */
+    void saveState(Object state);
 
-    void stateRestored();
+    /**
+     * Restores state from given state object.
+     * <p/>
+     * Normally this would be an instance of android's Bundle class, but in order to allow unit testing there is just Object as parameter type.
+     */
+    void restoreState(Object state);
 
 }

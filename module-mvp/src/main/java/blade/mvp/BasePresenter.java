@@ -16,7 +16,7 @@ public abstract class BasePresenter<V extends IView, D>
     }
 
     @Override
-    public void create(D data) {
+    public void create(D data, boolean wasRestored) {
     }
 
     @Override
@@ -34,13 +34,11 @@ public abstract class BasePresenter<V extends IView, D>
     }
 
     @Override
-    public void saveState(Object bundle) {
-
+    public void saveState(Object state) {
     }
 
     @Override
-    public void stateRestored() {
-
+    public void restoreState(Object state) {
     }
 
 }

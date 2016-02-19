@@ -147,11 +147,10 @@ public class PresenterHelperModule extends BaseHelperModule {
             String fieldName = mPresenters.get(i);
             TypeName fieldType = mPresenterTypes.get(i);
 
-            method.addStatement("$N.$N = ($T) $T.get($N, $N, $T.class)", target, fieldName, fieldType, PresenterManager.class, target, tagObject, fieldType);
+            method.addStatement("$N.$N = ($T) $T.get($N, $N, $T.class)", target, fieldName, fieldType, PresenterManager.class, target, param, fieldType);
             method.beginControlFlow("if ($N.$N == null)", target, fieldName)
                     .addStatement("$N.$N = new $T()", target, fieldName, fieldType)
-                    .addStatement("$T.put($N, $N, $N.$N)", PresenterManager.class, target, tagObject, target, fieldName)
-                    .addStatement("$N.$N.create($N)", target, fieldName, param)
+                    .addStatement("$T.put($N, $N, $N.$N)", PresenterManager.class, target, param, target, fieldName)
                     .endControlFlow();
             method.addStatement("$N.$N.bind($N)", target, fieldName, target);
         }

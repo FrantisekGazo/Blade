@@ -29,12 +29,12 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
 public final class PresenterTest extends BaseTest {
 
     private static final String PRESENTER_METHODS =
-            " public <T extends %s> void bind(T view) {} " +
+            " public void bind(%s view) {} " +
                     " public void unbind() {} " +
-                    " public void create(%s o) {} " +
+                    " public void create(%s o, boolean wasRestored) {} " +
                     " public void destroy() {} " +
                     " public void saveState(Object o) {} " +
-                    " public void stateRestored() {} ";
+                    " public void restoreState(Object o) {} ";
 
     @Test
     public void invalidClass() {
@@ -283,11 +283,10 @@ public final class PresenterTest extends BaseTest {
                         "               throw new $E(\"Incorrect type of tag object.\");",
                         "           }",
                         "           String param = (String) tagObject;",
-                        "           target.mPresenter = ($P) $PM.get(target, tagObject, $P.class);",
+                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
                         "           if (target.mPresenter == null) {",
                         "               target.mPresenter = new $P();",
-                        "               $PM.put(target, tagObject, target.mPresenter);",
-                        "               target.mPresenter.create(param);",
+                        "               $PM.put(target, param, target.mPresenter);",
                         "           }",
                         "           target.mPresenter.bind(target);",
                         "           return tagObject.toString();",
@@ -367,11 +366,10 @@ public final class PresenterTest extends BaseTest {
                         "               throw new $E(\"Incorrect type of tag object.\");",
                         "           }",
                         "           String param = (String) tagObject;",
-                        "           target.mPresenter = ($P) $PM.get(target, tagObject, $P.class);",
+                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
                         "           if (target.mPresenter == null) {",
                         "               target.mPresenter = new $P();",
-                        "               $PM.put(target, tagObject, target.mPresenter);",
-                        "               target.mPresenter.create(param);",
+                        "               $PM.put(target, param, target.mPresenter);",
                         "           }",
                         "           target.mPresenter.bind(target);",
                         "           return tagObject.toString();",
