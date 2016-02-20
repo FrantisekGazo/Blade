@@ -10,6 +10,8 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 
 import blade.State;
+import blade.mvp.IPresenter;
+import blade.mvp.IView;
 import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
@@ -119,6 +121,64 @@ public final class StateTest extends BaseTest {
                         "   }",
                         "",
                         "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.restoreState(this, $1);\")",
+                        "   public static void restoreState($I target, Bundle state) {",
+                        "       if (state == null) {",
+                        "           return;",
+                        "       }",
+                        "       BundleWrapper bundleWrapper = BundleWrapper.from(state);",
+                        "       target.mText = bundleWrapper.get(\"<Stateful-mText>\", target.mText);",
+                        "       target.mNumber = bundleWrapper.get(\"<Stateful-mNumber>\", target.mNumber);",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void presenter() {
+        JavaFileObject input = file("com.example", "MyPresenter")
+                .imports(
+                        IPresenter.class,
+                        IView.class,
+                        State.class, "S"
+                )
+                .body(
+                        "public abstract class $T implements IPresenter<IView, Object> {",
+                        "",
+                        "   @$S String mText;",
+                        "   @$S int mNumber;",
+                        "",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyPresenter_Helper")
+                .imports(
+                        input, "I",
+                        Bundle.class,
+                        BundleWrapper.class,
+                        IllegalArgumentException.class, "E",
+                        Weave.class
+                )
+                .body(
+                        "public final class $T {",
+                        "",
+                        "   @Weave(into = \"saveState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.saveState(this, (android.os.Bundle) $1);\")",
+                        "   public static void saveState($I target, Bundle state) {",
+                        "       if (state == null) {",
+                        "           throw new $E(\"State cannot be null!\");",
+                        "       }",
+                        "       BundleWrapper bundleWrapper = BundleWrapper.from(state);",
+                        "       bundleWrapper.put(\"<Stateful-mText>\", target.mText);",
+                        "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"restoreState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.restoreState(this, (android.os.Bundle) $1);\")",
                         "   public static void restoreState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",

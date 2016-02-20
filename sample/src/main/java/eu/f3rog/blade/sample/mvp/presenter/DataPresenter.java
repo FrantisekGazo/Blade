@@ -2,6 +2,7 @@ package eu.f3rog.blade.sample.mvp.presenter;
 
 import java.util.concurrent.TimeUnit;
 
+import blade.State;
 import blade.mvp.BasePresenter;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.view.IDataView;
@@ -19,7 +20,8 @@ public class DataPresenter extends BasePresenter<IDataView, Data> {
 
     private static final int COUNT = 10;
     private Data mData;
-    private String mLoadedValue;
+    @State
+    String mLoadedValue;
 
     @Override
     public void create(Data data, boolean wasRestored) {
