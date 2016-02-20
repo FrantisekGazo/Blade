@@ -3,9 +3,7 @@ package blade.mvp;
 import android.app.Activity;
 import android.os.Bundle;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -124,7 +122,7 @@ public class PresenterManager {
 
     private static class ActivityPresenterManager {
 
-        private final Map<String, IPresenter> mPresenters;
+        private final Map<String, Map<String, IPresenter>> mPresenters;
         private Bundle mState;
 
         private ActivityPresenterManager() {
@@ -137,17 +135,23 @@ public class PresenterManager {
             assert data != null;
             assert presenter != null;
 
-            String id = buildId(view, data, presenter.getClass());
+            String viewId = buildViewId(view, data);
+            putPresenter(viewId, presenter);
 
-            mPresenters.put(id, presenter);
             boolean restored = false;
+
             if (mState != null) {
-                Bundle presenterState = mState.getBundle(id);
-                if (presenterState != null) {
-                    presenter.restoreState(presenterState);
-                    restored = true;
+                Bundle viewPresentersState = mState.getBundle(viewId);
+                if (viewPresentersState != null) {
+                    String presenterId = buildPresenterId(presenter.getClass());
+                    Bundle presenterState = viewPresentersState.getBundle(presenterId);
+                    if (presenterState != null) {
+                        presenter.restoreState(presenterState);
+                        restored = true;
+                    }
                 }
             }
+
             presenter.create(data, restored);
         }
 
@@ -156,54 +160,92 @@ public class PresenterManager {
             assert data != null;
             assert presenterClass != null;
 
-            String id = buildId(view, data, presenterClass);
-
-            return mPresenters.get(id);
-        }
-
-        private String buildId(IView view, Object tagObject, Class presenterClass) {
-            return view.getClass().getCanonicalName() + ":" + tagObject.toString() + ":" + presenterClass.getCanonicalName();
+            String viewId = buildViewId(view, data);
+            return getPresenter(viewId, presenterClass);
         }
 
         public void removeFor(IView view) {
             assert view != null;
 
-            String keyStart = view.getClass() + ":" + view.getTag() + ":";
-            List<String> toRemove = new ArrayList<>();
-
-            // TODO : optimize !!!
-
-            for (String key : mPresenters.keySet()) {
-                if (key.startsWith(keyStart)) {
-                    toRemove.add(key);
-                }
+            if (view.getTag() == null) {
+                return;
             }
 
-            for (int i = 0, c = toRemove.size(); i < c; i++) {
-                String key = toRemove.get(i);
-                IPresenter presenter = mPresenters.remove(key);
+            String viewId = buildViewId(view, view.getTag());
+            Map<String, IPresenter> presenters = mPresenters.get(viewId);
+            if (presenters == null) {
+                return;
+            }
+
+            for (IPresenter presenter : presenters.values()) {
                 presenter.destroy();
             }
+            presenters.clear();
+            mPresenters.remove(viewId);
         }
 
         public void removeAll() {
-            for (IPresenter presenter : mPresenters.values()) {
-                presenter.destroy();
+            for (Map<String, IPresenter> viewPresenters : mPresenters.values()) {
+                for (IPresenter presenter : viewPresenters.values()) {
+                    presenter.destroy();
+                }
+                viewPresenters.clear();
             }
             mPresenters.clear();
         }
 
         public void saveInto(Bundle state) {
-            for (String key : mPresenters.keySet()) {
-                Bundle presenterState = new Bundle();
-                mPresenters.get(key).saveState(presenterState);
-                state.putBundle(key, presenterState);
+            for (Map.Entry<String, Map<String, IPresenter>> viewEntry : mPresenters.entrySet()) {
+                String viewId = viewEntry.getKey();
+                Map<String, IPresenter> viewPresenters = viewEntry.getValue();
+                Bundle viewPresentersState = new Bundle();
+
+                for (Map.Entry<String, IPresenter> presenterEntry : viewPresenters.entrySet()) {
+                    String key = presenterEntry.getKey();
+                    IPresenter presenter = presenterEntry.getValue();
+                    Bundle presenterState = new Bundle();
+
+                    presenter.saveState(presenterState);
+
+                    viewPresentersState.putBundle(key, presenterState);
+                }
+
+                state.putBundle(viewId, viewPresentersState);
             }
             mState = state;
         }
 
         public void restoreFrom(Bundle state) {
             mState = state;
+        }
+
+        private void putPresenter(String viewId, IPresenter presenter) {
+            Map<String, IPresenter> viewPresenters = mPresenters.get(viewId);
+            if (viewPresenters == null) {
+                viewPresenters = new HashMap<>();
+                mPresenters.put(viewId, viewPresenters);
+            }
+
+            String presenterId = buildPresenterId(presenter.getClass());
+            viewPresenters.put(presenterId, presenter);
+        }
+
+        private IPresenter getPresenter(String viewId, Class presenterClass) {
+            Map<String, IPresenter> viewPresenters = mPresenters.get(viewId);
+            if (viewPresenters == null) {
+                return null;
+            }
+
+            String presenterId = buildPresenterId(presenterClass);
+            return viewPresenters.get(presenterId);
+        }
+
+        private String buildPresenterId(Class presenterClass) {
+            return presenterClass.getCanonicalName();
+        }
+
+        private String buildViewId(IView view, Object tagObject) {
+            return String.format("%s:%s", view.getClass().getCanonicalName(), tagObject.toString());
         }
 
     }
