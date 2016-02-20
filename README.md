@@ -1,4 +1,4 @@
-![](website/static/logo_small.png)
+![logo](website/static/logo_small.png)
 ----------------------------
 Android library for boilerplate destruction - *"Just code what is worth coding"*
 
@@ -12,6 +12,7 @@ Available annotations:
 * [@Arg](https://github.com/FrantisekGazo/Blade#arg)
 * [@Extra](https://github.com/FrantisekGazo/Blade#extra)
 * [@State](https://github.com/FrantisekGazo/Blade#state)
+* [@Presenter](https://github.com/FrantisekGazo/Blade#presenter)
 
 Special annotation:
 * [@Blade](https://github.com/FrantisekGazo/Blade#blade)
@@ -186,6 +187,101 @@ public class MyActivity extends Activity {
 }
 ```
 
+## @Presenter
+Annotation for implementing MVP architecture.
+
+![mvp architecture](website/static/mvp.png)
+
+#### How to implement:
+
+1. Create an interface for your view by extending [IView](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/IView.java).
+```Java
+public interface IMyView implements blade.mvp.IView {
+    void show(String something);  
+}
+```
+
+2. Create a Presenter that will interact with the view interface. You can either extend [BasePresenter](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/BasePresenter.java) or implement [IPresenter](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/IPresenter.java).
+```Java
+public class MyPresenter extends blade.mvp.BasePresenter<IMyView, Data> {
+
+    public void onUserDidSomething() {
+        String s = // do something ...
+        
+        if (getView() != null) {
+            getView().show(s);
+        }
+    }
+    
+    //...
+}
+```
+
+3. Create an implementation for your view interface with presenter field annotated with `@Presenter` (can be more than one). `@Presenter` is supported only for android views (not fragments or activities).
+```Java
+public class MyView extends android.view.View implements IMyView {
+    
+    @Presenter
+    MyPresenter mPresenter;
+    
+    @Override
+    void show(String something) { /* ... */ }
+    
+    // ...
+}
+```
+
+4. Make Blade aware of view's activity class by using `@Blade` annotation. (This is needed for any Activity class that can contain views with presenters)
+```Java
+@Blade
+public class MyActivity extends Activity {
+    // ...
+}
+```
+
+5. Call `setTag(data)` method on your view implementation to set the `@Presenter` field.
+
+#### How does it work?
+
+Each time you call `setTag(data)` method on your view this happens: 
+
+* Unique ID (per activity) is created from **view class**, **presenter class** and **data.toString()** combination (so provide custom implementation of `toString()`).
+* If presenter for this ID does not exists yet, then it is created via **default constructor** and `create(data, boolean)` is called with the **data** given as parameter to `setTag(data)` and boolean flag indicating if presenter was recreated from state.
+* `@Presenter` field is set with proper instance.
+* Presenter is connected to the view by calling `bind(view)`.
+
+If you call `setTag(null)` on view then:
+* Presenter is disconnected from the view by calling `unbind()`.
+* `@Presenter` field is set to `null`.
+* Presenter still lives until containing Activity is finshed. (so you can use it again if you set appropriate tag)
+
+(Same applies for any number of `@Presenter` fields inside your view)
+
+#### Presenter lifecycle
+
+Presenter is independent of activity's lifecycle. It is created when needed and destroyed when activity finishes.
+
+If you want to programmatically remove view and know that you won't need its presenters anymore (or simply want to destroy it), you can call `removePresentersFor(view)` static method on [PresenterManager](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/PresenterManager.java) before removing view from layout.
+
+#### Presenter state
+
+As you surely know, activity can be killed in order to reclaim resources and then be restored back from state in the future.
+
+Therefore **Presenter** needs to be able to restore its state too. For this purpose use `@State` annotation on fields that are needed.
+```Java
+public class MyPresenter extends blade.mvp.BasePresenter<IMyView, Data> {
+
+    @State
+    boolean mFlag;
+    @State
+    SomeData mData;
+    
+    //...
+}
+```
+
+When presenter is recreated from state `create(data, boolean)` method has `true` as second parameter to indicate this.
+
 
 ## @Blade
 If you do not use any `@Extra` inside your class, but you want the library to generate methods in `blade.I` for this class, 
@@ -212,7 +308,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.3.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:1.2.0'
+        classpath 'eu.f3rog.blade:plugin:2.0.0'
     }
 }
 
@@ -220,6 +316,21 @@ apply plugin: 'com.android.application'
 // Apply Blade plugin
 apply plugin: 'blade'
 ```
+
+And create `blade.json` file in application directory with Blade modules you need: (or [download](https://github.com/FrantisekGazo/Blade/blob/master/sample/blade.json) from sample app)
+```
+{
+    debug: false,
+    modules: [
+        "arg",
+        "extra",
+        "state",
+        "mvp"
+    ]
+}
+```
+
+If you do not provide `blade.json` file, all Blade modules will be used.
 
 This library uses Annotation Processor so you have to apply also this Gradle plugin, if not already used:
 ```Gradle
