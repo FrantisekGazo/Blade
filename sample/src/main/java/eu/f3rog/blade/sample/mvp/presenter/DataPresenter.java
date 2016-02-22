@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 import blade.State;
 import blade.mvp.BasePresenter;
 import eu.f3rog.blade.sample.mvp.model.Data;
+import eu.f3rog.blade.sample.mvp.service.AppDI;
+import eu.f3rog.blade.sample.mvp.service.SimpleDI;
 import eu.f3rog.blade.sample.mvp.view.IDataView;
 import rx.Observable;
 import rx.functions.Action1;
@@ -19,9 +21,21 @@ import rx.functions.Func1;
 public class DataPresenter extends BasePresenter<IDataView, Data> {
 
     private static final int COUNT = 10;
+
+    private final SimpleDI mDI;
+
     private Data mData;
     @State
     String mLoadedValue;
+
+    public DataPresenter(SimpleDI di) {
+        mDI = di;
+    }
+
+    public DataPresenter() {
+        this(AppDI.getInstance());
+    }
+
 
     @Override
     public void create(Data data, boolean wasRestored) {
@@ -58,8 +72,8 @@ public class DataPresenter extends BasePresenter<IDataView, Data> {
                         return integer < COUNT ? String.valueOf(COUNT - integer) : mData.getText();
                     }
                 })
-                .subscribeOn(S.getBackgroundScheduler())
-                .observeOn(S.getMainScheduler())
+                .subscribeOn(mDI.getBackgroundScheduler())
+                .observeOn(mDI.getMainScheduler())
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
