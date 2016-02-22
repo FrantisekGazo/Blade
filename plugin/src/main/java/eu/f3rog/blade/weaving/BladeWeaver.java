@@ -72,6 +72,11 @@ public class BladeWeaver extends AWeaver {
                 weave(metadata, classToTransform, null);
             }
 
+            // weave interfaces
+            for (CtClass interfaceClass : helper.getInterfaces()) {
+                Interfaces.weaveInterface(interfaceClass, classToTransform, getAfterBurner());
+            }
+
             log("Transformation done");
         } catch (Exception e) {
             log("Transformation failed!");

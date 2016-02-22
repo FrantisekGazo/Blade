@@ -108,7 +108,7 @@ public final class StateTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
                         "   public static void saveState($I target, Bundle state) {",
@@ -166,7 +166,7 @@ public final class StateTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"saveState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.saveState(this, (android.os.Bundle) $1);\")",
                         "   public static void saveState($I target, Bundle state) {",
@@ -225,7 +225,7 @@ public final class StateTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"onSaveInstanceState\", ",
                         "       statement = \"android.os.Bundle bundle = new android.os.Bundle();bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());com.example.$T.saveState(this, bundle);return bundle;\")",

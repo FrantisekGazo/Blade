@@ -268,7 +268,7 @@ public final class PresenterTest extends BaseTest {
                         IllegalStateException.class, "E"
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); return;\")",
                         "   public static String setPresenters($V target, Object tagObject) {",
@@ -351,7 +351,7 @@ public final class PresenterTest extends BaseTest {
                         IllegalStateException.class, "E"
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); return;\")",
                         "   public static String setPresenters($V target, Object tagObject) {",

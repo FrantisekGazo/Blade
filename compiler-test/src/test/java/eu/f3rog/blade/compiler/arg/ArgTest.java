@@ -126,7 +126,7 @@ public final class ArgTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into=\"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",

@@ -36,7 +36,7 @@ public class HelperClassBuilder
     public void start() throws ProcessorError {
         super.start();
 
-        getBuilder().addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+        getBuilder().addModifiers(Modifier.ABSTRACT);
     }
 
     @Override

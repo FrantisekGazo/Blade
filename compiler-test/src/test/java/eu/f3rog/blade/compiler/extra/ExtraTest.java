@@ -150,7 +150,7 @@ public final class ExtraTest extends BaseTest {
                         Intent.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",
@@ -203,7 +203,7 @@ public final class ExtraTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"onStartCommand\", args = {\"android.content.Intent\", \"int\", \"int\"}, statement = \"com.example.$T.inject(this, $1);\")",
                         "   public static void inject($I target, Intent intent) {",
@@ -256,7 +256,7 @@ public final class ExtraTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "public final class $T {",
+                        "abstract class $T {",
                         "",
                         "   @Weave(into = \"onHandleIntent\", args = {\"android.content.Intent\"}, statement = \"com.example.$T.inject(this, $1);\")",
                         "   public static void inject($I target, Intent intent) {",

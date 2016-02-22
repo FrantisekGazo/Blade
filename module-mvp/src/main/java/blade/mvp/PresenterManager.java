@@ -5,6 +5,9 @@ import android.os.Bundle;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import eu.f3rog.blade.mvp.MvpActivity;
 
 /**
  * Class {@link PresenterManager}
@@ -41,6 +44,10 @@ public class PresenterManager {
     public static void removePresentersFor(Activity activity) {
         assert activity != null;
 
+        if (!activity.isFinishing()) {
+            return;
+        }
+
         Object activityId = buildActivityId(activity);
         getInstance().removeActivityPresenters(activityId);
     }
@@ -56,11 +63,22 @@ public class PresenterManager {
 
     public static void restorePresentersFor(Activity activity, Bundle state) {
         assert activity != null;
-        assert state != null;
+
+        if (state == null) {
+            return;
+        }
 
         Object activityId = buildActivityId(activity);
         ActivityPresenterManager presenters = getInstance().getActivityPresenters(activityId);
         presenters.restoreFrom(state);
+    }
+
+    public static String getActivityId(Bundle state) {
+        return (state != null) ? state.getString("blade:activity_id") : UUID.randomUUID().toString();
+    }
+
+    public static void putActivityId(Bundle state, String activityId) {
+        state.putString("blade:activity_id", activityId);
     }
 
     // ------------------------------------------------------------------------------------
@@ -80,11 +98,12 @@ public class PresenterManager {
     }
 
     private static Object buildActivityId(Activity activity) {
-        Object id = activity.getSystemService(ACTIVITY_ID);
-        if (id == null) {
+        if (activity instanceof MvpActivity) {
+            MvpActivity a = (MvpActivity) activity;
+            return String.format("%s:%s", activity.getClass().getCanonicalName(), a.getId());
+        } else {
             throw new IllegalStateException("Activity is missing @Blade annotation.");
         }
-        return activity.getClass().getCanonicalName() + ":" + id;
     }
 
 
