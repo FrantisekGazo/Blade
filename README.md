@@ -194,14 +194,14 @@ Annotation for implementing MVP architecture.
 
 #### How to implement:
 
-1. Create an interface for your view by extending [IView](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/IView.java).
+1. Create an interface for your view by extending [IView](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/IView.java).
 ```Java
 public interface IMyView implements blade.mvp.IView {
     void show(String something);  
 }
 ```
 
-2. Create a Presenter that will interact with the view interface. You can either extend [BasePresenter](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/BasePresenter.java) or implement [IPresenter](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/IPresenter.java).
+2. Create a Presenter that will interact with the view interface. You can either extend [BasePresenter](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/BasePresenter.java) or implement [IPresenter](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/IPresenter.java).
 ```Java
 public class MyPresenter extends blade.mvp.BasePresenter<IMyView, Data> {
 
@@ -261,7 +261,7 @@ If you call `setTag(null)` on view then:
 
 Presenter is independent of activity's lifecycle. It is created when needed and destroyed when activity finishes.
 
-If you want to programmatically remove view and know that you won't need its presenters anymore (or simply want to destroy it), you can call `removePresentersFor(view)` static method on [PresenterManager](https://github.com/FrantisekGazo/Blade/blob/master/module-mvp/src/main/java/blade/mvp/PresenterManager.java) before removing view from layout.
+If you want to programmatically remove view and know that you won't need its presenters anymore (or simply want to destroy it), you can call `removePresentersFor(view)` static method on [PresenterManager](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/PresenterManager.java) before removing view from layout.
 
 #### Presenter state
 
