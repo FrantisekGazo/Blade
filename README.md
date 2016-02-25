@@ -195,65 +195,72 @@ Annotation for implementing MVP architecture.
 #### How to implement:
 
 1. Create an interface for your view by extending [IView](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/IView.java).
-```Java
-public interface IMyView implements blade.mvp.IView {
-    void show(String something);  
-}
-```
-
-2. Create a Presenter that will interact with the view interface. You can either extend [BasePresenter](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/BasePresenter.java) or implement [IPresenter](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/IPresenter.java).
-```Java
-public class MyPresenter extends blade.mvp.BasePresenter<IMyView, Data> {
-
-    public void onUserDidSomething() {
-        String s = // do something ...
-        
-        if (getView() != null) {
-            getView().show(s);
-        }
+    ```Java
+    public interface IMyView implements blade.mvp.IView {
+        void show(String something);  
     }
-    
-    //...
-}
-```
+    ```
 
-3. Create an implementation for your view interface with presenter field annotated with `@Presenter` (can be more than one). `@Presenter` is supported only for android views (not fragments or activities).
-```Java
-public class MyView extends android.view.View implements IMyView {
+2. Create a Presenter that will interact with the view interface. 
+You can either extend [BasePresenter](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/BasePresenter.java) 
+or implement [IPresenter](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/IPresenter.java).
+    ```Java
+    public class MyPresenter extends blade.mvp.BasePresenter<IMyView, Data> {
     
-    @Presenter
-    MyPresenter mPresenter;
-    
-    @Override
-    void show(String something) { /* ... */ }
-    
-    // ...
-}
-```
+        public void onUserDidSomething() {
+            String s = // do something ...
+            
+            if (getView() != null) {
+                getView().show(s);
+            }
+        }
+        
+        //...
+    }
+    ```
 
-4. Make Blade aware of view's activity class by using `@Blade` annotation. (This is needed for any Activity class that can contain views with presenters)
-```Java
-@Blade
-public class MyActivity extends Activity {
-    // ...
-}
-```
+3. Create an implementation for your view interface with presenter field annotated with `@Presenter` (can be more than one). 
+`@Presenter` is supported only for android views and activities (not fragments).
+    ```Java
+    public class MyView extends android.view.View implements IMyView {
+        
+        @Presenter
+        MyPresenter mPresenter;
+        
+        @Override
+        void show(String something) { /* ... */ }
+        
+        // ...
+    }
+    ```
 
-5. Call `setTag(data)` method on your view implementation to set the `@Presenter` field.
+4. Call `setTag(data)` method on your view implementation to set the `@Presenter` field.
+
+5. Every Activity class, that can contain View class with presenter, needs to be known to Blade.
+If this Activity class does not use presenter, you need to annotate this class with `@Blade`.
+    ```Java
+    @Blade
+    public class MyActivity extends Activity {
+        // ...
+    }
+    ```
 
 #### How does it work?
 
 Each time you call `setTag(data)` method on your view this happens: 
 
-* Unique ID (per activity) is created from **view class**, **presenter class** and **data.toString()** combination (so provide custom implementation of `toString()`).
-* If presenter for this ID does not exists yet, then it is created via **default constructor** and `create(data, boolean)` is called with the **data** given as parameter to `setTag(data)` and boolean flag indicating if presenter was recreated from state.
+* Unique ID (per activity) is created from **view class**, **presenter class** 
+and **data.toString()** combination (so provide custom implementation of `toString()`).
+* If presenter for this ID does not exists yet, then it is created via **default constructor** 
+and `create(data, boolean)` is called with the **data** given as parameter to `setTag(data)` 
+and boolean flag indicating if presenter was recreated from state.
 * `@Presenter` field is set with proper instance.
 * Presenter is connected to the view by calling `bind(view)`.
 
 If you call `setTag(null)` on view then:
 * Presenter is disconnected from the view by calling `unbind()`.
 * `@Presenter` field is set to `null`.
-* Presenter still lives until containing Activity is finshed. (so you can use it again if you set appropriate tag)
+* Presenter still lives until containing Activity is finished. (so you can use it again if you set appropriate tag)
 
 (Same applies for any number of `@Presenter` fields inside your view)
 
@@ -261,7 +268,9 @@ If you call `setTag(null)` on view then:
 
 Presenter is independent of activity's lifecycle. It is created when needed and destroyed when activity finishes.
 
-If you want to programmatically remove view and know that you won't need its presenters anymore (or simply want to destroy it), you can call `removePresentersFor(view)` static method on [PresenterManager](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/PresenterManager.java) before removing view from layout.
+If you want to programmatically remove view and know that you won't need its presenters anymore (or simply want to destroy it), 
+you can call `removePresentersFor(view)` static method on [PresenterManager](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/PresenterManager.java) 
+before removing view from layout.
 
 #### Presenter state
 
