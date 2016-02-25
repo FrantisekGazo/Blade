@@ -1,5 +1,8 @@
 package eu.f3rog.blade.compiler.util;
 
+import android.app.Activity;
+import android.app.Fragment;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -19,6 +22,8 @@ import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+
+import eu.f3rog.blade.compiler.name.ClassNames;
 
 /**
  * Class {@link ProcessorUtils}.
@@ -153,6 +158,14 @@ public class ProcessorUtils {
             className = typeName.toString();
         }
         return sProcessingEnvironment.getElementUtils().getTypeElement(className);
+    }
+
+    public static boolean isActivitySubClass(TypeElement inspectedType) {
+        return isSubClassOf(inspectedType, Activity.class) || isSubClassOf(inspectedType, ClassNames.AppCompatActivity);
+    }
+
+    public static boolean isFragmentSubClass(TypeElement inspectedType) {
+        return isSubClassOf(inspectedType, Fragment.class) || isSubClassOf(inspectedType, ClassNames.SupportFragment);
     }
 
     public static boolean isSubClassOf(TypeElement inspectedType, Class lookupClass) {

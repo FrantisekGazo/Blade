@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.mvp;
 
-import android.app.Activity;
-
 import com.squareup.javapoet.ClassName;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -9,11 +7,10 @@ import javax.lang.model.element.TypeElement;
 
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.mvp.MvpActivity;
 
-import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
 
 /**
  * Class {@link PresenterScopeHelperModule}
@@ -25,7 +22,7 @@ public class PresenterScopeHelperModule extends BaseHelperModule {
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (!isSubClassOf(e, Activity.class) && !isSubClassOf(e, EClass.AppCompatActivity.getName())) {
+        if (!isActivitySubClass(e)) {
             throw new IllegalStateException();
         }
     }

@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.state;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.View;
@@ -26,11 +24,12 @@ import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
-import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isFragmentSubClass;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
@@ -65,8 +64,7 @@ public class StateHelperModule
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
         // support any class
-        if (isSubClassOf(e, Fragment.class) || isSubClassOf(e, EClass.SupportFragment.getName())
-                || isSubClassOf(e, Activity.class) || isSubClassOf(e, EClass.AppCompatActivity.getName())) {
+        if (isActivitySubClass(e) || isFragmentSubClass(e)) {
             mHelpedClassType = HelpedClassType.ACTIVITY_OR_FRAGMENT;
         } else if (isSubClassOf(e, View.class)) {
             mHelpedClassType = HelpedClassType.VIEW;

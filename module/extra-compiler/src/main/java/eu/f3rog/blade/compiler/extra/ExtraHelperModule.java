@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.extra;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
@@ -24,14 +23,13 @@ import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
-import eu.f3rog.blade.compiler.name.EClass;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
-import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
 
 /**
  * Class {@link ExtraHelperModule}
@@ -58,7 +56,7 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (isSubClassOf(e, Activity.class) || isSubClassOf(e, EClass.AppCompatActivity.getName())) {
+        if (isActivitySubClass(e)) {
             mInjected = Injected.ACTIVITY;
         } else if (ProcessorUtils.isSubClassOf(e, IntentService.class)) {
             mInjected = Injected.INTENT_SERVICE;
