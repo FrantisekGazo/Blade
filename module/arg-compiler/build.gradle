@@ -8,7 +8,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compile project(':compiler')
-    compile project(':module-extra')
+    compile project(':module:arg')
 }
 
 publish {
