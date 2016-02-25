@@ -5,13 +5,7 @@ import blade.mvp.IView;
 class MockView implements IView {
 
     @Override
-    public Object getContext() {
-        return null;
-    }
-
-    @Override
-    public Object getTag() {
-        return null;
+    public void setTag(Object o) {
     }
 
 }

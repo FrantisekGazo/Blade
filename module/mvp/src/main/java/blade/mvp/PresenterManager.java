@@ -2,6 +2,7 @@ package blade.mvp;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,25 +18,45 @@ import eu.f3rog.blade.mvp.MvpActivity;
  */
 public class PresenterManager {
 
-    private static final String ACTIVITY_ID = "ACTIVITY-ID";
-
+    /**
+     * Used internally by Blade library.
+     */
     public static <V extends IView, D> void put(V view, D data, IPresenter<V, D> presenter) {
         assert view != null;
         assert data != null;
         assert presenter != null;
 
-        forParentActivity(view).put(view, data, presenter);
+        if (view instanceof View) {
+            View v = (View) view;
+            forParentActivity(v).put(v, data, presenter);
+        } else if (view instanceof Activity) {
+            Activity a = (Activity) view;
+            forActivity(a).put(data, presenter);
+        } else {
+            throw new IllegalArgumentException("View has to be instance of android View or Activity.");
+        }
     }
 
-    public static IPresenter get(IView view, Object data, Class presenterClass) {
+    /**
+     * Used internally by Blade library.
+     */
+    public static <V extends IView, D> IPresenter get(V view, D data, Class presenterClass) {
         assert view != null;
         assert data != null;
         assert presenterClass != null;
 
-        return forParentActivity(view).get(view, data, presenterClass);
+        if (view instanceof View) {
+            View v = (View) view;
+            return forParentActivity(v).get(v, data, presenterClass);
+        } else if (view instanceof Activity) {
+            Activity a = (Activity) view;
+            return forActivity(a).get(data, presenterClass);
+        } else {
+            throw new IllegalArgumentException("View has to be instance of android View or Activity.");
+        }
     }
 
-    public static void removePresentersFor(IView view) {
+    public static void removePresentersFor(View view) {
         assert view != null;
 
         forParentActivity(view).removeFor(view);
@@ -56,9 +77,7 @@ public class PresenterManager {
         assert activity != null;
         assert state != null;
 
-        Object activityId = buildActivityId(activity);
-        ActivityPresenterManager presenters = getInstance().getActivityPresenters(activityId);
-        presenters.saveInto(state);
+        forActivity(activity).saveInto(state);
     }
 
     public static void restorePresentersFor(Activity activity, Bundle state) {
@@ -68,9 +87,7 @@ public class PresenterManager {
             return;
         }
 
-        Object activityId = buildActivityId(activity);
-        ActivityPresenterManager presenters = getInstance().getActivityPresenters(activityId);
-        presenters.restoreFrom(state);
+        forActivity(activity).restoreFrom(state);
     }
 
     public static String getActivityId(Bundle state) {
@@ -83,11 +100,10 @@ public class PresenterManager {
 
     // ------------------------------------------------------------------------------------
 
-    private static ActivityPresenterManager forParentActivity(IView view) {
+    private static ActivityPresenterManager forParentActivity(View view) {
         assert view != null;
 
-        Object activityId = buildActivityId((Activity) view.getContext());
-        return getInstance().getActivityPresenters(activityId);
+        return forActivity((Activity) view.getContext());
     }
 
     private static ActivityPresenterManager forActivity(Activity activity) {
@@ -141,29 +157,31 @@ public class PresenterManager {
 
     private static class ActivityPresenterManager {
 
-        private final Map<String, Map<String, IPresenter>> mPresenters;
+        private final Map<Class, IPresenter> mActivityPresenters;
+        private final Map<String, Map<Class, IPresenter>> mViewPresenters;
         private Bundle mState;
 
         private ActivityPresenterManager() {
-            mPresenters = new HashMap<>();
+            mActivityPresenters = new HashMap<>();
+            mViewPresenters = new HashMap<>();
             mState = null;
         }
 
-        public <V extends IView, D> void put(V view, D data, IPresenter<V, D> presenter) {
+        public <V extends IView, D> void put(View view, D data, IPresenter<V, D> presenter) {
             assert view != null;
             assert data != null;
             assert presenter != null;
 
             String viewId = buildViewId(view, data);
-            putPresenter(viewId, presenter);
+            putViewPresenter(viewId, presenter);
 
             boolean restored = false;
 
             if (mState != null) {
                 Bundle viewPresentersState = mState.getBundle(viewId);
                 if (viewPresentersState != null) {
-                    String presenterId = buildPresenterId(presenter.getClass());
-                    Bundle presenterState = viewPresentersState.getBundle(presenterId);
+                    String key = presenter.getClass().getCanonicalName();
+                    Bundle presenterState = viewPresentersState.getBundle(key);
                     if (presenterState != null) {
                         presenter.restoreState(presenterState);
                         restored = true;
@@ -174,16 +192,43 @@ public class PresenterManager {
             presenter.create(data, restored);
         }
 
-        public IPresenter get(IView view, Object data, Class presenterClass) {
+        public <V extends IView, D> void put(D data, IPresenter<V, D> presenter) {
+            assert data != null;
+            assert presenter != null;
+
+            putActivityPresenter(presenter);
+
+            boolean restored = false;
+
+            if (mState != null) {
+                String key = presenter.getClass().getCanonicalName();
+                Bundle presenterState = mState.getBundle(key);
+                if (presenterState != null) {
+                    presenter.restoreState(presenterState);
+                    restored = true;
+                }
+            }
+
+            presenter.create(data, restored);
+        }
+
+        public <D> IPresenter get(View view, D data, Class presenterClass) {
             assert view != null;
             assert data != null;
             assert presenterClass != null;
 
             String viewId = buildViewId(view, data);
-            return getPresenter(viewId, presenterClass);
+            return getViewPresenter(viewId, presenterClass);
         }
 
-        public void removeFor(IView view) {
+        public <D> IPresenter get(D data, Class presenterClass) {
+            assert data != null;
+            assert presenterClass != null;
+
+            return getActivityPresenter(presenterClass);
+        }
+
+        public void removeFor(View view) {
             assert view != null;
 
             if (view.getTag() == null) {
@@ -191,7 +236,7 @@ public class PresenterManager {
             }
 
             String viewId = buildViewId(view, view.getTag());
-            Map<String, IPresenter> presenters = mPresenters.get(viewId);
+            Map<Class, IPresenter> presenters = mViewPresenters.get(viewId);
             if (presenters == null) {
                 return;
             }
@@ -200,70 +245,88 @@ public class PresenterManager {
                 presenter.destroy();
             }
             presenters.clear();
-            mPresenters.remove(viewId);
+            mViewPresenters.remove(viewId);
         }
 
         public void removeAll() {
-            for (Map<String, IPresenter> viewPresenters : mPresenters.values()) {
+            // activity presenters
+            for (IPresenter presenter : mActivityPresenters.values()) {
+                presenter.destroy();
+            }
+            mActivityPresenters.clear();
+
+            // view presenters
+            for (Map<Class, IPresenter> viewPresenters : mViewPresenters.values()) {
                 for (IPresenter presenter : viewPresenters.values()) {
                     presenter.destroy();
                 }
                 viewPresenters.clear();
             }
-            mPresenters.clear();
+            mViewPresenters.clear();
         }
 
         public void saveInto(Bundle state) {
-            for (Map.Entry<String, Map<String, IPresenter>> viewEntry : mPresenters.entrySet()) {
+            // save activity presenters
+            save(mActivityPresenters, state);
+
+            // save view presenters
+            for (Map.Entry<String, Map<Class, IPresenter>> viewEntry : mViewPresenters.entrySet()) {
                 String viewId = viewEntry.getKey();
-                Map<String, IPresenter> viewPresenters = viewEntry.getValue();
+                Map<Class, IPresenter> viewPresenters = viewEntry.getValue();
                 Bundle viewPresentersState = new Bundle();
 
-                for (Map.Entry<String, IPresenter> presenterEntry : viewPresenters.entrySet()) {
-                    String key = presenterEntry.getKey();
-                    IPresenter presenter = presenterEntry.getValue();
-                    Bundle presenterState = new Bundle();
-
-                    presenter.saveState(presenterState);
-
-                    viewPresentersState.putBundle(key, presenterState);
-                }
+                save(viewPresenters, viewPresentersState);
 
                 state.putBundle(viewId, viewPresentersState);
             }
+
             mState = state;
+        }
+
+        private void save(Map<Class, IPresenter> presenters, Bundle state) {
+            for (Map.Entry<Class, IPresenter> presenterEntry : presenters.entrySet()) {
+                String key = presenterEntry.getKey().getCanonicalName();
+                IPresenter presenter = presenterEntry.getValue();
+                Bundle presenterState = new Bundle();
+
+                presenter.saveState(presenterState);
+
+                state.putBundle(key, presenterState);
+            }
         }
 
         public void restoreFrom(Bundle state) {
             mState = state;
         }
 
-        private void putPresenter(String viewId, IPresenter presenter) {
-            Map<String, IPresenter> viewPresenters = mPresenters.get(viewId);
+        private void putViewPresenter(String viewId, IPresenter presenter) {
+            Map<Class, IPresenter> viewPresenters = mViewPresenters.get(viewId);
             if (viewPresenters == null) {
                 viewPresenters = new HashMap<>();
-                mPresenters.put(viewId, viewPresenters);
+                mViewPresenters.put(viewId, viewPresenters);
             }
 
-            String presenterId = buildPresenterId(presenter.getClass());
-            viewPresenters.put(presenterId, presenter);
+            viewPresenters.put(presenter.getClass(), presenter);
         }
 
-        private IPresenter getPresenter(String viewId, Class presenterClass) {
-            Map<String, IPresenter> viewPresenters = mPresenters.get(viewId);
+        private IPresenter getViewPresenter(String viewId, Class presenterClass) {
+            Map<Class, IPresenter> viewPresenters = mViewPresenters.get(viewId);
             if (viewPresenters == null) {
                 return null;
             }
 
-            String presenterId = buildPresenterId(presenterClass);
-            return viewPresenters.get(presenterId);
+            return viewPresenters.get(presenterClass);
         }
 
-        private String buildPresenterId(Class presenterClass) {
-            return presenterClass.getCanonicalName();
+        private void putActivityPresenter(IPresenter presenter) {
+            mActivityPresenters.put(presenter.getClass(), presenter);
         }
 
-        private String buildViewId(IView view, Object tagObject) {
+        private IPresenter getActivityPresenter(Class presenterClass) {
+            return mActivityPresenters.get(presenterClass);
+        }
+
+        private String buildViewId(View view, Object tagObject) {
             return String.format("%s:%s", view.getClass().getCanonicalName(), tagObject.toString());
         }
 

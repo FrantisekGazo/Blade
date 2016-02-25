@@ -47,8 +47,8 @@ public class BladePlugin extends AWeavingPlugin {
             compile "$PACKAGE_NAME:core:$VERSION"
 
             for (String moduleName : mConfig.modules) {
-                compile "$PACKAGE_NAME:module-$moduleName:$VERSION"
-                apt "$PACKAGE_NAME:module-$moduleName-compiler:$VERSION"
+                compile "$PACKAGE_NAME:$moduleName:$VERSION"
+                apt "$PACKAGE_NAME:$moduleName-compiler:$VERSION"
             }
         }
     }

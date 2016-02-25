@@ -1,5 +1,6 @@
 package eu.f3rog.blade.compiler.mvp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
@@ -16,6 +17,7 @@ import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.Weave;
+import eu.f3rog.blade.mvp.MvpActivity;
 
 import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
@@ -170,11 +172,6 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void inconsistentPresenterParameterTypes() {
-        JavaFileObject t1 = file("com", "Test1").imports().body("public class $T {}");
-        JavaFileObject t2 = file("com", "Test2").imports().body("public class $T {}");
-        JavaFileObject a = file("com.example.a", "A").imports().body("public class $T {}");
-        JavaFileObject b = file("com.example.a.b", "B").imports().body("public class $T {}");
-
         JavaFileObject presenter1 = file("com.example", "MyPresenter1")
                 .imports(
                         IPresenter.class, "P",
@@ -219,14 +216,14 @@ public final class PresenterTest extends BaseTest {
                         "}"
                 );
 
-        assertFiles(t1, t2, a, b, presenter1, presenter2, input)
+        assertFiles(presenter1, presenter2, input)
                 .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Inconsistent_Presenter_parameter_classes);
     }
 
     @Test
-    public void onePresenter() {
+    public void oneViewPresenter() {
         JavaFileObject presenter = file("com.example", "MyPresenter")
                 .imports(
                         IPresenter.class, "P",
@@ -311,7 +308,7 @@ public final class PresenterTest extends BaseTest {
     }
 
     @Test
-    public void oneBasePresenter() {
+    public void oneViewBasePresenter() {
         JavaFileObject presenter = file("com.example", "MyPresenter")
                 .imports(
                         BasePresenter.class, "P",
@@ -387,6 +384,98 @@ public final class PresenterTest extends BaseTest {
                 );
 
         assertFiles(presenter, view)
+                .with(BladeProcessor.Module.MVP)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void oneActivityPresenter() {
+        JavaFileObject viewInterface = file("com.example", "IMyView")
+                .imports(
+                        IView.class, "V"
+                )
+                .body(
+                        "public interface $T extends $V {",
+                        "}"
+                );
+        JavaFileObject presenter = file("com.example", "MyPresenter")
+                .imports(
+                        IPresenter.class, "P",
+                        viewInterface, "MV"
+                )
+                .body(
+                        "public class $T implements $P<$MV, String> {",
+                        "",
+                        String.format(PRESENTER_METHODS, "$MV", "String"),
+                        "",
+                        "}"
+                );
+        JavaFileObject activity = file("com.example", "MyActivity")
+                .imports(
+                        Activity.class,
+                        viewInterface, "MV",
+                        Presenter.class, "P",
+                        presenter, "MP",
+                        Object.class
+                )
+                .body(
+                        "public class $T extends Activity implements $MV {",
+                        "",
+                        "   @$P $MP mPresenter;",
+                        "",
+                        "   public void setTag(Object o) {}",
+                        "",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyActivity_Helper")
+                .imports(
+                        Weave.class,
+                        activity, "A",
+                        MvpActivity.class, "M",
+                        PresenterManager.class, "PM",
+                        presenter, "P",
+                        Object.class,
+                        String.class,
+                        IllegalStateException.class, "E"
+                )
+                .body(
+                        "abstract class $T implements $M {",
+                        "",
+                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.setPresenters(this, $1);\")",
+                        "   public static void setPresenters($A target, Object tagObject) {",
+                        "       if (tagObject == null) {",
+                        "           if (target.mPresenter != null) {",
+                        "               target.mPresenter.unbind();",
+                        "           }",
+                        "           target.mPresenter = null;",
+                        "       } else {",
+                        "           if (!(tagObject instanceof String)) {",
+                        "               throw new $E(\"Incorrect type of tag object.\");",
+                        "           }",
+                        "           String param = (String) tagObject;",
+                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
+                        "           if (target.mPresenter == null) {",
+                        "               target.mPresenter = new $P();",
+                        "               $PM.put(target, param, target.mPresenter);",
+                        "           }",
+                        "           target.mPresenter.bind(target);",
+                        "       }",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"onDestroy\", statement = \"com.example.$T.unbindPresenters(this);\")",
+                        "   public static void unbindPresenters($A target) {",
+                        "       if (target.mPresenter != null) {",
+                        "           target.mPresenter.unbind();",
+                        "       }",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(viewInterface, presenter, activity)
                 .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()

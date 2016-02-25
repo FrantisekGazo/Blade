@@ -1,5 +1,5 @@
 include ':core'
-include ':compiler'
+include ':core-compiler'
 include ':plugin'
 include ':module:arg'
 include ':module:arg-compiler'

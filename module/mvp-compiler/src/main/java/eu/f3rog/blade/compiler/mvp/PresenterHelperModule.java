@@ -2,6 +2,7 @@ package eu.f3rog.blade.compiler.mvp;
 
 import android.view.View;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -32,6 +33,7 @@ import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.getTypeElement;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
@@ -42,20 +44,37 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
  */
 public class PresenterHelperModule extends BaseHelperModule {
 
+    private enum ViewType {
+        ACTIVITY, VIEW
+    }
+
     private static final String METHOD_NAME_CREATE_PRESENTERS = "setPresenters";
     private static final String METHOD_NAME_UNBIND_PRESENTERS = "unbindPresenters";
 
     private static final int DATA_ARG = 1;
 
+    private ViewType mViewType = null;
     private TypeName mPresenterDataType = null;
     private List<String> mPresenters = new ArrayList<>();
     private List<TypeName> mPresenterTypes = new ArrayList<>();
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
-        if (!isSubClassOf(e, View.class) || !isSubClassOf(e, IView.class)) {
+        ViewType viewType = null;
+
+        if (isSubClassOf(e, IView.class)) {
+            if (isActivitySubClass(e)) {
+                viewType = ViewType.ACTIVITY;
+            } else if (isSubClassOf(e, View.class)) {
+                viewType = ViewType.VIEW;
+            }
+        }
+
+        if (viewType == null) {
             throw new ProcessorError(e, MvpErrorMsg.Invalid_class_with_Presenter);
         }
+
+        mViewType = viewType;
     }
 
     @Override
@@ -109,17 +128,19 @@ public class PresenterHelperModule extends BaseHelperModule {
         String tagObject = "tagObject";
         String target = "target";
 
+        boolean returnsString = (mViewType == ViewType.VIEW);
+
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_CREATE_PRESENTERS)
                 .addAnnotation(
-                        WeaveBuilder.weave().method("setTag", Object.class)
-                                .withStatement("String tag = %s.%s(this, $1); super.setTag(tag); return;",
-                                        fullName(builder.getClassName()), METHOD_NAME_CREATE_PRESENTERS)
-                                .build()
+                        weaveSetPresenters(builder)
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
-                .addParameter(Object.class, tagObject)
-                .returns(String.class);
+                .addParameter(Object.class, tagObject);
+
+        if (returnsString) {
+            method.returns(String.class);
+        }
 
         String param = "param";
 
@@ -134,7 +155,9 @@ public class PresenterHelperModule extends BaseHelperModule {
             method.addStatement("$N.$N = null", target, fieldName);
         }
 
-        method.addStatement("return null");
+        if (returnsString) {
+            method.addStatement("return null");
+        }
         method.endControlFlow().beginControlFlow("else");
 
         method.beginControlFlow("if (!($N instanceof $T))", tagObject, mPresenterDataType)
@@ -154,10 +177,29 @@ public class PresenterHelperModule extends BaseHelperModule {
                     .endControlFlow();
             method.addStatement("$N.$N.bind($N)", target, fieldName, target);
         }
-        method.addStatement("return $N.toString()", tagObject);
+        if (returnsString) {
+            method.addStatement("return $N.toString()", tagObject);
+        }
         method.endControlFlow();
 
         builder.getBuilder().addMethod(method.build());
+    }
+
+    private AnnotationSpec weaveSetPresenters(HelperClassBuilder builder) {
+        switch (mViewType) {
+            case VIEW:
+                return WeaveBuilder.weave().method("setTag", Object.class)
+                        .withStatement("String tag = %s.%s(this, $1); super.setTag(tag); return;",
+                                fullName(builder.getClassName()), METHOD_NAME_CREATE_PRESENTERS)
+                        .build();
+            case ACTIVITY:
+                return WeaveBuilder.weave().method("setTag", Object.class)
+                        .withStatement("%s.%s(this, $1);",
+                                fullName(builder.getClassName()), METHOD_NAME_CREATE_PRESENTERS)
+                        .build();
+            default:
+                return null;
+        }
     }
 
     private void addUnbindPresenterMethod(HelperClassBuilder builder) {
@@ -165,9 +207,7 @@ public class PresenterHelperModule extends BaseHelperModule {
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_UNBIND_PRESENTERS)
                 .addAnnotation(
-                        WeaveBuilder.weave().method("onDetachedFromWindow")
-                                .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
-                                .build()
+                        weaveUnbindPresenters(builder)
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
@@ -183,6 +223,21 @@ public class PresenterHelperModule extends BaseHelperModule {
         builder.getBuilder().addMethod(method.build());
     }
 
+    private AnnotationSpec weaveUnbindPresenters(HelperClassBuilder builder) {
+        switch (mViewType) {
+            case VIEW:
+                return WeaveBuilder.weave().method("onDetachedFromWindow")
+                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
+                        .build();
+            case ACTIVITY:
+                return WeaveBuilder.weave().method("onDestroy")
+                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
+                        .build();
+            default:
+                return null;
+        }
+    }
+
     private static TypeName getPresenterDataType(TypeElement presenterTypeElement) {
         TypeName interfaceTypeName = ProcessorUtils.getSuperType(presenterTypeElement, ClassName.get(IPresenter.class));
         if (interfaceTypeName != null) {
@@ -193,7 +248,7 @@ public class PresenterHelperModule extends BaseHelperModule {
         }
     }
 
-    private boolean hasDefaultConstructor(TypeElement presenterTypeElement) {
+    private static boolean hasDefaultConstructor(TypeElement presenterTypeElement) {
         for (Element e : presenterTypeElement.getEnclosedElements()) {
             if (e.getKind() == ElementKind.CONSTRUCTOR) {
                 ExecutableElement constructor = (ExecutableElement) e;

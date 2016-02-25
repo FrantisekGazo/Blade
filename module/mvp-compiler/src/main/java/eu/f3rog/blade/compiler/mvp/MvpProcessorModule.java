@@ -32,10 +32,16 @@ public class MvpProcessorModule implements ProcessorModule {
     public void process(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Presenter.class);
         for (Element e : elements) {
+            TypeElement typeElement = (TypeElement) e.getEnclosingElement();
+
             ClassManager.getInstance()
-                    .getHelper((TypeElement) e.getEnclosingElement())
+                    .getHelper(typeElement)
                     .getModule(PresenterHelperModule.class)
                     .add((VariableElement) e);
+
+            ClassManager.getInstance()
+                    .getHelper(typeElement)
+                    .tryGetModule(PresenterScopeHelperModule.class);
         }
     }
 
