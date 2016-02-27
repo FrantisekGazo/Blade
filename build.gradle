@@ -13,7 +13,7 @@ buildscript {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
 
         // publish plugin for bintray
-        classpath 'com.novoda:bintray-release:0.3.4'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 
@@ -23,19 +23,64 @@ allprojects {
         mavenLocal()
     }
 
-    group = LIB_GROUP_ID
-    version = LIB_VERSION
+    if (!['Blade', 'sample', 'module'].contains(project.name)) {
 
-    apply plugin: 'maven'
+        println " --> $project.name "
 
-    /* Prevents sporadic compilation error:
-    * 'Bad service configuration file, or exception thrown while constructing
-    *  Processor object: javax.annotation.processing.Processor: Error reading
-    *  configuration file'
-    *
-    * See https://discuss.gradle.org/t/gradle-not-compiles-with-solder-tooling-jar/7583/20
-    */
-    tasks.withType(JavaCompile) { options.fork = true }
+        group = LIB_GROUP_ID
+        version = LIB_VERSION
+
+        apply plugin: 'java'
+        apply plugin: 'maven'
+        apply plugin: 'maven-publish'
+        apply plugin: 'com.jfrog.bintray'
+
+        /* Prevents sporadic compilation error:
+        * 'Bad service configuration file, or exception thrown while constructing
+        *  Processor object: javax.annotation.processing.Processor: Error reading
+        *  configuration file'
+        *
+        * See https://discuss.gradle.org/t/gradle-not-compiles-with-solder-tooling-jar/7583/20
+        */
+        tasks.withType(JavaCompile) { options.fork = true }
+
+        ext.priv = parseConfig(rootProject.file('private.properties'))
+
+        task srcJar(type: Jar) {
+            from sourceSets.main.allJava
+            classifier "sources"
+        }
+
+        task docJar(type: Jar) {
+            classifier "javadoc"
+        }
+
+        artifacts {
+            archives srcJar
+            archives docJar
+        }
+
+        bintray {
+            dryRun false
+
+            user = priv.BINTRAY_USER
+            key = priv.BINTRAY_KEY
+
+            configurations = ['archives']
+
+            pkg {
+                repo = LIB_REPO_NAME
+                name = LIB_PACKAGE_NAME
+                licenses = LIB_LICENSES
+                vcsUrl = LIB_GIT_URL
+
+                version {
+                    name = LIB_VERSION
+                    desc = LIB_VERSION_DESC
+                }
+            }
+        }
+    }
 }
 
 ext.deps = [
@@ -58,3 +103,11 @@ ext.deps = [
         autoservice        : 'com.google.auto.service:auto-service:1.0-rc2',
         autocommon         : 'com.google.auto:auto-common:0.4'
 ]
+
+def parseConfig(File config) {
+    config.withReader {
+        def prop = new Properties()
+        prop.load(it)
+        return (new ConfigSlurper().parse(prop))
+    }
+}

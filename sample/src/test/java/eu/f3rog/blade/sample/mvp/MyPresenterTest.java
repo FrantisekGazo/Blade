@@ -52,7 +52,7 @@ public class MyPresenterTest {
 
     @Test
     public void test() throws InterruptedException {
-        DataPresenter presenter = new DataPresenter(); // FIXME : DI
+        DataPresenter presenter = new DataPresenter();
         MockDataView view = new MockDataView();
 
         presenter.create(new Data(123, 2, "Hello World!"), false);

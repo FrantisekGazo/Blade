@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'com.novoda.bintray-release'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -9,15 +8,4 @@ dependencies {
 
     compile project(':core-compiler')
     compile project(':module:extra')
-}
-
-publish {
-    groupId = LIB_GROUP_ID
-    artifactId = ARTIFACT_ID
-    publishVersion = LIB_VERSION
-    // bintray
-    repoName = LIB_REPO_NAME
-    uploadName = LIB_PACKAGE_NAME
-    desc = DESC
-    website = LIB_GIT_URL
 }

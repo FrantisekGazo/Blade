@@ -60,7 +60,7 @@ public class DataPresenter extends BasePresenter<IDataView, Data> {
     private void startFakeLoading() {
         mLoadedValue = null;
         Observable.range(0, COUNT + 1)
-                //.delay(mData.getWait(), TimeUnit.SECONDS)
+                .delay(mData.getWait(), TimeUnit.SECONDS)
                 .delay(new Func1<Integer, Observable<Long>>() {
                     @Override
                     public Observable<Long> call(Integer integer) {

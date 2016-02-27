@@ -1,7 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'nexus'
-apply plugin: 'com.novoda.bintray-release'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -20,15 +19,4 @@ dependencies {
     compile deps.android
 
     compile project(':core')
-}
-
-publish {
-    groupId = LIB_GROUP_ID
-    artifactId = ARTIFACT_ID
-    publishVersion = LIB_VERSION
-    // bintray
-    repoName = LIB_REPO_NAME
-    uploadName = LIB_PACKAGE_NAME
-    desc = DESC
-    website = LIB_GIT_URL
 }
