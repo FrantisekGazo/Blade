@@ -8,5 +8,5 @@ dependencies {
 
     compile project(':core')
 
-    compile deps.android
+    compile deps.google_android
 }

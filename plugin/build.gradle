@@ -16,7 +16,7 @@ dependencies {
     compile 'com.github.stephanenicolas.afterburner:afterburner-library:1.0.2' */
     compile 'org.projectlombok:lombok:1.14.2'
 
-    compile deps.android
+    compile deps.google_android
 
     compile project(':core')
 }

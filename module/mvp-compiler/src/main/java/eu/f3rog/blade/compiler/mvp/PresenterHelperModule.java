@@ -50,6 +50,7 @@ public class PresenterHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_CREATE_PRESENTERS = "setPresenters";
     private static final String METHOD_NAME_UNBIND_PRESENTERS = "unbindPresenters";
+    private static final String METHOD_NAME_BIND_PRESENTERS = "bindPresenters";
 
     private static final int DATA_ARG = 1;
 
@@ -120,6 +121,9 @@ public class PresenterHelperModule extends BaseHelperModule {
     @Override
     public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         addSetPresenterMethod(builder);
+        if (mViewType == ViewType.VIEW) {
+            addBindPresenterMethod(builder);
+        }
         addUnbindPresenterMethod(builder);
         return true;
     }
@@ -175,7 +179,14 @@ public class PresenterHelperModule extends BaseHelperModule {
                     .addStatement("$N.$N = new $T()", target, fieldName, fieldType)
                     .addStatement("$T.put($N, $N, $N.$N)", PresenterManager.class, target, param, target, fieldName)
                     .endControlFlow();
-            method.addStatement("$N.$N.bind($N)", target, fieldName, target);
+
+            if (mViewType == ViewType.VIEW) { // bind to view only if it is visible
+                method.beginControlFlow("if ($N.isAttachedToWindow())", target)
+                        .addStatement("$N.$N.bind($N)", target, fieldName, target)
+                        .endControlFlow();
+            } else { //Activity
+                method.addStatement("$N.$N.bind($N)", target, fieldName, target);
+            }
         }
         if (returnsString) {
             method.addStatement("return $N.toString()", tagObject);
@@ -200,6 +211,29 @@ public class PresenterHelperModule extends BaseHelperModule {
             default:
                 return null;
         }
+    }
+
+    private void addBindPresenterMethod(HelperClassBuilder builder) {
+        String target = "target";
+
+        MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_BIND_PRESENTERS)
+                .addAnnotation(
+                        WeaveBuilder.weave().method("onAttachedToWindow")
+                                .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_BIND_PRESENTERS)
+                                .build()
+                )
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(builder.getArgClassName(), target);
+
+        for (int i = 0; i < mPresenters.size(); i++) {
+            String fieldName = mPresenters.get(i);
+
+            method.beginControlFlow("if ($N.$N != null)", target, fieldName)
+                    .addStatement("$N.$N.bind($N)", target, fieldName, target)
+                    .endControlFlow();
+        }
+
+        builder.getBuilder().addMethod(method.build());
     }
 
     private void addUnbindPresenterMethod(HelperClassBuilder builder) {

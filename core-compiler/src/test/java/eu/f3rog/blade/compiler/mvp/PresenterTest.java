@@ -38,6 +38,24 @@ public final class PresenterTest extends BaseTest {
                     " public void saveState(Object o) {} " +
                     " public void restoreState(Object o) {} ";
 
+    /**
+     * android.view.View is missing <code>isAttachedToWindow()</code> method, so this class adds this method.
+     */
+    private static final JavaFileObject FIXED_ANDROID_VIEW = file("android.view", "FixedView")
+            .imports(
+                    View.class,
+                    Context.class
+            )
+            .body(
+                    "public class $T extends View {",
+                    "",
+                    "   public $T(Context c) { super(c); } ",
+                    "",
+                    "   public boolean isAttachedToWindow() {return false;} ",
+                    "",
+                    "}"
+            );
+
     @Test
     public void invalidClass() {
         JavaFileObject input = file("com.example", "MyClass")
@@ -239,13 +257,13 @@ public final class PresenterTest extends BaseTest {
         JavaFileObject view = file("com.example", "MyView")
                 .imports(
                         presenter, "MP",
-                        View.class,
+                        FIXED_ANDROID_VIEW, "FV",
                         Context.class,
                         Presenter.class, "P",
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        "public class $T extends $FV implements $V {",
                         "",
                         "   @$P $MP mPresenter;",
                         "",
@@ -285,8 +303,17 @@ public final class PresenterTest extends BaseTest {
                         "               target.mPresenter = new $P();",
                         "               $PM.put(target, param, target.mPresenter);",
                         "           }",
-                        "           target.mPresenter.bind(target);",
+                        "           if (target.isAttachedToWindow()) {",
+                        "               target.mPresenter.bind(target);",
+                        "           }",
                         "           return tagObject.toString();",
+                        "       }",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this);\")",
+                        "   public static void bindPresenters($V target) {",
+                        "       if (target.mPresenter != null) {",
+                        "           target.mPresenter.bind(target);",
                         "       }",
                         "   }",
                         "",
@@ -300,7 +327,7 @@ public final class PresenterTest extends BaseTest {
                         "}"
                 );
 
-        assertFiles(presenter, view)
+        assertFiles(FIXED_ANDROID_VIEW, presenter, view)
                 .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
@@ -322,13 +349,13 @@ public final class PresenterTest extends BaseTest {
         JavaFileObject view = file("com.example", "MyView")
                 .imports(
                         presenter, "MP",
-                        View.class,
+                        FIXED_ANDROID_VIEW, "FV",
                         Context.class,
                         Presenter.class, "P",
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        "public class $T extends $FV implements $V {",
                         "",
                         "   @$P $MP mPresenter;",
                         "",
@@ -368,8 +395,17 @@ public final class PresenterTest extends BaseTest {
                         "               target.mPresenter = new $P();",
                         "               $PM.put(target, param, target.mPresenter);",
                         "           }",
-                        "           target.mPresenter.bind(target);",
+                        "           if (target.isAttachedToWindow()) {",
+                        "               target.mPresenter.bind(target);",
+                        "           }",
                         "           return tagObject.toString();",
+                        "       }",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this);\")",
+                        "   public static void bindPresenters($V target) {",
+                        "       if (target.mPresenter != null) {",
+                        "           target.mPresenter.bind(target);",
                         "       }",
                         "   }",
                         "",
@@ -383,7 +419,7 @@ public final class PresenterTest extends BaseTest {
                         "}"
                 );
 
-        assertFiles(presenter, view)
+        assertFiles(FIXED_ANDROID_VIEW, presenter, view)
                 .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()

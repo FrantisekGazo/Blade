@@ -9,7 +9,7 @@ dependencies {
 
     compile project(':core')
 
-    compile deps.android
+    compile deps.google_android
     compile deps.javapoet
     compile deps.autoservice
     compile deps.autocommon

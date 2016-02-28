@@ -6,6 +6,6 @@ targetCompatibility = JavaVersion.VERSION_1_7
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile deps.android
+    compile deps.google_android
     compile deps.javax_annotations
 }
