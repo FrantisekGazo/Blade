@@ -38,24 +38,6 @@ public final class PresenterTest extends BaseTest {
                     " public void saveState(Object o) {} " +
                     " public void restoreState(Object o) {} ";
 
-    /**
-     * android.view.View is missing <code>isAttachedToWindow()</code> method, so this class adds this method.
-     */
-    private static final JavaFileObject FIXED_ANDROID_VIEW = file("android.view", "FixedView")
-            .imports(
-                    View.class,
-                    Context.class
-            )
-            .body(
-                    "public class $T extends View {",
-                    "",
-                    "   public $T(Context c) { super(c); } ",
-                    "",
-                    "   public boolean isAttachedToWindow() {return false;} ",
-                    "",
-                    "}"
-            );
-
     @Test
     public void invalidClass() {
         JavaFileObject input = file("com.example", "MyClass")
@@ -257,13 +239,13 @@ public final class PresenterTest extends BaseTest {
         JavaFileObject view = file("com.example", "MyView")
                 .imports(
                         presenter, "MP",
-                        FIXED_ANDROID_VIEW, "FV",
+                        View.class,
                         Context.class,
                         Presenter.class, "P",
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends $FV implements $V {",
+                        "public class $T extends View implements $V {",
                         "",
                         "   @$P $MP mPresenter;",
                         "",
@@ -285,7 +267,10 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); return;\")",
+                        "   @Weave(into = \"<FIELD>\", statement = \"\")",
+                        "   private boolean mIsAttached;",
+                        "",
+                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); if (this.mIsAttached) { com.example.$T.bindPresenters(this); } return;\")",
                         "   public static String setPresenters($V target, Object tagObject) {",
                         "       if (tagObject == null) {",
                         "           if (target.mPresenter != null) {",
@@ -303,21 +288,18 @@ public final class PresenterTest extends BaseTest {
                         "               target.mPresenter = new $P();",
                         "               $PM.put(target, param, target.mPresenter);",
                         "           }",
-                        "           if (target.isAttachedToWindow()) {",
-                        "               target.mPresenter.bind(target);",
-                        "           }",
                         "           return tagObject.toString();",
                         "       }",
                         "   }",
                         "",
-                        "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this);\")",
+                        "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this); this.mIsAttached = true;\")",
                         "   public static void bindPresenters($V target) {",
                         "       if (target.mPresenter != null) {",
                         "           target.mPresenter.bind(target);",
                         "       }",
                         "   }",
                         "",
-                        "   @Weave(into = \"onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this);\")",
+                        "   @Weave(into = \"onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this); this.mIsAttached = false;\")",
                         "   public static void unbindPresenters($V target) {",
                         "       if (target.mPresenter != null) {",
                         "           target.mPresenter.unbind();",
@@ -327,7 +309,7 @@ public final class PresenterTest extends BaseTest {
                         "}"
                 );
 
-        assertFiles(FIXED_ANDROID_VIEW, presenter, view)
+        assertFiles(presenter, view)
                 .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
@@ -349,13 +331,13 @@ public final class PresenterTest extends BaseTest {
         JavaFileObject view = file("com.example", "MyView")
                 .imports(
                         presenter, "MP",
-                        FIXED_ANDROID_VIEW, "FV",
+                        View.class,
                         Context.class,
                         Presenter.class, "P",
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends $FV implements $V {",
+                        "public class $T extends View implements $V {",
                         "",
                         "   @$P $MP mPresenter;",
                         "",
@@ -377,7 +359,10 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); return;\")",
+                        "   @Weave(into = \"<FIELD>\", statement = \"\")",
+                        "   private boolean mIsAttached;",
+                        "",
+                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); if (this.mIsAttached) { com.example.$T.bindPresenters(this); } return;\")",
                         "   public static String setPresenters($V target, Object tagObject) {",
                         "       if (tagObject == null) {",
                         "           if (target.mPresenter != null) {",
@@ -395,21 +380,18 @@ public final class PresenterTest extends BaseTest {
                         "               target.mPresenter = new $P();",
                         "               $PM.put(target, param, target.mPresenter);",
                         "           }",
-                        "           if (target.isAttachedToWindow()) {",
-                        "               target.mPresenter.bind(target);",
-                        "           }",
                         "           return tagObject.toString();",
                         "       }",
                         "   }",
                         "",
-                        "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this);\")",
+                        "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this); this.mIsAttached = true;\")",
                         "   public static void bindPresenters($V target) {",
                         "       if (target.mPresenter != null) {",
                         "           target.mPresenter.bind(target);",
                         "       }",
                         "   }",
                         "",
-                        "   @Weave(into = \"onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this);\")",
+                        "   @Weave(into = \"onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this); this.mIsAttached = false;\")",
                         "   public static void unbindPresenters($V target) {",
                         "       if (target.mPresenter != null) {",
                         "           target.mPresenter.unbind();",
@@ -419,7 +401,7 @@ public final class PresenterTest extends BaseTest {
                         "}"
                 );
 
-        assertFiles(FIXED_ANDROID_VIEW, presenter, view)
+        assertFiles(presenter, view)
                 .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
@@ -480,7 +462,7 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "abstract class $T implements $M {",
                         "",
-                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.setPresenters(this, $1);\")",
+                        "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.setPresenters(this, $1); com.example.$T.bindPresenters(this);\")",
                         "   public static void setPresenters($A target, Object tagObject) {",
                         "       if (tagObject == null) {",
                         "           if (target.mPresenter != null) {",
@@ -497,7 +479,6 @@ public final class PresenterTest extends BaseTest {
                         "               target.mPresenter = new $P();",
                         "               $PM.put(target, param, target.mPresenter);",
                         "           }",
-                        "           target.mPresenter.bind(target);",
                         "       }",
                         "   }",
                         "",

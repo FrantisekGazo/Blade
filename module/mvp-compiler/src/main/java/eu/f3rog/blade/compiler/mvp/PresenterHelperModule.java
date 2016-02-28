@@ -4,6 +4,7 @@ import android.view.View;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -48,6 +49,7 @@ public class PresenterHelperModule extends BaseHelperModule {
         ACTIVITY, VIEW
     }
 
+    private static final String FIELD_NAME_IS_ATTACHED = "mIsAttached";
     private static final String METHOD_NAME_CREATE_PRESENTERS = "setPresenters";
     private static final String METHOD_NAME_UNBIND_PRESENTERS = "unbindPresenters";
     private static final String METHOD_NAME_BIND_PRESENTERS = "bindPresenters";
@@ -120,12 +122,20 @@ public class PresenterHelperModule extends BaseHelperModule {
 
     @Override
     public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addSetPresenterMethod(builder);
-        if (mViewType == ViewType.VIEW) {
-            addBindPresenterMethod(builder);
+        switch (mViewType) {
+            case ACTIVITY:
+                addSetPresenterMethod(builder);
+                addUnbindPresenterMethod(builder);
+                return true;
+            case VIEW:
+                addIsAttachedField(builder);
+                addSetPresenterMethod(builder);
+                addBindPresenterMethod(builder);
+                addUnbindPresenterMethod(builder);
+                return true;
+            default:
+                return false;
         }
-        addUnbindPresenterMethod(builder);
-        return true;
     }
 
     private void addSetPresenterMethod(HelperClassBuilder builder) {
@@ -179,14 +189,6 @@ public class PresenterHelperModule extends BaseHelperModule {
                     .addStatement("$N.$N = new $T()", target, fieldName, fieldType)
                     .addStatement("$T.put($N, $N, $N.$N)", PresenterManager.class, target, param, target, fieldName)
                     .endControlFlow();
-
-            if (mViewType == ViewType.VIEW) { // bind to view only if it is visible
-                method.beginControlFlow("if ($N.isAttachedToWindow())", target)
-                        .addStatement("$N.$N.bind($N)", target, fieldName, target)
-                        .endControlFlow();
-            } else { //Activity
-                method.addStatement("$N.$N.bind($N)", target, fieldName, target);
-            }
         }
         if (returnsString) {
             method.addStatement("return $N.toString()", tagObject);
@@ -197,20 +199,36 @@ public class PresenterHelperModule extends BaseHelperModule {
     }
 
     private AnnotationSpec weaveSetPresenters(HelperClassBuilder builder) {
+        String helperClassName = fullName(builder.getClassName());
         switch (mViewType) {
             case VIEW:
                 return WeaveBuilder.weave().method("setTag", Object.class)
-                        .withStatement("String tag = %s.%s(this, $1); super.setTag(tag); return;",
-                                fullName(builder.getClassName()), METHOD_NAME_CREATE_PRESENTERS)
+                        .withStatement("String tag = %s.%s(this, $1);",
+                                helperClassName, METHOD_NAME_CREATE_PRESENTERS)
+                        .withStatement(" super.setTag(tag);")
+                        .withStatement(" if (this.%s) { %s.%s(this); }",
+                                FIELD_NAME_IS_ATTACHED, helperClassName, METHOD_NAME_BIND_PRESENTERS)
+                        .withStatement(" return;")
                         .build();
             case ACTIVITY:
                 return WeaveBuilder.weave().method("setTag", Object.class)
                         .withStatement("%s.%s(this, $1);",
-                                fullName(builder.getClassName()), METHOD_NAME_CREATE_PRESENTERS)
+                                helperClassName, METHOD_NAME_CREATE_PRESENTERS)
+                        .withStatement(" %s.%s(this);",
+                                helperClassName, METHOD_NAME_BIND_PRESENTERS)
                         .build();
             default:
                 return null;
         }
+    }
+
+    private void addIsAttachedField(HelperClassBuilder builder) {
+        FieldSpec.Builder field = FieldSpec.builder(boolean.class, FIELD_NAME_IS_ATTACHED, Modifier.PRIVATE)
+                .addAnnotation(
+                        WeaveBuilder.weave().field().build()
+                );
+
+        builder.getBuilder().addField(field.build());
     }
 
     private void addBindPresenterMethod(HelperClassBuilder builder) {
@@ -220,6 +238,7 @@ public class PresenterHelperModule extends BaseHelperModule {
                 .addAnnotation(
                         WeaveBuilder.weave().method("onAttachedToWindow")
                                 .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_BIND_PRESENTERS)
+                                .withStatement(" this.%s = true;", FIELD_NAME_IS_ATTACHED)
                                 .build()
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -262,6 +281,7 @@ public class PresenterHelperModule extends BaseHelperModule {
             case VIEW:
                 return WeaveBuilder.weave().method("onDetachedFromWindow")
                         .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
+                        .withStatement(" this.%s = false;", FIELD_NAME_IS_ATTACHED)
                         .build();
             case ACTIVITY:
                 return WeaveBuilder.weave().method("onDestroy")
