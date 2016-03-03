@@ -1,3 +1,5 @@
+*.DS_Store
+
 ### Android template
 # Built application files
 *.apk

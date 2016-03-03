@@ -7,9 +7,6 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import eu.f3rog.blade.sample.mvp.di.component.Component;
-import eu.f3rog.blade.sample.mvp.di.component.DaggerAppComponent;
-import eu.f3rog.blade.sample.mvp.di.module.MockRxModule;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
 import eu.f3rog.blade.sample.mvp.view.IDataView;
@@ -42,12 +39,6 @@ public class MyPresenterTest {
 
     @Before
     public void setup() {
-        // mock DI
-        Component.setForApp(
-                DaggerAppComponent.builder()
-                        .rxModule(new MockRxModule())
-                        .build()
-        );
     }
 
     @Test

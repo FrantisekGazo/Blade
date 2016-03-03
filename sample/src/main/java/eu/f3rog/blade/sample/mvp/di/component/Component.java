@@ -22,8 +22,4 @@ public class Component {
         return sAppComponent;
     }
 
-    public static void setForApp(AppComponent component) {
-        sAppComponent = component;
-    }
-
 }
