@@ -1,0 +1,26 @@
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
+
+    compile project(':core')
+
+    compile deps.google_android
+    compile deps.javapoet
+    compile deps.autoservice
+    compile deps.autocommon
+
+    // test
+    testCompile project(':module:arg-compiler')
+    testCompile project(':module:extra-compiler')
+    testCompile project(':module:state-compiler')
+    testCompile project(':module:mvp-compiler')
+
+    testCompile deps.guava
+    testCompile deps.truth
+    testCompile deps.compiletesting
+}

@@ -2,27 +2,31 @@ package eu.f3rog.blade.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.EditText;
 
-import blade.F;
 import blade.I;
-import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-    @Bind(R.id.edt)
-    EditText mEditText;
-
-    @OnClick(R.id.btn_1)
-    public void b1() {
-        I.startShowTextActivity(this, mEditText.getText().toString());
+    @OnClick(R.id.btn_go_extra)
+    public void gotoExtra() {
+        I.startTestExtraActivity(this);
     }
 
-    @OnClick(R.id.btn_2)
-    public void b2() {
-        F.newSampleDialogFragment("Hello mate :)").show(getSupportFragmentManager(), "some-tag");
+    @OnClick(R.id.btn_go_arg)
+    public void gotoArg() {
+        I.startTestArgActivity(this);
+    }
+
+    @OnClick(R.id.btn_go_state)
+    public void gotoState() {
+        I.startTestStateActivity(this);
+    }
+
+    @OnClick(R.id.btn_go_mvp)
+    public void gotoMvp() {
+        I.startTestMvpActivity(this);
     }
 
     @Override

@@ -1,23 +1,11 @@
 apply plugin: 'java'
-apply plugin: 'com.novoda.bintray-release'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    /* Android 4.0.x (http://mvnrepository.com/artifact/com.google.android/android) */
-    compile 'com.google.android:android:4.0.1.2'
-    compile project(':annotations')
-}
 
-publish {
-    groupId = LIB_GROUP_ID
-    artifactId = ARTIFACT_ID
-    publishVersion = LIB_VERSION
-    // bintray
-    repoName = LIB_REPO_NAME
-    uploadName = LIB_PACKAGE_NAME
-    desc = DESC
-    website = LIB_GIT_URL
+    compile deps.google_android
+    compile deps.javax_annotations
 }

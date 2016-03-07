@@ -3,7 +3,9 @@ package eu.f3rog.blade.weaving;
 import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
 import eu.f3rog.afterburner.inserts.InsertableConstructor;
 import eu.f3rog.blade.core.Weave;
+import eu.f3rog.blade.core.Weaves;
 import eu.f3rog.blade.weaving.util.AWeaver;
+import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtField;
@@ -12,6 +14,7 @@ import javassist.NotFoundException;
 import javassist.build.JavassistBuildException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.Annotation;
+import javassist.bytecode.annotation.AnnotationMemberValue;
 import javassist.bytecode.annotation.ArrayMemberValue;
 import javassist.bytecode.annotation.MemberValue;
 
@@ -55,41 +58,23 @@ public class BladeWeaver extends AWeaver {
 
             // weave field metadata
             for (CtField field : helper.getDeclaredFields()) {
-                Metadata metadata = loadWeaveMetadata(classPool, field);
-                if (metadata != null) {
-                    log("field named \"%s\"", field.getName());
+                log("field named \"%s\"", field.getName());
 
-                    CtField f = new CtField(field, classToTransform);
-                    if (metadata.statement != null) {
-                        log(" -> init with \"%s\"", metadata.statement);
-                        classToTransform.addField(f, CtField.Initializer.byExpr(metadata.statement));
-                    } else {
-                        log(" -> no statement");
-                        classToTransform.addField(f);
-                    }
-                }
+                Metadata[] metadata = loadWeaveMetadata(classPool, field);
+                weave(metadata, classToTransform, field);
             }
 
             // weave method metadata
             for (CtMethod method : helper.getDeclaredMethods()) {
                 log("method named \"%s\"", method.getName());
 
-                Metadata metadata = loadWeaveMetadata(classPool, method);
-                if (metadata == null) { // nowhere
-                    log(" -> nowhere");
-                    continue;
-                }
+                Metadata[] metadata = loadWeaveMetadata(classPool, method);
+                weave(metadata, classToTransform, null);
+            }
 
-                String body = "{ " + metadata.statement + " }";
-
-                if (metadata.into.length() == 0) { // weave into constructor
-                    getAfterBurner().insertConstructor(new SpecificConstructor(body, classToTransform, metadata.args));
-                    log(" -> %s weaved into constructor", body);
-                } else { // weave into method
-                    getAfterBurner().atBeginningOfOverrideMethod(body, classToTransform, metadata.into, metadata.args);
-                    log(" -> %s weaved into %s", body, metadata.into);
-                }
-
+            // weave interfaces
+            for (CtClass interfaceClass : helper.getInterfaces()) {
+                Interfaces.weaveInterface(interfaceClass, classToTransform, getAfterBurner());
             }
 
             log("Transformation done");
@@ -97,6 +82,43 @@ public class BladeWeaver extends AWeaver {
             log("Transformation failed!");
             e.printStackTrace();
             throw new JavassistBuildException(e);
+        }
+    }
+
+    private void weave(Metadata[] m, CtClass intoClass, CtField helperField) throws NotFoundException, CannotCompileException, AfterBurnerImpossibleException {
+        for (int i = 0; i < m.length; i++) {
+            Metadata metadata = m[i];
+
+            if (metadata == null) {
+                log(" -> nowhere");
+                continue;
+            }
+
+            if (helperField != null && Weave.WEAVE_FIELD.equals(metadata.into)) {
+                // weave field
+                CtField f = new CtField(helperField.getType(), helperField.getName(), intoClass);
+                f.setModifiers(helperField.getModifiers());
+
+                if (metadata.statement != null) {
+                    log(" -> field %s with statement %s", f.getName(), metadata.statement);
+                    intoClass.addField(f, CtField.Initializer.byExpr(metadata.statement));
+                } else {
+                    log(" -> field with no statement", f.getName());
+                    intoClass.addField(f);
+                }
+            } else {
+                String body = "{ " + metadata.statement + " }";
+
+                if (Weave.WEAVE_CONSTRUCTOR.equals(metadata.into)) {
+                    // weave into constructor
+                    getAfterBurner().insertConstructor(new SpecificConstructor(body, intoClass, metadata.args));
+                    log(" -> %s weaved into constructor", body);
+                } else {
+                    // weave into method
+                    getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, metadata.into, metadata.args);
+                    log(" -> %s weaved into %s", body, metadata.into);
+                }
+            }
         }
     }
 
@@ -113,69 +135,91 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private Metadata loadWeaveMetadata(ClassPool classPool, CtMethod method) throws NotFoundException {
+    private Metadata[] loadWeaveMetadata(ClassPool classPool, CtMethod method) throws NotFoundException {
         AnnotationsAttribute attr = getAnnotations(method);
-        if (attr == null) {
-            return null;
+        if (attr != null) {
+            return loadWeaveMetadata(classPool, attr);
         }
 
-        Annotation a = attr.getAnnotation(Weave.class.getName());
-        if (a == null) {
-            return null;
+        return new Metadata[0];
+    }
+
+    private Metadata[] loadWeaveMetadata(ClassPool classPool, CtField field) throws NotFoundException {
+        AnnotationsAttribute attr = getAnnotations(field);
+        if (attr != null) {
+            return loadWeaveMetadata(classPool, attr);
         }
 
+        return new Metadata[0];
+    }
+
+    private Metadata[] loadWeaveMetadata(ClassPool classPool, AnnotationsAttribute attr) throws NotFoundException {
+        Annotation a;
+
+        a = attr.getAnnotation(Weave.class.getName());
+        if (a != null) {
+            return new Metadata[]{readWeaveAnnotation(a, classPool)};
+        }
+
+        a = attr.getAnnotation(Weaves.class.getName());
+        if (a != null) {
+            return readWeavesAnnotation(a, classPool);
+        }
+
+        return new Metadata[0];
+    }
+
+
+    private Metadata readWeaveAnnotation(Annotation weaveAnnotation, ClassPool classPool) throws NotFoundException {
         Metadata metadata = new Metadata();
+
         // get INTO
-        MemberValue val = a.getMemberValue("into");
+        MemberValue val = weaveAnnotation.getMemberValue("into");
         if (val != null) {
             metadata.into = val.toString().replaceAll("\"", "");
         }
         // get INTO ARGS
-        metadata.args = loadClasses(a, "args", classPool);
+        metadata.args = readArgs(weaveAnnotation, classPool);
         // get STATEMENT
-        val = a.getMemberValue("statement");
+        val = weaveAnnotation.getMemberValue("statement");
         if (val != null) {
             metadata.statement = val.toString().replaceAll("\"", "");
             metadata.statement = metadata.statement.replaceAll("'", "\"");
+            if (metadata.statement.length() == 0) {
+                metadata.statement = null;
+            }
         }
 
         return metadata;
     }
 
-    private Metadata loadWeaveMetadata(ClassPool classPool, CtField field) throws NotFoundException {
-        AnnotationsAttribute attr = getAnnotations(field);
-        if (attr == null) {
-            return null;
-        }
-
-        Annotation a = attr.getAnnotation(Weave.class.getName());
-        if (a == null) {
-            return null;
-        }
-
-        Metadata metadata = new Metadata();
-        // get STATEMENT
-        MemberValue val = a.getMemberValue("statement");
-        if (val != null) {
-            metadata.statement = val.toString().replaceAll("\"", "");
-            metadata.statement = metadata.statement.replaceAll("'", "\"");
-        }
-
-        return metadata;
-    }
-
-    private CtClass[] loadClasses(Annotation a, String argName, ClassPool classPool) throws NotFoundException {
-        ArrayMemberValue arrayMemberValue = (ArrayMemberValue) a.getMemberValue(argName);
+    private CtClass[] readArgs(Annotation weaveAnnotation, ClassPool classPool) throws NotFoundException {
+        ArrayMemberValue arrayMemberValue = (ArrayMemberValue) weaveAnnotation.getMemberValue("args");
         if (arrayMemberValue != null) {
-            MemberValue[] values = arrayMemberValue.getValue();
-            CtClass[] classes = new CtClass[values.length];
-            for (int i = 0; i < values.length; i++) {
-                String className = values[i].toString().replaceAll("\"", "");
+            MemberValue[] memberValues = arrayMemberValue.getValue();
+            CtClass[] classes = new CtClass[memberValues.length];
+            for (int i = 0; i < memberValues.length; i++) {
+                String className = memberValues[i].toString().replaceAll("\"", "");
                 classes[i] = classPool.get(className);
             }
             return classes;
         } else {
             return new CtClass[0];
+        }
+    }
+
+    private Metadata[] readWeavesAnnotation(Annotation weavesAnnotation, ClassPool classPool) throws NotFoundException {
+        ArrayMemberValue arrayMemberValue = (ArrayMemberValue) weavesAnnotation.getMemberValue("value");
+        if (arrayMemberValue != null) {
+            MemberValue[] memberValues = arrayMemberValue.getValue();
+            Metadata[] annotations = new Metadata[memberValues.length];
+            for (int i = 0; i < memberValues.length; i++) {
+                AnnotationMemberValue memberValue = (AnnotationMemberValue) memberValues[i];
+                annotations[i] = readWeaveAnnotation(memberValue.getValue(), classPool);
+            }
+            return annotations;
+        } else {
+            return new Metadata[0];
         }
     }
 

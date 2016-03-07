@@ -1,0 +1,9 @@
+{
+  "debug": true,
+  "modules": [
+    "arg",
+    "extra",
+    "state",
+    "mvp"
+  ]
+}

@@ -7,7 +7,4 @@ package eu.f3rog.blade.plugin
  * @version 2015-10-31
  */
 public class BladeExtension {
-
-    boolean debug = false
-
 }
