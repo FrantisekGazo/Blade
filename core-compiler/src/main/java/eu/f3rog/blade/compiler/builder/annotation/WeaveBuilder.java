@@ -1,4 +1,4 @@
-package eu.f3rog.blade.compiler.builder.weaving;
+package eu.f3rog.blade.compiler.builder.annotation;
 
 import com.squareup.javapoet.AnnotationSpec;
 
@@ -6,7 +6,7 @@ import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
 
 /**
- * Class {@link eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder}
+ * Class {@link WeaveBuilder}
  *
  * @author FrantisekGazo
  * @version 2015-12-31

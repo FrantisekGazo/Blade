@@ -25,9 +25,9 @@ import blade.mvp.IPresenter;
 import blade.mvp.IView;
 import blade.mvp.PresenterManager;
 import eu.f3rog.blade.compiler.ErrorMsg;
+import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 
@@ -123,12 +123,9 @@ public class PresenterHelperModule extends BaseHelperModule {
     @Override
     public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
         switch (mViewType) {
-            case ACTIVITY:
-                addSetPresenterMethod(builder);
-                addUnbindPresenterMethod(builder);
-                return true;
             case VIEW:
                 addIsAttachedField(builder);
+            case ACTIVITY:
                 addSetPresenterMethod(builder);
                 addBindPresenterMethod(builder);
                 addUnbindPresenterMethod(builder);
@@ -235,14 +232,17 @@ public class PresenterHelperModule extends BaseHelperModule {
         String target = "target";
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_BIND_PRESENTERS)
-                .addAnnotation(
-                        WeaveBuilder.weave().method("onAttachedToWindow")
-                                .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_BIND_PRESENTERS)
-                                .withStatement(" this.%s = true;", FIELD_NAME_IS_ATTACHED)
-                                .build()
-                )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target);
+
+        if (mViewType == ViewType.VIEW) {
+            method.addAnnotation(
+                    WeaveBuilder.weave().method("onAttachedToWindow")
+                            .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_BIND_PRESENTERS)
+                            .withStatement(" this.%s = true;", FIELD_NAME_IS_ATTACHED)
+                            .build()
+            );
+        }
 
         for (int i = 0; i < mPresenters.size(); i++) {
             String fieldName = mPresenters.get(i);

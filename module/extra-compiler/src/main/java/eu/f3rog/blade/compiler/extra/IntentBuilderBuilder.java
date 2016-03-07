@@ -19,6 +19,7 @@ import javax.lang.model.element.VariableElement;
 
 import blade.Extra;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
+import eu.f3rog.blade.compiler.builder.annotation.GeneratedForBuilder;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.util.ProcessorError;
@@ -71,11 +72,13 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
         String extras = "extras";
         // build FOR method
         MethodSpec.Builder forMethod = MethodSpec.methodBuilder(forName)
+                .addAnnotation(GeneratedForBuilder.buildFor(activityClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context.class, context)
                 .returns(Intent.class);
         // build START method
         MethodSpec.Builder startMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START, activityClassName))
+                .addAnnotation(GeneratedForBuilder.buildFor(activityClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context.class, context);
 

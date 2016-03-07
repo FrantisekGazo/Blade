@@ -20,9 +20,9 @@ import javax.lang.model.element.VariableElement;
 
 import blade.State;
 import eu.f3rog.blade.compiler.ErrorMsg;
+import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
-import eu.f3rog.blade.compiler.builder.weaving.WeaveBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;

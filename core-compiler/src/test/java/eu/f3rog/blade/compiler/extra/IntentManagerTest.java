@@ -13,6 +13,7 @@ import blade.Extra;
 import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.core.BundleWrapper;
+import eu.f3rog.blade.core.GeneratedFor;
 
 import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
@@ -39,6 +40,7 @@ public final class IntentManagerTest extends BaseTest {
 
         JavaFileObject expected = generatedFile("blade", "I")
                 .imports(
+                        GeneratedFor.class, "GF",
                         input, "A",
                         BundleWrapper.class, "BW",
                         Intent.class,
@@ -47,6 +49,7 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T {",
                         "",
+                        "   @$GF($A.class)",
                         "   public static Intent for$A(Context context) {",
                         "       Intent intent = new Intent(context, $A.class);",
                         "       $BW extras = new $BW();",
@@ -54,6 +57,7 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($A.class)",
                         "   public static void start$A(Context context) {",
                         "       context.startActivity(for$A(context));",
                         "   }",
@@ -85,6 +89,7 @@ public final class IntentManagerTest extends BaseTest {
 
         JavaFileObject expected = generatedFile("blade", "I")
                 .imports(
+                        GeneratedFor.class, "GF",
                         input, "A",
                         BundleWrapper.class, "BW",
                         String.class,
@@ -94,6 +99,7 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T {",
                         "",
+                        "   @$GF($A.class)",
                         "   public static Intent for$A(Context context, String mText) {",
                         "       Intent intent = new Intent(context, $A.class);",
                         "       $BW extras = new $BW();",
@@ -102,6 +108,7 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($A.class)",
                         "   public static void start$A(Context context, String mText) {",
                         "       context.startActivity(for$A(context, mText));",
                         "   }",
@@ -147,6 +154,7 @@ public final class IntentManagerTest extends BaseTest {
 
         JavaFileObject expected = generatedFile("blade", "I")
                 .imports(
+                        GeneratedFor.class, "GF",
                         input1, "A1",
                         input2, "A2",
                         BundleWrapper.class, "BW",
@@ -157,6 +165,7 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T {",
                         "",
+                        "   @$GF($A1.class)",
                         "   public static Intent for$A1(Context context, int number) {",
                         "       Intent intent = new Intent(context, $A1.class);",
                         "       $BW extras = new $BW();",
@@ -165,10 +174,12 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($A1.class)",
                         "   public static void start$A1(Context context, int number) {",
                         "       context.startActivity(for$A1(context, number));",
                         "   }",
                         "",
+                        "   @$GF($A2.class)",
                         "   public static Intent for$A2(Context context, String text, boolean flag, double number) {",
                         "       Intent intent = new Intent(context, $A2.class);",
                         "       $BW extras = new $BW();",
@@ -179,6 +190,7 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($A2.class)",
                         "   public static void start$A2(Context context, String text, boolean flag, double number) {",
                         "       context.startActivity(for$A2(context, text, flag, number));",
                         "   }",
@@ -222,6 +234,7 @@ public final class IntentManagerTest extends BaseTest {
 
         JavaFileObject expected = generatedFile("blade", "I")
                 .imports(
+                        GeneratedFor.class, "GF",
                         base, "B",
                         activity, "A",
                         BundleWrapper.class, "BW",
@@ -232,6 +245,7 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T {",
                         "",
+                        "   @$GF($B.class)",
                         "   public static Intent for$B(Context context, int number) {",
                         "       Intent intent = new Intent(context, $B.class);",
                         "       $BW extras = new $BW();",
@@ -240,10 +254,12 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($B.class)",
                         "   public static void start$B(Context context, int number) {",
                         "       context.startActivity(for$B(context, number));",
                         "   }",
                         "",
+                        "   @$GF($A.class)",
                         "   public static Intent for$A(Context context, int number, String text) {",
                         "       Intent intent = new Intent(context, $A.class);",
                         "       $BW extras = new $BW();",
@@ -253,6 +269,7 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($A.class)",
                         "   public static void start$A(Context context, int number, String text) {",
                         "       context.startActivity(for$A(context, number, text));",
                         "   }",
@@ -296,6 +313,7 @@ public final class IntentManagerTest extends BaseTest {
 
         JavaFileObject expected = generatedFile("blade", "I")
                 .imports(
+                        GeneratedFor.class, "GF",
                         activity, "A",
                         BundleWrapper.class, "BW",
                         String.class,
@@ -305,6 +323,7 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T {",
                         "",
+                        "   @$GF($A.class)",
                         "   public static Intent for$A(Context context, int number, String text) {",
                         "       Intent intent = new Intent(context, $A.class);",
                         "       $BW extras = new $BW();",
@@ -314,6 +333,7 @@ public final class IntentManagerTest extends BaseTest {
                         "       return intent;",
                         "   }",
                         "",
+                        "   @$GF($A.class)",
                         "   public static void start$A(Context context, int number, String text) {",
                         "       context.startActivity(for$A(context, number, text));",
                         "   }",
