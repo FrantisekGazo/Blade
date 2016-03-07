@@ -6,13 +6,14 @@ Android library for boilerplate destruction - *"Just code what is worth coding"*
 * Generated code is fully traceable.
 * Everything is generated during compile time.
 * No reflection used!
+* Consists of modules.
 
 # Usage
-Available annotations:
-* [@Arg](https://github.com/FrantisekGazo/Blade#arg)
-* [@Extra](https://github.com/FrantisekGazo/Blade#extra)
-* [@State](https://github.com/FrantisekGazo/Blade#state)
-* [@Presenter](https://github.com/FrantisekGazo/Blade#presenter)
+This library is divided into several **modules**. Each module provides different annotation and support classes:
+* **arg** provides [@Arg](https://github.com/FrantisekGazo/Blade#arg)
+* **extra** provides [@Extra](https://github.com/FrantisekGazo/Blade#extra)
+* **state** provides [@State](https://github.com/FrantisekGazo/Blade#state)
+* **mvp** provides [@Presenter](https://github.com/FrantisekGazo/Blade#presenter)
 
 Special annotation:
 * [@Blade](https://github.com/FrantisekGazo/Blade#blade)
