@@ -1,3 +1,5 @@
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Blade-green.svg?style=true)](https://android-arsenal.com/details/1/3280)
+
 ![logo](website/static/logo_small.png)
 ----------------------------
 Android library for boilerplate destruction - *"Just code what is worth coding"*
