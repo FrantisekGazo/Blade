@@ -9,13 +9,11 @@ buildscript {
         }
 
         classpath 'com.android.tools.build:gradle:2.0.0-beta6'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-        classpath 'eu.f3rog.blade:plugin:2.0.0-beta4'
+        classpath 'eu.f3rog.blade:plugin:2.0.1'
     }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'blade'
 
 android {

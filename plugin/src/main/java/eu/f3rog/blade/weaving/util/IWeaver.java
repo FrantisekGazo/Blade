@@ -1,19 +1,19 @@
 package eu.f3rog.blade.weaving.util;
 
-import java.io.File;
-
-import javassist.build.IClassTransformer;
+import javassist.CtClass;
 
 /**
- * Interface {@link IWeaver} adds method for setting destination directory
- * of transformed classes to {@link IClassTransformer}.
+ * Interface {@link IWeaver} used for bytecode weaving.
  *
  * @author FrantisekGazo
- * @version 2015-11-08
+ * @version 2016-03-19
  */
-public interface IWeaver extends IClassTransformer {
+public interface IWeaver {
 
-    void setDestinationDirectory(File dst);
+    /**
+     * Weave given helper class into given class.
+     */
+    void weave(CtClass helperClass, CtClass intoClass);
 
 }
 

@@ -3,7 +3,6 @@ package eu.f3rog.blade.sample.mvp;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,7 +40,7 @@ public class MyPresenterTest {
     public void setup() {
     }
 
-    @Test
+    //@Test
     public void test() throws InterruptedException {
         DataPresenter presenter = new DataPresenter();
         MockDataView view = new MockDataView();
