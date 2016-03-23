@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-Version 2.0.1-beta1 *(?)*
--------------------------
+Version 2.1.0 *(2016-03-23)*
+----------------------------
 
  * Optimization: Used google's **Transform API** for bytecode weaving.
  * Optimization: **APT** plugin is automatically applied.

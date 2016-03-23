@@ -320,7 +320,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.3.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:2.0.0'
+        classpath 'eu.f3rog.blade:plugin:2.1.0'
     }
 }
 
@@ -343,3 +343,7 @@ And create `blade.json` file in application directory with Blade modules you nee
 ```
 
 If you do not provide `blade.json` file, all Blade modules will be used.
+
+### NOTE:
+
+This library uses `com.neenbedankt.android-apt` plugin. You **don't** need to apply it explicitly.
