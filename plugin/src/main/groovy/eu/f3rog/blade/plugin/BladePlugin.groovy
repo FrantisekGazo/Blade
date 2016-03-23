@@ -1,75 +1,93 @@
 package eu.f3rog.blade.plugin
 
-import eu.f3rog.blade.plugin.util.AWeavingPlugin
-import eu.f3rog.blade.weaving.BladeWeaver
-import eu.f3rog.blade.weaving.util.IWeaver
+import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.LibraryPlugin
+import com.neenbedankt.gradle.androidapt.AndroidAptPlugin
 import groovy.json.JsonSlurper
+import org.gradle.api.GradleException
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-/**
- * Class {@link BladePlugin} adds dependencies to gradle project and applies Bytecode Weaving.
- *
- * @author FrantisekGazo
- * @version 2015-11-09
- */
-public class BladePlugin extends AWeavingPlugin {
+class BladePlugin implements Plugin<Project> {
 
     private static class BladeConfig {
-        boolean debug = false;
-        String[] modules = ["arg", "extra", "state", "mvp"];
+
+        // non-debug by default
+        boolean debug = false
+        // include all modules by default
+        String[] modules = LIB_MODULES
+
     }
 
-    public static final String PLUGIN_NAME = "blade"
-    public static final String PACKAGE_NAME = "eu.f3rog.blade"
-    public static final String CONFIG_FILE_NAME = "blade.json"
-    public static final String VERSION = "2.0.0"
+    public static final String LIB_CONFIG_FILE_NAME = "blade.json"
+    public static final String LIB_PACKAGE_NAME = "eu.f3rog.blade"
+    public static final String[] LIB_MODULES = ["arg", "extra", "state", "mvp"]
+    public static final String LIB_VERSION = "2.0.1-beta2"
 
     private BladeConfig mConfig;
 
     @Override
-    public IWeaver[] getTransformers(Project project) {
-        return [
-                new BladeWeaver(mConfig.debug)
-        ]
-    }
+    void apply(Project project) {
+        // Make sure the project is either an Android application or library
+        boolean isAndroidApp = project.plugins.withType(AppPlugin)
+        boolean isAndroidLib = project.plugins.withType(LibraryPlugin)
+        if (!isAndroidApp && !isAndroidLib) {
+            throw new GradleException("'com.android.application' or 'com.android.library' plugin required.")
+        }
 
-    @Override
-    protected void configure(Project project) {
-        parseConfiguration(project)
+        // check gradle plugin
+        if (!isTransformAvailable()) {
+            throw new GradleException("Blade plugin only supports android gradle plugin 1.5.0 or later.")
+        }
 
-        project.android {
-            packagingOptions {
-                exclude 'META-INF/services/javax.annotation.processing.Processor'
+        prepareConfig(project)
+
+        boolean isKotlinProject = project.plugins.find {
+            it.getClass().name == "org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper"
+        }
+
+        if (!isKotlinProject) {
+            project.plugins.apply(AndroidAptPlugin)
+
+            project.android {
+                packagingOptions {
+                    exclude 'META-INF/services/javax.annotation.processing.Processor'
+                }
             }
         }
-        project.dependencies {
-            // library
-            compile "$PACKAGE_NAME:core:$VERSION"
 
-            for (String moduleName : mConfig.modules) {
-                compile "$PACKAGE_NAME:$moduleName:$VERSION"
-                apt "$PACKAGE_NAME:$moduleName-compiler:$VERSION"
-            }
+        project.repositories.add(project.getRepositories().jcenter())
+
+        // add dependencies
+        String apt = isKotlinProject ? "kapt" : "apt"
+        // core
+        project.dependencies.add("compile", "$LIB_PACKAGE_NAME:core:$LIB_VERSION")
+        // modules
+        for (String moduleName : mConfig.modules) {
+            project.dependencies.add("compile", "$LIB_PACKAGE_NAME:$moduleName:$LIB_VERSION")
+            project.dependencies.add(apt, "$LIB_PACKAGE_NAME:$moduleName-compiler:$LIB_VERSION")
+        }
+
+        // apply bytecode weaving via Transform API
+        project.android.registerTransform(new BladeTransformer(mConfig.debug))
+    }
+
+    private static boolean isTransformAvailable() {
+        try {
+            Class.forName('com.android.build.api.transform.Transform')
+            return true
+        } catch (Exception ignored) {
+            return false
         }
     }
 
-    @Override
-    protected Class getPluginExtension() {
-        return BladeExtension.class
-    }
+    private void prepareConfig(Project project) {
+        mConfig = new BladeConfig()
 
-    @Override
-    protected String getExtension() {
-        return PLUGIN_NAME
-    }
-
-    private void parseConfiguration(Project project) {
-        mConfig = new BladeConfig();
-
-        File configFile = new File(project.projectDir.getAbsolutePath() + File.separator + CONFIG_FILE_NAME)
+        File configFile = new File(project.projectDir.getAbsolutePath() + File.separator + LIB_CONFIG_FILE_NAME)
 
         if (!configFile.exists()) {
-            return;
+            return
         }
 
         Map json = new JsonSlurper().parseText(configFile.text)
@@ -78,15 +96,14 @@ public class BladePlugin extends AWeavingPlugin {
             switch (key) {
                 case "debug":
                     mConfig.debug = value
-                    break;
+                    break
                 case "modules":
                     mConfig.modules = value
-                    break;
+                    break
                 default:
-                    throw new IllegalStateException("'$key' is not supported in $CONFIG_FILE_NAME.")
+                    throw new IllegalStateException("'$key' is not supported in $LIB_CONFIG_FILE_NAME.")
             }
         }
 
     }
-
 }

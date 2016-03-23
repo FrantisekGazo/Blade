@@ -343,9 +343,3 @@ And create `blade.json` file in application directory with Blade modules you nee
 ```
 
 If you do not provide `blade.json` file, all Blade modules will be used.
-
-This library uses Annotation Processor so you have to apply also this Gradle plugin, if not already used:
-```Gradle
-classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-apply plugin: 'com.neenbedankt.android-apt'
-```

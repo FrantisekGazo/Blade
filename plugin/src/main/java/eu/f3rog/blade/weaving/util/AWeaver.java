@@ -2,17 +2,14 @@ package eu.f3rog.blade.weaving.util;
 
 import eu.f3rog.afterburner.AfterBurner;
 
-import java.io.File;
-
 /**
- * Class {@link AWeaver} is used for injecting classes with bytecode dependent on other application classes.
+ * Class {@link AWeaver} is used for bytecode weaving.
  *
  * @author FrantisekGazo
- * @version 2015-11-04
+ * @version 2016-03-19
  */
 public abstract class AWeaver implements IWeaver {
 
-    private String mDestinationDir;
     private boolean mDebug;
     private AfterBurner mAfterBurner;
 
@@ -26,21 +23,12 @@ public abstract class AWeaver implements IWeaver {
         this.mAfterBurner = new AfterBurner();
     }
 
-    public boolean isDebug() {
+    protected boolean isDebug() {
         return mDebug;
     }
 
-    public AfterBurner getAfterBurner() {
+    protected AfterBurner getAfterBurner() {
         return mAfterBurner;
-    }
-
-    @Override
-    public final void setDestinationDirectory(File dst) {
-        mDestinationDir = dst.toString();
-    }
-
-    public String getDestinationDir() {
-        return mDestinationDir;
     }
 
     protected void log(String msg, Object... args) {

@@ -11,7 +11,6 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.NotFoundException;
-import javassist.build.JavassistBuildException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.AnnotationMemberValue;
@@ -38,50 +37,37 @@ public class BladeWeaver extends AWeaver {
     }
 
     @Override
-    public boolean shouldTransform(CtClass candidateClass) throws JavassistBuildException {
+    public void weave(CtClass helperClass, CtClass intoClass) {
+        log("Applying transformation to %s", intoClass.getName());
         try {
-            //log("needTransformation ? %s", candidateClass.getName());
-            return hasHelper(candidateClass);
-        } catch (Exception e) {
-            log("needTransformation failed on class %s", candidateClass.getName());
-            e.printStackTrace();
-            throw new JavassistBuildException(e);
-        }
-    }
-
-    @Override
-    public void applyTransformations(CtClass classToTransform) throws JavassistBuildException {
-        log("Applying transformation to %s", classToTransform.getName());
-        try {
-            ClassPool classPool = classToTransform.getClassPool();
-            CtClass helper = getHelper(classToTransform);
+            ClassPool classPool = intoClass.getClassPool();
 
             // weave field metadata
-            for (CtField field : helper.getDeclaredFields()) {
+            for (CtField field : helperClass.getDeclaredFields()) {
                 log("field named \"%s\"", field.getName());
 
                 Metadata[] metadata = loadWeaveMetadata(classPool, field);
-                weave(metadata, classToTransform, field);
+                weave(metadata, intoClass, field);
             }
 
             // weave method metadata
-            for (CtMethod method : helper.getDeclaredMethods()) {
+            for (CtMethod method : helperClass.getDeclaredMethods()) {
                 log("method named \"%s\"", method.getName());
 
                 Metadata[] metadata = loadWeaveMetadata(classPool, method);
-                weave(metadata, classToTransform, null);
+                weave(metadata, intoClass, null);
             }
 
             // weave interfaces
-            for (CtClass interfaceClass : helper.getInterfaces()) {
-                Interfaces.weaveInterface(interfaceClass, classToTransform, getAfterBurner());
+            for (CtClass interfaceClass : helperClass.getInterfaces()) {
+                Interfaces.weaveInterface(interfaceClass, intoClass, getAfterBurner());
             }
 
             log("Transformation done");
         } catch (Exception e) {
             log("Transformation failed!");
             e.printStackTrace();
-            throw new JavassistBuildException(e);
+            throw new IllegalStateException(e);
         }
     }
 
