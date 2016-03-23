@@ -11,9 +11,6 @@ dependencies {
 
     /* Gradle plugin */
     compile 'com.android.tools.build:gradle:1.5.0'
-    /* Transform API */
-    compile 'com.android.tools.build:transform-api:1.5.0'
-//    compile 'com.android.tools.build:transform-api:2.0.0-alpha3'
     /* Javassist */
     compile 'org.javassist:javassist:3.20.0-GA'
     /* Logging */
