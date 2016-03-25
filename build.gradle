@@ -42,39 +42,42 @@ allprojects {
         */
         tasks.withType(JavaCompile) { options.fork = true }
 
-        ext.priv = parseConfig(rootProject.file('private.properties'))
+        File privateProperties = rootProject.file('private.properties')
+        if (privateProperties.exists()) {
+            ext.priv = parseConfig(privateProperties)
 
-        task srcJar(type: Jar) {
-            from sourceSets.main.allJava
-            classifier "sources"
-        }
+            task srcJar(type: Jar) {
+                from sourceSets.main.allJava
+                classifier "sources"
+            }
 
-        task docJar(type: Jar) {
-            classifier "javadoc"
-        }
+            task docJar(type: Jar) {
+                classifier "javadoc"
+            }
 
-        artifacts {
-            archives srcJar
-            archives docJar
-        }
+            artifacts {
+                archives srcJar
+                archives docJar
+            }
 
-        bintray {
-            dryRun false
+            bintray {
+                dryRun false
 
-            user = priv.BINTRAY_USER
-            key = priv.BINTRAY_KEY
+                user = priv.BINTRAY_USER
+                key = priv.BINTRAY_KEY
 
-            configurations = ['archives']
+                configurations = ['archives']
 
-            pkg {
-                repo = LIB_REPO_NAME
-                name = LIB_PACKAGE_NAME
-                licenses = LIB_LICENSES
-                vcsUrl = LIB_GIT_URL
+                pkg {
+                    repo = LIB_REPO_NAME
+                    name = LIB_PACKAGE_NAME
+                    licenses = LIB_LICENSES
+                    vcsUrl = LIB_GIT_URL
 
-                version {
-                    name = LIB_VERSION
-                    desc = LIB_VERSION_DESC
+                    version {
+                        name = LIB_VERSION
+                        desc = LIB_VERSION_DESC
+                    }
                 }
             }
         }
