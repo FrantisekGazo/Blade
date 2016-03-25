@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/FrantisekGazo/Blade.svg?branch=master)](https://travis-ci.org/FrantisekGazo/Blade)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Blade-green.svg?style=true)](https://android-arsenal.com/details/1/3280)
 
 ![logo](website/static/logo_small.png)
