@@ -3,8 +3,8 @@
   "modules": [
     "arg",
     "extra",
-    "state",
     "mvp",
-    "parcel"
+    "parcel",
+    "state"
   ]
 }
