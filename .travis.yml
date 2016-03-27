@@ -2,6 +2,11 @@ language : android
 
 jdk: oraclejdk8
 
+branches:
+  only:
+    - master
+    - develop
+
 android:
  components:
     # Uncomment the lines below if you want to
@@ -31,4 +36,4 @@ install:
     - ./gradlew install
 
 script:
-    - ./gradlew test
+    - ./gradlew :core-compiler:test
