@@ -29,7 +29,8 @@ public class BladeProcessor extends BaseProcessor {
         ARG("eu.f3rog.blade.compiler.arg.ArgProcessorModule"),
         EXTRA("eu.f3rog.blade.compiler.extra.ExtraProcessorModule"),
         STATE("eu.f3rog.blade.compiler.state.StateProcessorModule"),
-        MVP("eu.f3rog.blade.compiler.mvp.MvpProcessorModule");
+        MVP("eu.f3rog.blade.compiler.mvp.MvpProcessorModule"),
+        PARCEL("eu.f3rog.blade.compiler.parcel.ParcelProcessorModule");
 
         private String mPath;
 
