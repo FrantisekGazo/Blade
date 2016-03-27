@@ -135,7 +135,7 @@ public class ProcessorUtils {
         return StringUtils.startLowerCase(className.simpleName()).replaceAll("_", "");
     }
 
-    private static boolean hasSomeModifier(Element e, Modifier... modifiers) {
+    public static boolean hasSomeModifier(Element e, Modifier... modifiers) {
         if (e == null) {
             throw new IllegalStateException("Element cannot be null!");
         }
@@ -188,27 +188,33 @@ public class ProcessorUtils {
     }
 
     private static TypeName getSuperType(TypeMirror inspectedType, TypeName lookupType) {
+        TypeName tn = isSameType(inspectedType, lookupType);
+        if (tn != null) {
+            return tn;
+        }
+
         List<? extends TypeMirror> superTypes = ProcessorUtils.getTypeUtils().directSupertypes(inspectedType);
 
         for (TypeMirror typeMirror : superTypes) {
-            TypeName tn = ClassName.get(typeMirror);
-            if (tn instanceof ParameterizedTypeName) {
-                ParameterizedTypeName paramTypeName = (ParameterizedTypeName) tn;
-                if (paramTypeName.rawType.equals(lookupType)) {
-                    return paramTypeName;
-                }
-            } else if (tn.equals(lookupType)) {
-                return tn;
-            }
-        }
-
-        for (TypeMirror typeMirror : superTypes) {
-            TypeName tn = getSuperType(typeMirror, lookupType);
+            tn = getSuperType(typeMirror, lookupType);
             if (tn != null) {
                 return tn;
             }
         }
 
+        return null;
+    }
+
+    private static TypeName isSameType(TypeMirror typeMirror, TypeName lookupType) {
+        TypeName tn = ClassName.get(typeMirror);
+        if (tn instanceof ParameterizedTypeName) {
+            ParameterizedTypeName paramTypeName = (ParameterizedTypeName) tn;
+            if (paramTypeName.rawType.equals(lookupType)) {
+                return paramTypeName;
+            }
+        } else if (tn.equals(lookupType)) {
+            return tn;
+        }
         return null;
     }
 

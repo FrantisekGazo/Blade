@@ -20,6 +20,7 @@
         <activity android:name=".extra.ExtraTextActivity"/>
         <activity android:name=".state.TestStateActivity"/>
         <activity android:name=".mvp.TestMvpActivity"/>
+        <activity android:name=".parcel.TestParcelActivity"/>
     </application>
 
 </manifest>

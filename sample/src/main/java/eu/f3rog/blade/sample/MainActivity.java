@@ -29,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
         I.startTestMvpActivity(this);
     }
 
+    @OnClick(R.id.btn_go_parcel)
+    public void gotoParcel() {
+        I.startTestParcelActivity(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
