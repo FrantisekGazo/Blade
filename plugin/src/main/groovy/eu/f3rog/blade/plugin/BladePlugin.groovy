@@ -19,6 +19,8 @@ class BladePlugin implements Plugin<Project> {
 
     }
 
+    public static final String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
+
     public static final String LIB_CONFIG_FILE_NAME = "blade.json"
     public static final String LIB_PACKAGE_NAME = "eu.f3rog.blade"
     public static final String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
@@ -32,7 +34,7 @@ class BladePlugin implements Plugin<Project> {
         boolean isAndroidApp = project.plugins.withType(AppPlugin)
         boolean isAndroidLib = project.plugins.withType(LibraryPlugin)
         if (!isAndroidApp && !isAndroidLib) {
-            throw new GradleException("'com.android.application' or 'com.android.library' plugin required.")
+            throw new GradleException(ANDROID_PLUGIN_REQUIRED)
         }
 
         // check gradle plugin
