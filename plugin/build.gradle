@@ -24,6 +24,7 @@ dependencies {
     compile project(':core')
 
     /* TEST */
+    // use gradle 2.9 (2.10 is throwing exceptions -> https://discuss.gradle.org/t/nosuchmethoderror-in-testkit-after-2-9-2-10-transition/13505)
     testCompile gradleTestKit()
     testCompile 'junit:junit:4.12'
     testCompile 'org.codehaus.groovy:groovy-all:2.4.4'
