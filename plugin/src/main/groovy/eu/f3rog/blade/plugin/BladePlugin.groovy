@@ -18,6 +18,8 @@ class BladePlugin implements Plugin<Project> {
         String[] modules = LIB_MODULES
 
     }
+    public static final String GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later."
+    public static final String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
 
     public static final String LIB_CONFIG_FILE_NAME = "blade.json"
     public static final String LIB_PACKAGE_NAME = "eu.f3rog.blade"
@@ -32,12 +34,12 @@ class BladePlugin implements Plugin<Project> {
         boolean isAndroidApp = project.plugins.withType(AppPlugin)
         boolean isAndroidLib = project.plugins.withType(LibraryPlugin)
         if (!isAndroidApp && !isAndroidLib) {
-            throw new GradleException("'com.android.application' or 'com.android.library' plugin required.")
+            throw new GradleException(ANDROID_PLUGIN_REQUIRED)
         }
 
         // check gradle plugin
         if (!isTransformAvailable()) {
-            throw new GradleException("Blade plugin only supports android gradle plugin 1.5.0 or later.")
+            throw new GradleException(GRADLE_TOOLS_1_5_0_REQUIRED)
         }
 
         prepareConfig(project)

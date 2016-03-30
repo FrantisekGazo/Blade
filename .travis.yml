@@ -37,3 +37,4 @@ install:
 
 script:
     - ./gradlew :core-compiler:test
+    - ./gradlew :plugin:test
