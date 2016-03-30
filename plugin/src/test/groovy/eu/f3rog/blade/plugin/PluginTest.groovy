@@ -3,7 +3,6 @@ package eu.f3rog.blade.plugin
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -12,124 +11,23 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 class PluginTest extends Specification {
 
     @Rule
-    final TemporaryFolder testProjectDir = new TemporaryFolder()
+    final ProjectFolder testProjectDir = new ProjectFolder()
 
-    File buildFile
+    private String bladeVersion
 
     def setup() {
-        buildFile = testProjectDir.newFile('build.gradle')
-        testProjectDir.newFolder("src", "main")
-        testProjectDir.newFile('src/main/AndroidManifest.xml') << """<?xml version="1.0" encoding="utf-8"?>
-            <manifest package="com.example"
-                      xmlns:android="http://schemas.android.com/apk/res/android">
-
-                <application>
-                    <activity android:name=".MainActivity">
-                        <intent-filter>
-                            <action android:name="android.intent.action.MAIN"/>
-
-                            <category android:name="android.intent.category.LAUNCHER"/>
-                        </intent-filter>
-                    </activity>
-                </application>
-
-            </manifest>
-        """
-        testProjectDir.newFolder("src", "main", "java", "com", "example")
-        testProjectDir.newFile('src/main/java/com/example/MainActivity.java') << """
-            package com.example;
-
-            import android.app.Activity;
-
-            public class MainActivity extends Activity {}
-        """
+        bladeVersion = BladePlugin.LIB_VERSION
     }
 
     @Unroll
-    def "successfully build -> Blade #bladeVersion"() {
+    def "fail without android plugin - for android gradle tools #gradleToolsVersion"() {
         given:
-        buildFile << """
-            buildscript {
-                dependencies {
-                    repositories {
-                        mavenCentral()
-                        jcenter()
-
-                        // NOTE: This is only needed when developing the plugin!
-                        mavenLocal()
-                    }
-
-                    classpath 'com.android.tools.build:gradle:1.5.0'
-                    classpath 'eu.f3rog.blade:plugin:${bladeVersion}'
-                }
-            }
-
-            apply plugin: 'com.android.application'
-            apply plugin: 'blade'
-
-            android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
-
-                defaultConfig {
-                    applicationId "com.example"
-                    minSdkVersion 14
-                    targetSdkVersion 23
-                    versionCode 1
-                    versionName "1.0"
-                }
-                buildTypes {
-                    release {
-                        minifyEnabled false
-                        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-                    }
-                }
-            }
-
-            dependencies {
-                compile fileTree(dir: 'libs', include: ['*.jar'])
-            }
-        """
-
-        when:
-        BuildResult result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withArguments(':build')
-                .build()
-
-        then:
-        result.task(":build").outcome == SUCCESS
-
-        where:
-        bladeVersion << ['2.1.0']
-    }
-
-    @Unroll
-    def "fail without android plugin -> Blade #bladeVersion"() {
-        given:
-        buildFile << """
-            buildscript {
-                dependencies {
-                    repositories {
-                        mavenCentral()
-                        jcenter()
-
-                        // NOTE: This is only needed when developing the plugin!
-                        mavenLocal()
-                    }
-
-                    classpath 'com.android.tools.build:gradle:1.5.0'
-                    classpath 'eu.f3rog.blade:plugin:${bladeVersion}'
-                }
-            }
-
-            apply plugin: 'blade'
-        """
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, false)
 
         when:
         Exception e = null
         try {
-            BuildResult result = GradleRunner.create()
+            GradleRunner.create()
                     .withProjectDir(testProjectDir.root)
                     .withArguments(':build')
                     .build()
@@ -139,9 +37,64 @@ class PluginTest extends Specification {
 
         then:
         e != null
-        e.getMessage().contains("'com.android.application' or 'com.android.library' plugin required.")
+        e.getMessage().contains(BladePlugin.ANDROID_PLUGIN_REQUIRED)
 
         where:
-        bladeVersion << ['2.1.0']
+        gradleToolsVersion << ['1.5.0', '2.0.0-beta6']
+    }
+
+    @Unroll
+    def "add correct dependencies - gradleToolsVersion #gradleToolsVersion, gradleVersion #gradleVersion"() {
+        given:
+        testProjectDir.addBladeFile(bladeModules)
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true)
+
+        when:
+        BuildResult result = GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir.root)
+                .withArguments('dependencies')
+                .build()
+
+        then:
+        // check Blade core dependencies
+        result.output.contains("eu.f3rog.blade:core:${bladeVersion}")
+        result.output.contains("eu.f3rog.blade:core-compiler:${bladeVersion}")
+        // check other Blade module dependencies
+        for (module in BladePlugin.LIB_MODULES) {
+            result.output.contains("eu.f3rog.blade:${module}:${bladeVersion}") == bladeModules.contains(module)
+        }
+        // check plugins
+        result.output.contains("com.neenbedankt.gradle.androidapt.AndroidAptPlugin")
+        result.output.contains("eu.f3rog.blade.plugin.BladePlugin")
+
+        where:
+        gradleToolsVersion << ['1.5.0', '2.0.0-beta6']
+        gradleVersion << ['2.9', '2.10']
+        bladeModules << [Arrays.asList("extra", "mvp", "state"), Arrays.asList("arg")]
+    }
+
+    @Unroll
+    def "build successfully - for android gradle tools #gradleToolsVersion"() {
+        given:
+        testProjectDir.addBladeFile(bladeModules)
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true)
+
+        when:
+        BuildResult result = GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir.root)
+                .withArguments(':build')
+                .build()
+
+        then:
+        result.task(":build").outcome == SUCCESS
+        result.task(":transformClassesWithBladeTransformerForDebug").outcome == SUCCESS
+        result.task(":transformClassesWithBladeTransformerForRelease").outcome == SUCCESS
+
+        where:
+        gradleToolsVersion << ['1.5.0', '2.0.0-beta6']
+        gradleVersion << ['2.9', '2.10']
+        bladeModules << [Arrays.asList("extra"), Arrays.asList("extra", "arg")]
     }
 }
