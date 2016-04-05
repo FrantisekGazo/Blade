@@ -1,3 +1,5 @@
+[![Gitter](https://badges.gitter.im/FrantisekGazo/Blade.svg)](https://gitter.im/FrantisekGazo/Blade?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 [![Build Status](https://travis-ci.org/FrantisekGazo/Blade.svg?branch=master)](https://travis-ci.org/FrantisekGazo/Blade)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Blade-green.svg?style=true)](https://android-arsenal.com/details/1/3280)
 
