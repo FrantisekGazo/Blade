@@ -1,6 +1,7 @@
 package eu.f3rog.blade.sample.parcel;
 
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -36,6 +37,8 @@ public class TestParcelActivity extends AppCompatActivity {
         data.inum = rand.nextInt(100);
         test(data);
 
+        test(new Data2());
+
         Data2 data2 = new Data2();
         data2.d = data;
         data2.number = rand.nextInt(100);
@@ -60,18 +63,24 @@ public class TestParcelActivity extends AppCompatActivity {
         test(data3);
     }
 
-    private void test(Parcelable p) {
-        mOutput.append("\n> Created new object " + p);
+    private void test(final Parcelable obj) {
+        mOutput.append("\n> Created new object " + obj);
 
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("data", p);
+        final Parcel p1 = Parcel.obtain();
+        p1.writeParcelable(obj, 0);
+        final byte[] bytes = p1.marshall();
+        p1.recycle();
         mOutput.append("\n> put in Bundle");
 
-        Parcelable p2 = bundle.getParcelable("data");
-        mOutput.append("\n> retrieved from Bundle -> object " + p2);
+        final Parcel p2 = Parcel.obtain();
+        p2.unmarshall(bytes, 0, bytes.length);
+        p2.setDataPosition(0);
+        final Parcelable result = p2.readParcelable(obj.getClass().getClassLoader());
+        p2.recycle();
+        mOutput.append("\n> retrieved from Bundle -> object " + result);
 
         mOutput.append("\n> Test ");
-        mOutput.append(p.equals(p2) ? "was SUCCESSFULL" : "FAILED");
+        mOutput.append(obj.equals(result) ? "was SUCCESSFULL" : "FAILED");
 
         mOutput.append("\n");
     }

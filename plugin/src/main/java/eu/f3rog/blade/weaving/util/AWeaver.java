@@ -32,9 +32,16 @@ public abstract class AWeaver implements IWeaver {
     }
 
     protected void log(String msg, Object... args) {
+        internalLog(msg, false, args);
+    }
+
+    protected void lognl(String msg, Object... args) {
+        internalLog(msg, true, args);
+    }
+
+    private void internalLog(String msg, boolean newLine, Object... args) {
         if (mDebug) {
-            String format = String.format("@ %s : %s\n", getClass().getSimpleName(), msg);
-            System.out.printf(format, args);
+            System.out.printf(msg + (newLine ? "\n" : ""), args);
         }
     }
 

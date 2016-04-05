@@ -121,6 +121,7 @@ public class ParcelHelperModule
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_WRITE_TO_PARCEL)
                 .addAnnotation(
                         WeaveBuilder.weave().method(METHOD_NAME_WRITE_TO_PARCEL, Parcel.class, int.class)
+                                .placed(WeaveBuilder.MethodWeaveType.AFTER_SUPER)
                                 .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_WRITE_TO_PARCEL)
                                 .build()
                 )

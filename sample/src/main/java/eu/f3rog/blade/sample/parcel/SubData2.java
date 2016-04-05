@@ -14,6 +14,7 @@ import java.util.Arrays;
 public class SubData2 extends Data2 {
 
     String[] stringArray;
+    int something;
 
     public SubData2() {
     }

@@ -55,12 +55,14 @@ public class BladeTransformer extends Transform {
                    boolean isIncremental)
             throws IOException, TransformException, InterruptedException {
 
+        log " * Bl@de >------------------------------------------"
+
         long tic = System.currentTimeMillis()
 
         BladeWeaver weaver = new BladeWeaver(mDebug);
 
         String path = getOutputDir(outputProvider).absolutePath
-        log "Output cath: ${path}"
+        log " * Output path: ${path}"
 
         // Find all the class names
         def inputClassNames = getClassNames(inputs)
@@ -69,7 +71,7 @@ public class BladeTransformer extends Transform {
 
         // Create and populate the Javassist class pool
         ClassPool classPool = createClassPool(inputs, referencedInputs)
-        log "ClassPool initialized with ${inputClassNames.size()} input classes and ${referencedClassNames.size()} reference classes"
+        log " * ClassPool initialized with ${inputClassNames.size()} input classes and ${referencedClassNames.size()} reference classes"
 
         // find all helper classes
         def allHelperClasses = inputClassNames
@@ -86,7 +88,7 @@ public class BladeTransformer extends Transform {
 
             CtClass intoClass = classPool.getCtClass(intoClassName)
 
-            log "Helper Class ${helperClass.getName()} for ${intoClass.getName()}"
+            log " * Weaving '${helperClass.getName()}' into '${intoClass.getName()}'"
 
             weaver.weave(helperClass, intoClass)
 
@@ -102,7 +104,9 @@ public class BladeTransformer extends Transform {
         }
 
         long toc = System.currentTimeMillis()
-        log "Blade Transform time: ${toc - tic} milliseconds"
+        log " * Blade Transform time: ${toc - tic} milliseconds"
+
+        log " * Bl@de <------------------------------------------"
     }
 
     /**
