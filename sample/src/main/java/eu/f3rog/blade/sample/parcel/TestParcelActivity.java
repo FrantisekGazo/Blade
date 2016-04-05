@@ -61,9 +61,21 @@ public class TestParcelActivity extends AppCompatActivity {
         }
         data3.stringArray = new String[]{"abc", "def"};
         test(data3);
+
+        IgnoreData ignoreData = new IgnoreData();
+        ignoreData.i = 123;
+        ignoreData.d = 2.2d;
+        test(ignoreData);
+
+        ignoreData.f = 1.1f;
+        test(ignoreData, false);
     }
 
     private void test(final Parcelable obj) {
+        test(obj, true);
+    }
+
+    private void test(final Parcelable obj, boolean equal) {
         mOutput.append("\n> Created new object " + obj);
 
         final Parcel p1 = Parcel.obtain();
@@ -79,8 +91,10 @@ public class TestParcelActivity extends AppCompatActivity {
         p2.recycle();
         mOutput.append("\n> retrieved from Bundle -> object " + result);
 
+        mOutput.append("\n> Objects should be ");
+        mOutput.append(equal ? "EQUAL" : "DIFFERENT");
         mOutput.append("\n> Test ");
-        mOutput.append(obj.equals(result) ? "was SUCCESSFULL" : "FAILED");
+        mOutput.append(equal == obj.equals(result) ? "was SUCCESSFULL" : "FAILED");
 
         mOutput.append("\n");
     }
