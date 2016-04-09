@@ -19,6 +19,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
+import blade.ParcelIgnore;
 import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
@@ -62,6 +63,11 @@ public class ParcelHelperModule
         for (Element ee : e.getEnclosedElements()) {
             if (ee.getKind() == ElementKind.FIELD) {
                 if (hasSomeModifier(ee, Modifier.STATIC, Modifier.PRIVATE, Modifier.PROTECTED)) {
+                    continue;
+                }
+
+                // do not process if ignored
+                if (ee.getAnnotation(ParcelIgnore.class) != null) {
                     continue;
                 }
 
@@ -121,6 +127,7 @@ public class ParcelHelperModule
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_WRITE_TO_PARCEL)
                 .addAnnotation(
                         WeaveBuilder.weave().method(METHOD_NAME_WRITE_TO_PARCEL, Parcel.class, int.class)
+                                .placed(WeaveBuilder.MethodWeaveType.AFTER_SUPER)
                                 .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_WRITE_TO_PARCEL)
                                 .build()
                 )

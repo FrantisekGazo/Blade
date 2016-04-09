@@ -22,6 +22,7 @@ dependencies {
     compile 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 
     compile project(':core')
+    compile project(':core-compiler')
 
     /* TEST */
     // use gradle 2.9 (2.10 is throwing exceptions -> https://discuss.gradle.org/t/nosuchmethoderror-in-testkit-after-2-9-2-10-transition/13505)
