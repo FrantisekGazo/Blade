@@ -32,11 +32,8 @@ public enum GCN {
             return mName;
         }
     }
-    public String formatName(ClassName arg) {
-        if (arg != null) {
-            return String.format(mName, arg.simpleName());
-        } else {
-            return mName;
-        }
+
+    public String formatName(final ClassName arg) {
+        return String.format(mName, NameUtils.getNestedName(arg));
     }
 }

@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -62,8 +61,8 @@ public class ArgHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addMethodToFragmentFactory(processingEnvironment, builder);
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
+        addMethodToFragmentFactory(builder);
         if (!mArgs.isEmpty()) {
             // add inject() only if there is something
             addInjectMethod(builder);
@@ -93,10 +92,10 @@ public class ArgHelperModule extends BaseHelperModule {
         builder.getBuilder().addMethod(method.build());
     }
 
-    private void addMethodToFragmentFactory(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToFragmentFactory(HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(FragmentFactoryBuilder.class)
-                .addMethodFor(processingEnvironment, builder.getTypeElement());
+                .addMethodFor(builder.getTypeElement());
     }
 
 }

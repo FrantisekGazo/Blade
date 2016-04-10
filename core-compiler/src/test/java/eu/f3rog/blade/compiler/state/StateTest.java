@@ -110,7 +110,7 @@ public final class StateTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
+                        "   @Weave(into = \"^onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
                         "   public static void saveState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
@@ -120,7 +120,7 @@ public final class StateTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
-                        "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.restoreState(this, $1);\")",
+                        "   @Weave(into = \"^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.restoreState(this, $1);\")",
                         "   public static void restoreState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",
@@ -168,7 +168,7 @@ public final class StateTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"saveState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.saveState(this, (android.os.Bundle) $1);\")",
+                        "   @Weave(into = \"^saveState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.saveState(this, (android.os.Bundle) $1);\")",
                         "   public static void saveState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
@@ -178,7 +178,7 @@ public final class StateTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
-                        "   @Weave(into = \"restoreState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.restoreState(this, (android.os.Bundle) $1);\")",
+                        "   @Weave(into = \"^restoreState\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.restoreState(this, (android.os.Bundle) $1);\")",
                         "   public static void restoreState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",
@@ -227,7 +227,7 @@ public final class StateTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"onSaveInstanceState\", ",
+                        "   @Weave(into = \"^onSaveInstanceState\", ",
                         "       statement = \"android.os.Bundle bundle = new android.os.Bundle();bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());com.example.$T.saveState(this, bundle);return bundle;\")",
                         "   public static void saveState($I target, Bundle state) {",
                         "       if (state == null) {",
@@ -238,8 +238,60 @@ public final class StateTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
-                        "   @Weave(into = \"onRestoreInstanceState\", args = {\"android.os.Parcelable\"}, ",
+                        "   @Weave(into = \"^onRestoreInstanceState\", args = {\"android.os.Parcelable\"}, ",
                         "       statement = \"if ($1 instanceof android.os.Bundle) {android.os.Bundle bundle = (android.os.Bundle) $1;com.example.$T.restoreState(this, bundle);super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));} else {super.onRestoreInstanceState($1);}return;\")",
+                        "   public static void restoreState($I target, Bundle state) {",
+                        "       if (state == null) {",
+                        "           return;",
+                        "       }",
+                        "       BundleWrapper bundleWrapper = BundleWrapper.from(state);",
+                        "       target.mText = bundleWrapper.get(\"<Stateful-mText>\", target.mText);",
+                        "       target.mNumber = bundleWrapper.get(\"<Stateful-mNumber>\", target.mNumber);",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void other() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        State.class, "S"
+                )
+                .body(
+                        "public class $T {",
+                        "",
+                        "   @$S String mText;",
+                        "   @$S int mNumber;",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyClass_Helper")
+                .imports(
+                        input, "I",
+                        Bundle.class,
+                        BundleWrapper.class,
+                        IllegalArgumentException.class, "E"
+                )
+                .body(
+                        "abstract class $T {",
+                        "",
+                        "   public static void saveState($I target, Bundle state) {",
+                        "       if (state == null) {",
+                        "           throw new $E(\"State cannot be null!\");",
+                        "       }",
+                        "       BundleWrapper bundleWrapper = BundleWrapper.from(state);",
+                        "       bundleWrapper.put(\"<Stateful-mText>\", target.mText);",
+                        "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
+                        "   }",
+                        "",
                         "   public static void restoreState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",

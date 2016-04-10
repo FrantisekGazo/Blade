@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.builder.helper;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -31,7 +30,7 @@ public interface IHelperModule {
      *
      * @return <code>true</code> if something was added to the helper builder.
      */
-    boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError;
+    boolean implement(HelperClassBuilder builder) throws ProcessorError;
 
 }
 

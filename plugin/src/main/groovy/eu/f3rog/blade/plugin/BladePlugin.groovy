@@ -16,15 +16,15 @@ class BladePlugin implements Plugin<Project> {
         boolean debug = false
         // include all modules by default
         String[] modules = LIB_MODULES
-
     }
-    public static final String GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later."
-    public static final String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
 
-    public static final String LIB_CONFIG_FILE_NAME = "blade.json"
-    public static final String LIB_PACKAGE_NAME = "eu.f3rog.blade"
-    public static final String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
-    public static final String LIB_VERSION = "2.2.0-beta3"
+    static String GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later."
+    static String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
+
+    static String LIB_GROUP_ID = "eu.f3rog.blade"
+    static String LIB_VERSION = "2.2.0-beta3"
+    static String LIB_CONFIG_FILE_NAME = "blade.json"
+    static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
     private BladeConfig mConfig;
 
@@ -63,11 +63,11 @@ class BladePlugin implements Plugin<Project> {
         // add dependencies
         String apt = isKotlinProject ? "kapt" : "apt"
         // core
-        project.dependencies.add("compile", "$LIB_PACKAGE_NAME:core:$LIB_VERSION")
+        project.dependencies.add("compile", "$LIB_GROUP_ID:core:$LIB_VERSION")
         // modules
         for (String moduleName : mConfig.modules) {
-            project.dependencies.add("compile", "$LIB_PACKAGE_NAME:$moduleName:$LIB_VERSION")
-            project.dependencies.add(apt, "$LIB_PACKAGE_NAME:$moduleName-compiler:$LIB_VERSION")
+            project.dependencies.add("compile", "$LIB_GROUP_ID:$moduleName:$LIB_VERSION")
+            project.dependencies.add(apt, "$LIB_GROUP_ID:$moduleName-compiler:$LIB_VERSION")
         }
 
         // apply bytecode weaving via Transform API
@@ -107,5 +107,14 @@ class BladePlugin implements Plugin<Project> {
             }
         }
 
+    }
+
+    private static ConfigObject parseLibConfig() {
+        FileInputStream fis = new FileInputStream("../gradle.properties")
+        Properties prop = new Properties()
+        prop.load(fis)
+        ConfigObject config = new ConfigSlurper().parse(prop)
+        fis.close()
+        return config
     }
 }

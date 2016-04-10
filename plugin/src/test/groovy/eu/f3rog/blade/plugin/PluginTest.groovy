@@ -14,9 +14,11 @@ class PluginTest extends Specification {
     final ProjectFolder testProjectDir = new ProjectFolder()
 
     private String bladeVersion
+    private String bladeGroupId
 
     def setup() {
         bladeVersion = BladePlugin.LIB_VERSION
+        bladeGroupId = BladePlugin.LIB_GROUP_ID
     }
 
     @Unroll
@@ -40,7 +42,7 @@ class PluginTest extends Specification {
         e.getMessage().contains(BladePlugin.ANDROID_PLUGIN_REQUIRED)
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0-beta6']
+        gradleToolsVersion << ['1.5.0', '2.0.0']
     }
 
     @Unroll
@@ -58,18 +60,19 @@ class PluginTest extends Specification {
 
         then:
         // check Blade core dependencies
-        result.output.contains("eu.f3rog.blade:core:${bladeVersion}")
-        result.output.contains("eu.f3rog.blade:core-compiler:${bladeVersion}")
+        result.output.contains("$bladeGroupId:core:${bladeVersion}")
+        result.output.contains("$bladeGroupId:core-compiler:${bladeVersion}")
         // check other Blade module dependencies
         for (module in BladePlugin.LIB_MODULES) {
-            result.output.contains("eu.f3rog.blade:${module}:${bladeVersion}") == bladeModules.contains(module)
+            result.output.contains("$bladeGroupId:${module}:${bladeVersion}") == bladeModules.contains(module)
+            result.output.contains("$bladeGroupId:${module}-compiler:${bladeVersion}") == bladeModules.contains(module)
         }
         // check plugins
         result.output.contains("com.neenbedankt.gradle.androidapt.AndroidAptPlugin")
         result.output.contains("eu.f3rog.blade.plugin.BladePlugin")
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0-beta6']
+        gradleToolsVersion << ['1.5.0', '2.0.0']
         gradleVersion << ['2.9', '2.10']
         bladeModules << [Arrays.asList("extra", "mvp", "state"), Arrays.asList("arg")]
     }
@@ -93,7 +96,7 @@ class PluginTest extends Specification {
         result.task(":transformClassesWithBladeTransformerForRelease").outcome == SUCCESS
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0-beta6']
+        gradleToolsVersion << ['1.5.0', '2.0.0']
         gradleVersion << ['2.9', '2.10']
         bladeModules << [Arrays.asList("extra"), Arrays.asList("extra", "arg")]
     }
