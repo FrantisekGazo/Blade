@@ -34,18 +34,6 @@ public enum GCN {
     }
 
     public String formatName(final ClassName arg) {
-        StringBuilder name = new StringBuilder();
-        ClassName className = arg;
-
-        while (className != null) {
-            if (className != arg) {
-                name.insert(0, "_");
-            }
-            name.insert(0, className.simpleName());
-
-            className = className.enclosingClassName();
-        }
-
-        return String.format(mName, name.toString());
+        return String.format(mName, NameUtils.getNestedName(arg));
     }
 }

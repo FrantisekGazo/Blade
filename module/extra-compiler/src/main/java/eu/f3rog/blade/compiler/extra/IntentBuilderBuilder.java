@@ -21,6 +21,7 @@ import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.annotation.GeneratedForBuilder;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
+import eu.f3rog.blade.compiler.name.NameUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
@@ -105,7 +106,6 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
     }
 
     private String getMethodName(String format, ClassName activityName) {
-        return String.format(format, activityName.simpleName());
+        return String.format(format, NameUtils.getNestedName(activityName, ""));
     }
-
 }
