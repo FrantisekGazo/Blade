@@ -30,7 +30,7 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  */
 public final class PresenterTest extends BaseTest {
 
-    private static final String PRESENTER_METHODS =
+    static final String PRESENTER_METHODS =
             " public void bind(%s view) {} " +
                     " public void unbind() {} " +
                     " public void create(%s o, boolean wasRestored) {} " +
