@@ -259,4 +259,56 @@ public final class StateTest extends BaseTest {
                 .generatesSources(expected);
     }
 
+    @Test
+    public void other() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        State.class, "S"
+                )
+                .body(
+                        "public class $T {",
+                        "",
+                        "   @$S String mText;",
+                        "   @$S int mNumber;",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyClass_Helper")
+                .imports(
+                        input, "I",
+                        Bundle.class,
+                        BundleWrapper.class,
+                        IllegalArgumentException.class, "E"
+                )
+                .body(
+                        "abstract class $T {",
+                        "",
+                        "   public static void saveState($I target, Bundle state) {",
+                        "       if (state == null) {",
+                        "           throw new $E(\"State cannot be null!\");",
+                        "       }",
+                        "       BundleWrapper bundleWrapper = BundleWrapper.from(state);",
+                        "       bundleWrapper.put(\"<Stateful-mText>\", target.mText);",
+                        "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
+                        "   }",
+                        "",
+                        "   public static void restoreState($I target, Bundle state) {",
+                        "       if (state == null) {",
+                        "           return;",
+                        "       }",
+                        "       BundleWrapper bundleWrapper = BundleWrapper.from(state);",
+                        "       target.mText = bundleWrapper.get(\"<Stateful-mText>\", target.mText);",
+                        "       target.mNumber = bundleWrapper.get(\"<Stateful-mNumber>\", target.mNumber);",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
 }

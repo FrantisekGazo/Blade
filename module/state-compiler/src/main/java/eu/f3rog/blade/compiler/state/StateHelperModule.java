@@ -114,10 +114,13 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
-                .addAnnotation(weaveSave(builder.getClassName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
                 .addParameter(Bundle.class, state);
+
+        if (mHelpedClassType != HelpedClassType.OTHER) {
+            method.addAnnotation(weaveSave(builder.getClassName()));
+        }
 
         String bundleWrapper = "bundleWrapper";
         method.beginControlFlow("if ($N == null)", state)
@@ -134,10 +137,13 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
-                .addAnnotation(weaveRestore(builder.getClassName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(builder.getArgClassName(), target)
                 .addParameter(Bundle.class, state);
+
+        if (mHelpedClassType != HelpedClassType.OTHER) {
+            method.addAnnotation(weaveRestore(builder.getClassName()));
+        }
 
         String bundleWrapper = "bundleWrapper";
         method.beginControlFlow("if ($N == null)", state)
