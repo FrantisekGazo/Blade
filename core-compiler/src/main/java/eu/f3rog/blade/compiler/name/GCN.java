@@ -32,11 +32,20 @@ public enum GCN {
             return mName;
         }
     }
-    public String formatName(ClassName arg) {
-        if (arg != null) {
-            return String.format(mName, arg.simpleName());
-        } else {
-            return mName;
+
+    public String formatName(final ClassName arg) {
+        StringBuilder name = new StringBuilder();
+        ClassName className = arg;
+
+        while (className != null) {
+            if (className != arg) {
+                name.insert(0, "_");
+            }
+            name.insert(0, className.simpleName());
+
+            className = className.enclosingClassName();
         }
+
+        return String.format(mName, name.toString());
     }
 }
