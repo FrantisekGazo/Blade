@@ -11,7 +11,6 @@ import com.squareup.javapoet.TypeName;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -23,6 +22,7 @@ import eu.f3rog.blade.compiler.builder.annotation.GeneratedForBuilder;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.util.ProcessorError;
+import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
@@ -48,14 +48,14 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.PUBLIC);
     }
 
-    public void addMethodsFor(ProcessingEnvironment processingEnvironment, TypeElement typeElement) throws ProcessorError {
+    public void addMethodsFor(TypeElement typeElement) throws ProcessorError {
         if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
             return;
         }
 
         List<VariableElement> extras = new ArrayList<>();
 
-        List<? extends Element> elements = processingEnvironment.getElementUtils().getAllMembers(typeElement);
+        List<? extends Element> elements = ProcessorUtils.getElementUtils().getAllMembers(typeElement);
         for (Element e : elements) {
             if (e instanceof VariableElement && e.getAnnotation(Extra.class) != null) {
                 extras.add((VariableElement) e);

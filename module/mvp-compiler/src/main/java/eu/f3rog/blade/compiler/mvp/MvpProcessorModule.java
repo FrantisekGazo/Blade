@@ -2,7 +2,6 @@ package eu.f3rog.blade.compiler.mvp;
 
 import java.util.Set;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -22,14 +21,14 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
 public class MvpProcessorModule implements ProcessorModule {
 
     @Override
-    public void process(ProcessingEnvironment processingEnvironment, TypeElement bladeElement) throws ProcessorError {
+    public void process(TypeElement bladeElement) throws ProcessorError {
         ClassManager.getInstance()
                 .getHelper(bladeElement)
                 .tryGetModule(PresenterScopeHelperModule.class);
     }
 
     @Override
-    public void process(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnv) throws ProcessorError {
+    public void process(RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Presenter.class);
         for (Element e : elements) {
             TypeElement typeElement = (TypeElement) e.getEnclosingElement();

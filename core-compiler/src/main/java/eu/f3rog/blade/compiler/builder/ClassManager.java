@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
@@ -73,18 +72,18 @@ public class ClassManager
     }
 
     @Override
-    public void build(ProcessingEnvironment processingEnvironment) throws ProcessorError, IOException {
+    public void build() throws ProcessorError, IOException {
         List<ClassName> classes = new ArrayList<>(mHelpers.keySet());
         Collections.sort(classes, new ClassNameComparator());
         for (int i = 0, size = classes.size(); i < size; i++) {
             HelperClassBuilder builder = mHelpers.get(classes.get(i));
             // build file
-            builder.build(processingEnvironment);
+            builder.build();
         }
 
         // build special classes
         for (Map.Entry<Class, BaseClassBuilder> entry : mSpecialClasses.entrySet()) {
-            entry.getValue().build(processingEnvironment);
+            entry.getValue().build();
         }
     }
 

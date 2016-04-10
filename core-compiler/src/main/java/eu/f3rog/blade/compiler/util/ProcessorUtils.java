@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -49,6 +50,10 @@ public class ProcessorUtils {
 
     public static Types getTypeUtils() {
         return sProcessingEnvironment.getTypeUtils();
+    }
+
+    public static Filer getFiler() {
+        return sProcessingEnvironment.getFiler();
     }
 
     public static String fullName(ClassName className) {

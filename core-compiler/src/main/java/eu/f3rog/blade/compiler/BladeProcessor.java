@@ -76,20 +76,20 @@ public class BladeProcessor extends BaseProcessor {
         for (Element e : roundEnv.getElementsAnnotatedWith(Blade.class)) {
             if (e.getKind() == ElementKind.CLASS) {
                 for (int i = 0; i < mModules.size(); i++) {
-                    mModules.get(i).process(getProcessingEnvironment(), (TypeElement) e);
+                    mModules.get(i).process((TypeElement) e);
                 }
             }
         }
 
         for (int i = 0; i < mModules.size(); i++) {
-            mModules.get(i).process(getProcessingEnvironment(), roundEnv);
+            mModules.get(i).process(roundEnv);
         }
     }
 
     @Override
     protected void finish(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
         // create class files
-        ClassManager.getInstance().build(getProcessingEnvironment());
+        ClassManager.getInstance().build();
     }
 
 }

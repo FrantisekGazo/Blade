@@ -11,7 +11,6 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -101,7 +100,7 @@ public class StateHelperModule
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
         if (!mStatefulFields.isEmpty()) {
             // add methods only if there is something stateful
             addSaveStateMethod(builder);

@@ -2,7 +2,6 @@ package eu.f3rog.blade.compiler.parcel;
 
 import java.util.Set;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -23,12 +22,12 @@ public class ParcelProcessorModule
         implements ProcessorModule {
 
     @Override
-    public void process(ProcessingEnvironment processingEnvironment, TypeElement bladeElement) throws ProcessorError {
+    public void process(TypeElement bladeElement) throws ProcessorError {
         // do nothing
     }
 
     @Override
-    public void process(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnv) throws ProcessorError {
+    public void process(RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Parcel.class);
         for (Element e : elements) {
             if (e.getKind() != ElementKind.CLASS) continue;

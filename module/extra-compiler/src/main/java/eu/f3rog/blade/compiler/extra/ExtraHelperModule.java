@@ -11,7 +11,6 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -77,8 +76,8 @@ public class ExtraHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addMethodToIntentManager(processingEnvironment, builder);
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
+        addMethodToIntentManager(builder);
         if (!mExtras.isEmpty()) {
             // add inject() only if there is something
             addInjectMethod(builder);
@@ -132,10 +131,10 @@ public class ExtraHelperModule extends BaseHelperModule {
         }
     }
 
-    private void addMethodToIntentManager(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToIntentManager(HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(IntentBuilderBuilder.class)
-                .addMethodsFor(processingEnvironment, builder.getTypeElement());
+                .addMethodsFor(builder.getTypeElement());
     }
 
 }
