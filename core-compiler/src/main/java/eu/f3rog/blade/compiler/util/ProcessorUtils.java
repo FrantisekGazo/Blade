@@ -6,6 +6,8 @@ import android.app.Fragment;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
@@ -62,7 +65,7 @@ public class ProcessorUtils {
 
         sb.append(className.packageName());
 
-        for (int i = 0; i < className.simpleNames().size(); i++) {
+        for (int i = 0, c = className.simpleNames().size(); i < c; i++) {
             String name = className.simpleNames().get(i);
             sb.append(".").append(name);
         }
@@ -77,7 +80,8 @@ public class ProcessorUtils {
         // if given element has no annotation => end now
         if (annotationMirrors == null || annotationMirrors.size() == 0) return false;
         // go through all annotation of given element
-        for (AnnotationMirror annotationMirror : annotationMirrors) {
+        for (int i = 0, c = annotationMirrors.size(); i < c; i++) {
+            AnnotationMirror annotationMirror = annotationMirrors.get(i);
             // check if found annotation is the same class as needed annotation
             if (needed.equals(ClassName.get(annotationMirror.getAnnotationType().asElement().asType())))
                 return true;
@@ -122,12 +126,15 @@ public class ProcessorUtils {
         List<ClassName> className = new ArrayList<>();
         try {
             Class<?>[] classes = getter.get(annotation);
-            for (Class<?> cls : classes) {
+            for (int i = 0; i < classes.length; i++) {
+                Class cls = classes[i];
                 className.add(ClassName.get(cls));
             }
         } catch (MirroredTypesException mte) {
             try {
-                for (TypeMirror typeMirror : mte.getTypeMirrors()) {
+                List<? extends TypeMirror> typeMirrors = mte.getTypeMirrors();
+                for (int i = 0, c = typeMirrors.size(); i < c; i++) {
+                    TypeMirror typeMirror = typeMirrors.get(i);
                     className.add((ClassName) ClassName.get(((DeclaredType) typeMirror).asElement().asType()));
                 }
             } catch (Exception e) { // if there is 'primitive'.class
@@ -182,7 +189,7 @@ public class ProcessorUtils {
     }
 
     /**
-     * Finds requested supertype (can be also interface) of given type.
+     * Finds requested super-type or interface of given type.
      */
     public static TypeName getSuperType(TypeElement inspectedType, Class lookupClass) {
         return getSuperType(inspectedType.asType(), ClassName.get(lookupClass));
@@ -193,15 +200,15 @@ public class ProcessorUtils {
     }
 
     private static TypeName getSuperType(TypeMirror inspectedType, TypeName lookupType) {
-        TypeName tn = isSameType(inspectedType, lookupType);
-        if (tn != null) {
-            return tn;
+        TypeName inspectedTypeName = ClassName.get(inspectedType);
+        if (areSameType(inspectedTypeName, lookupType)) {
+            return inspectedTypeName;
         }
 
-        List<? extends TypeMirror> superTypes = ProcessorUtils.getTypeUtils().directSupertypes(inspectedType);
-
-        for (TypeMirror typeMirror : superTypes) {
-            tn = getSuperType(typeMirror, lookupType);
+        List<? extends TypeMirror> supertypes = sProcessingEnvironment.getTypeUtils().directSupertypes(inspectedType);
+        for (int i = 0, c = supertypes.size(); i < c; i++) {
+            TypeMirror superType = supertypes.get(i);
+            TypeName tn = getSuperType(superType, lookupType);
             if (tn != null) {
                 return tn;
             }
@@ -210,17 +217,28 @@ public class ProcessorUtils {
         return null;
     }
 
-    private static TypeName isSameType(TypeMirror typeMirror, TypeName lookupType) {
-        TypeName tn = ClassName.get(typeMirror);
-        if (tn instanceof ParameterizedTypeName) {
-            ParameterizedTypeName paramTypeName = (ParameterizedTypeName) tn;
-            if (paramTypeName.rawType.equals(lookupType)) {
-                return paramTypeName;
-            }
-        } else if (tn.equals(lookupType)) {
-            return tn;
+    private static boolean areSameType(TypeName typeName1, TypeName typeName2) {
+        if (typeName1 instanceof ParameterizedTypeName) {
+            ParameterizedTypeName paramTypeName = (ParameterizedTypeName) typeName1;
+            return paramTypeName.rawType.equals(typeName2);
         }
-        return null;
+        return typeName1.equals(typeName2);
+    }
+
+    /**
+     * Returns type of given <code>variableElement</code> or bound type if it is generic type.
+     */
+    public static Type getBoundedType(VariableElement variableElement) {
+        if (variableElement instanceof Symbol.VarSymbol) {
+            Symbol.VarSymbol arg = (Symbol.VarSymbol) variableElement;
+            Type type = arg.type;
+            if (type.getUpperBound() != null) {
+                type = type.getUpperBound();
+            }
+            return type;
+        } else {
+            throw new IllegalStateException();
+        }
     }
 
 }

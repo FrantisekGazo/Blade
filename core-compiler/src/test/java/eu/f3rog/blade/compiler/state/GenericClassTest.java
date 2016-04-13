@@ -22,7 +22,7 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  * @author FrantisekGazo
  * @version 2016-04-10
  */
-public class GenericClassTest extends BaseTest {
+public final class GenericClassTest extends BaseTest {
 
     @Test
     public void genericClass() {
