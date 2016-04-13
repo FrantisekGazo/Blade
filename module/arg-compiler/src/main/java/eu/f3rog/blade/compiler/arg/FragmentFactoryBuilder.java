@@ -3,6 +3,7 @@ package eu.f3rog.blade.compiler.arg;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.sun.tools.javac.code.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,8 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
 
         for (int i = 0; i < allArgs.size(); i++) {
             VariableElement arg = allArgs.get(i);
-            TypeName typeName = ClassName.get(arg.asType());
+            Type type = ProcessorUtils.getBoundedType(arg);
+            TypeName typeName = ClassName.get(type);
             String name = arg.getSimpleName().toString();
             forMethod.addParameter(typeName, name);
             forMethod.addStatement("$N.put($S, $N)", args, ArgHelperModule.getArgId(name), name);

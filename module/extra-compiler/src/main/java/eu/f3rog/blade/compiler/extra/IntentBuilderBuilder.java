@@ -7,6 +7,7 @@ import android.content.Intent;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.sun.tools.javac.code.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +90,8 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
                 (isService) ? "startService" : "startActivity",
                 forName, context);
         for (VariableElement extra : allExtras) {
-            TypeName typeName = ClassName.get(extra.asType());
+            Type type = ProcessorUtils.getBoundedType(extra);
+            TypeName typeName = ClassName.get(type);
             String name = extra.getSimpleName().toString();
             forMethod.addParameter(typeName, name);
             forMethod.addStatement("$N.put($S, $N)", extras, ExtraHelperModule.getExtraId(name), name);

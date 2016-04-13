@@ -292,7 +292,7 @@ public class PresenterHelperModule extends BaseHelperModule {
     }
 
     private static TypeName getPresenterDataType(TypeElement presenterTypeElement) {
-        TypeName interfaceTypeName = ProcessorUtils.getSuperType(presenterTypeElement, ClassName.get(IPresenter.class));
+        TypeName interfaceTypeName = ProcessorUtils.getSuperType(presenterTypeElement, IPresenter.class);
         if (interfaceTypeName != null) {
             ParameterizedTypeName ptn = (ParameterizedTypeName) interfaceTypeName;
             return ptn.typeArguments.get(DATA_ARG);
