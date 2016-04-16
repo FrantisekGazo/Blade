@@ -254,9 +254,15 @@ public class ProcessorUtils {
         return parameterTypes;
     }
 
-    public static void addTypeVariables(MethodSpec.Builder method, TypeVariableName[] types) {
-        for (int i = 0, c = types.length; i < c; i++) {
-            method.addTypeVariable(types[i]);
+    public static void addClassAsParameter(MethodSpec.Builder method, ClassName targetTypeName, String parameterName) {
+        TypeVariableName[] typeParameterNames = getTypeParameterNames(targetTypeName);
+        if (typeParameterNames.length > 0) {
+            for (int i = 0, c = typeParameterNames.length; i < c; i++) {
+                method.addTypeVariable(typeParameterNames[i]);
+            }
+            method.addParameter(ParameterizedTypeName.get(targetTypeName, typeParameterNames), parameterName);
+        } else {
+            method.addParameter(targetTypeName, parameterName);
         }
     }
 }

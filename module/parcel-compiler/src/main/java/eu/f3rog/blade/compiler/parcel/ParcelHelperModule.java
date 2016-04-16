@@ -7,7 +7,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeVariableName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +26,8 @@ import eu.f3rog.blade.compiler.parcel.p.Parceler;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 
-import static eu.f3rog.blade.compiler.util.ProcessorUtils.addTypeVariables;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
-import static eu.f3rog.blade.compiler.util.ProcessorUtils.getTypeParameterNames;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.hasSomeModifier;
 
 /**
@@ -135,13 +133,7 @@ public class ParcelHelperModule
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
-        TypeVariableName[] parameterTypes = getTypeParameterNames(targetClassName);
-        if (parameterTypes.length > 0) {
-            addTypeVariables(method, parameterTypes);
-            method.addParameter(ParameterizedTypeName.get(targetClassName, parameterTypes), target);
-        } else {
-            method.addParameter(targetClassName, target);
-        }
+        addClassAsParameter(method, targetClassName, target);
         method.addParameter(Parcel.class, parcel);
 
         for (int i = 0, c = mAttributeNames.size(); i < c; i++) {
@@ -165,13 +157,7 @@ public class ParcelHelperModule
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
-        TypeVariableName[] parameterTypes = getTypeParameterNames(targetClassName);
-        if (parameterTypes.length > 0) {
-            addTypeVariables(method, parameterTypes);
-            method.addParameter(ParameterizedTypeName.get(targetClassName, parameterTypes), target);
-        } else {
-            method.addParameter(targetClassName, target);
-        }
+        addClassAsParameter(method, targetClassName, target);
         method.addParameter(Parcel.class, parcel);
 
         for (int i = 0, c = mAttributeNames.size(); i < c; i++) {
