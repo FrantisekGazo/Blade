@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import blade.Blade;
@@ -32,6 +34,16 @@ public class TestParcelActivity extends AppCompatActivity {
         Random rand = new Random();
         mOutput.setText("Testing:");
 
+        LinkedList<String> l = new LinkedList<>();
+        l.add("Hello");
+        l.add("World");
+        final Parcel p1 = Parcel.obtain();
+        p1.writeValue(l);
+        p1.setDataPosition(0);
+        List<String> l2 = (List<String>) p1.readValue(null);
+
+
+
         Data data = new Data();
         data.fnum = rand.nextFloat();
         data.inum = rand.nextInt(100);
@@ -50,17 +62,17 @@ public class TestParcelActivity extends AppCompatActivity {
         }
         test(data2);
 
-        SubData2 data3 = new SubData2();
-        data3.d = data;
-        data3.number = rand.nextInt(100);
-        data3.flag = rand.nextBoolean();
-        data3.text = "<some-text-" + data.inum + ">";
-        data3.array = new double[rand.nextInt(5)];
-        for (int i = 0; i < data3.array.length; i++) {
-            data3.array[i] = rand.nextDouble();
+        SubData2 subData2 = new SubData2();
+        subData2.d = data;
+        subData2.number = rand.nextInt(100);
+        subData2.flag = rand.nextBoolean();
+        subData2.text = "<some-text-" + data.inum + ">";
+        subData2.array = new double[rand.nextInt(5)];
+        for (int i = 0; i < subData2.array.length; i++) {
+            subData2.array[i] = rand.nextDouble();
         }
-        data3.stringArray = new String[]{"abc", "def"};
-        test(data3);
+        subData2.stringArray = new String[]{"abc", "def"};
+        test(subData2);
 
         IgnoreData ignoreData = new IgnoreData();
         ignoreData.i = 123;
@@ -69,6 +81,11 @@ public class TestParcelActivity extends AppCompatActivity {
 
         ignoreData.f = 1.1f;
         test(ignoreData, false);
+
+
+        Data3 data3 = new Data3();
+        data3.g = new GenericData<>("Hello :)");
+        test(data3);
     }
 
     private void test(final Parcelable obj) {

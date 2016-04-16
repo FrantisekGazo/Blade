@@ -301,7 +301,7 @@ public class ParcelTest extends BaseTest {
     }
 
     @Test
-    public void ignoreCollections() {
+    public void collections() {
         JavaFileObject input = file("com.example", "MyClass")
                 .imports(
                         Parcel.class, "P",
@@ -317,9 +317,7 @@ public class ParcelTest extends BaseTest {
                 .body(
                         "@$P",
                         "public class $T implements Parcelable {",
-                        "",// only field should processed
                         "   String text;",
-                        "",// this fields should be ignored
                         "   List<String> list1;",
                         "   ArrayList<String> list2;",
                         "   LinkedList<Object> list3;",
@@ -344,7 +342,17 @@ public class ParcelTest extends BaseTest {
                         android.os.Parcel.class,
                         Parcelable.class,
                         Weave.class,
-                        Override.class
+                        Override.class,
+                        Long.class,
+                        Object.class,
+                        String.class,
+                        ArrayList.class,
+                        LinkedList.class,
+                        HashMap.class,
+                        HashSet.class,
+                        List.class,
+                        Map.class,
+                        Set.class
                 )
                 .body(
                         "abstract class $T {",
@@ -366,11 +374,25 @@ public class ParcelTest extends BaseTest {
                         "   @Weave(into = \">writeToParcel\", args = {\"android.os.Parcel\", \"int\"}, statement = \"com.example.$T.writeToParcel(this, $1);\")",
                         "   public static void writeToParcel($I target, Parcel parcel) {",
                         "       parcel.writeString(target.text);",
+                        "       parcel.writeValue(target.list1);",
+                        "       parcel.writeSerializable(target.list2);",
+                        "       parcel.writeSerializable(target.list3);",
+                        "       parcel.writeValue(target.set1);",
+                        "       parcel.writeSerializable(target.set2);",
+                        "       parcel.writeValue(target.map1);",
+                        "       parcel.writeSerializable(target.map2);",
                         "   }",
                         "",
                         "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
                         "   public static void readFromParcel($I target, Parcel parcel) {",
                         "       target.text = parcel.readString();",
+                        "       target.list1 = (List<String>) parcel.readValue(null);",
+                        "       target.list2 = (ArrayList<String>) parcel.readSerializable();",
+                        "       target.list3 = (LinkedList<Object>) parcel.readSerializable();",
+                        "       target.set1 = (Set<String>) parcel.readValue(null);",
+                        "       target.set2 = (HashSet<Long>) parcel.readSerializable();",
+                        "       target.map1 = (Map<Long, String>) parcel.readValue(null);",
+                        "       target.map2 = (HashMap<Long, String>) parcel.readSerializable();",
                         "   }",
                         "",
                         "}"
@@ -458,6 +480,15 @@ public class ParcelTest extends BaseTest {
 
     @Test
     public void validParcel() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        JavaFileObject a = file("com.example", "A")
+                .imports(
+                        Serializable.class
+                )
+                .body(
+                        "public class $T<T> implements Serializable {",
+                        "",
+                        "}"
+                );
         JavaFileObject input = file("com.example", "MyClass")
                 .imports(
                         Parcel.class, "P",
@@ -465,11 +496,14 @@ public class ParcelTest extends BaseTest {
                 )
                 .body(
                         "@$P",
-                        "public class $T implements Parcelable {",
+                        "public class $T<T extends String> implements Parcelable {",
                         "",
                         "   String text;",
                         "   boolean flag;",
                         "   int[] array;",
+                        "   A<Long> a1;",
+                        "   A a2;",
+                        "   A<T> a3;",
                         "",
                         "   public $T(android.os.Parcel p) {}",
                         "",
@@ -511,6 +545,9 @@ public class ParcelTest extends BaseTest {
                         "       parcel.writeString(target.text);",
                         "       parcel.writeByte((byte) (target.flag ? 1 : 0));",
                         "       parcel.writeIntArray(target.array);",
+                        "       parcel.writeValue(target.a1);",
+                        "       parcel.writeValue(target.a2);",
+                        "       parcel.writeValue(target.a3);",
                         "   }",
                         "",
                         "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
@@ -518,12 +555,15 @@ public class ParcelTest extends BaseTest {
                         "       target.text = parcel.readString();",
                         "       target.flag = parcel.readByte() > 0;",
                         "       target.array = parcel.createIntArray();",
+                        "       target.a1 = (com.example.A<java.lang.Long>) parcel.readValue(null);",
+                        "       target.a2 = (A) parcel.readValue(A.class.getClassLoader());",
+                        "       target.a3 = (com.example.A<java.lang.String>) parcel.readValue(null);",
                         "   }",
                         "",
                         "}"
                 );
 
-        assertFiles(input)
+        assertFiles(a, input)
                 .with(BladeProcessor.Module.PARCEL)
                 .compilesWithoutError()
                 .and()
