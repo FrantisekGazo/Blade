@@ -18,7 +18,7 @@ This library is divided into several **modules**. Each module provides different
 * **arg** provides [@Arg](https://github.com/FrantisekGazo/Blade#arg)
 * **extra** provides [@Extra](https://github.com/FrantisekGazo/Blade#extra)
 * **mvp** provides [@Presenter](https://github.com/FrantisekGazo/Blade#presenter)
-* **parcel** provides [@Parcel](https://github.com/FrantisekGazo/Blade#parcel)
+* **parcel** provides [@Parcel](https://github.com/FrantisekGazo/Blade#parcel) and [@ParcelIgnore](https://github.com/FrantisekGazo/Blade#parcelignore)
 * **state** provides [@State](https://github.com/FrantisekGazo/Blade#state)
 
 Special annotation:
@@ -221,9 +221,35 @@ Class with `@Parcel` has to:
 * implement [Parcelable](http://developer.android.com/reference/android/os/Parcelable.html) interface
 * contain constructor with parameter of type [Parcel](http://developer.android.com/reference/android/os/Parcel.html)
 
-All fields that are static, private or protected will be ignored.
-`Collection` and `Map` subclasses are not supported (will be ignored).
-If you need some of these ignored fields, you need to add code for them inside `writeToParcel(Parcel, int)` and `constructor(Parcel)`.
+All fields that are **private** or **protected** will be **ignored!**
+If these fields are also needed in parcel, you need to add code for them inside `writeToParcel(Parcel, int)` and `constructor(Parcel)`.
+
+
+## @ParcelIgnore
+Use this annotation if you want **Blade** to ignore some field.
+
+```Java
+@blade.Parcel
+public class MyClass implements Parcelable {
+ 
+     int number; // this field will be processed             
+     @blade.ParcelIgnore 
+     String text; // this field will be ignored
+ 
+     protected MyClass(Parcel in) {
+     }
+ 
+     @Override
+     public int describeContents() {
+         return 0;
+     }
+ 
+     @Override
+     public void writeToParcel(Parcel dest, int flags) {
+     }
+}
+```
+
 
 ## @Presenter
 Annotation for implementing MVP architecture.
@@ -407,7 +433,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:2.2.0'
+        classpath 'eu.f3rog.blade:plugin:2.2.0-beta4'
     }
 }
 
