@@ -3,8 +3,11 @@ package eu.f3rog.blade.compiler.parcel.p;
 import android.util.SparseArray;
 
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.VariableElement;
+
+import eu.f3rog.blade.compiler.util.ProcessorUtils;
 
 /**
  * Class {@link SparseArrayParceler}
@@ -26,7 +29,12 @@ final class SparseArrayParceler implements ClassParceler {
 
     @Override
     public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.$N = ($T) $N.readSparseArray($T.class.getClassLoader())", object, e.getSimpleName(), e.asType(), parcel, SparseArray.class);
+        TypeName rawType = ProcessorUtils.getRawType(e.asType());
+        if (rawType != null) {
+            method.addStatement("$N.$N = ($T) $N.readSparseArray($T.class.getClassLoader())", object, e.getSimpleName(), e.asType(), parcel, rawType);
+        } else {
+            method.addStatement("$N.$N = ($T) $N.readSparseArray(null)", object, e.getSimpleName(), e.asType(), parcel);
+        }
     }
 
 }

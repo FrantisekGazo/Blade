@@ -36,9 +36,6 @@ final public class Parceler {
     private static final List<ClassParceler> sInheritanceLister = new ArrayList<>();
     private static final ClassParceler sObjectParceler = new ObjectClassParceler();
 
-    @Deprecated
-    public static final String TEMP_STRING = "temp";
-
     static {
         // DIRECT MAPPINGS:
         // primitive types

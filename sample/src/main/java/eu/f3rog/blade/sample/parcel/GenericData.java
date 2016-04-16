@@ -30,18 +30,6 @@ public class GenericData<T> implements Parcelable {
         return 0;
     }
 
-    public static final Creator<GenericData> CREATOR = new Creator<GenericData>() {
-        @Override
-        public GenericData createFromParcel(Parcel in) {
-            return new GenericData(in);
-        }
-
-        @Override
-        public GenericData[] newArray(int size) {
-            return new GenericData[size];
-        }
-    };
-
     @Override
     public String toString() {
         return "GenericData[" + data + "]";
