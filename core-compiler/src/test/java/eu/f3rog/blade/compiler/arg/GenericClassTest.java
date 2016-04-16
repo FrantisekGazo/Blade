@@ -50,7 +50,7 @@ public final class GenericClassTest extends BaseTest {
                         "abstract class $T {",
                         "",
                         "   @Weave(into=\"^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
-                        "   public static void inject($I target) {",
+                        "   public static <T> void inject($I<T> target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",
                         "       }",
@@ -108,13 +108,14 @@ public final class GenericClassTest extends BaseTest {
                 .imports(
                         input, "I",
                         BundleWrapper.class,
-                        Weave.class
+                        Weave.class,
+                        Serializable.class
                 )
                 .body(
                         "abstract class $T {",
                         "",
                         "   @Weave(into=\"^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
-                        "   public static void inject($I target) {",
+                        "   public static <T extends Serializable> void inject($I<T> target) {",
                         "       if (target.getArguments() == null) {",
                         "           return;",
                         "       }",

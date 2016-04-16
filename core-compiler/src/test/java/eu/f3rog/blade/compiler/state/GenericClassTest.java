@@ -48,7 +48,7 @@ public final class GenericClassTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   public static void saveState($I target, Bundle state) {",
+                        "   public static <T> void saveState($I<T> target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
                         "       }",
@@ -57,7 +57,7 @@ public final class GenericClassTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
-                        "   public static void restoreState($I target, Bundle state) {",
+                        "   public static <T> void restoreState($I<T> target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",
                         "       }",
@@ -95,12 +95,13 @@ public final class GenericClassTest extends BaseTest {
                         input, "I",
                         Bundle.class,
                         BundleWrapper.class,
-                        IllegalArgumentException.class, "E"
+                        IllegalArgumentException.class, "E",
+                        Serializable.class
                 )
                 .body(
                         "abstract class $T {",
                         "",
-                        "   public static void saveState($I target, Bundle state) {",
+                        "   public static <T extends Serializable> void saveState($I<T> target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
                         "       }",
@@ -109,7 +110,7 @@ public final class GenericClassTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
-                        "   public static void restoreState($I target, Bundle state) {",
+                        "   public static <T extends Serializable> void restoreState($I<T> target, Bundle state) {",
                         "       if (state == null) {",
                         "           return;",
                         "       }",

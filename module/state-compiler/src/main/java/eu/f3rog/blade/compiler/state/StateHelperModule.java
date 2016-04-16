@@ -26,6 +26,7 @@ import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isFragmentSubClass;
@@ -114,9 +115,10 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target)
-                .addParameter(Bundle.class, state);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
+        method.addParameter(Bundle.class, state);
 
         if (mHelpedClassType != HelpedClassType.OTHER) {
             method.addAnnotation(weaveSave(builder.getClassName()));
@@ -137,9 +139,10 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target)
-                .addParameter(Bundle.class, state);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
+        method.addParameter(Bundle.class, state);
 
         if (mHelpedClassType != HelpedClassType.OTHER) {
             method.addAnnotation(weaveRestore(builder.getClassName()));

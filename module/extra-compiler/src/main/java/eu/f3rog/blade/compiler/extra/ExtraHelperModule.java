@@ -26,6 +26,7 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
@@ -91,8 +92,9 @@ public class ExtraHelperModule extends BaseHelperModule {
         String intent = "intent";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
                 .addAnnotation(weaveAnnotation(builder))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
 
         if (mInjected == Injected.ACTIVITY) {
             method.addStatement("$T $N = $N.getIntent()", Intent.class, intent, target);
