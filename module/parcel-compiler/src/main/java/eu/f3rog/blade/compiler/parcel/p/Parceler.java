@@ -16,7 +16,6 @@ import java.util.Map;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
 import eu.f3rog.blade.compiler.util.ProcessorError;
@@ -97,8 +96,6 @@ final public class Parceler {
     }
 
     private static ClassParceler findParceler(VariableElement ve) throws ProcessorError {
-        TypeName typeName = readType(ve.asType());
-
         // find direct
         ClassParceler parceler = sDirectMapper.get(ve.asType().toString());
         if (parceler != null) {
@@ -135,10 +132,6 @@ final public class Parceler {
         }
 
         return sObjectParceler;
-    }
-
-    private static TypeName readType(TypeMirror typeMirror) {
-        return null;
     }
 
     private static boolean isCollection(TypeElement lookupType) {

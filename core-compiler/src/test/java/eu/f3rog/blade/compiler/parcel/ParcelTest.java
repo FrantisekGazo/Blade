@@ -386,12 +386,12 @@ public class ParcelTest extends BaseTest {
                         "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
                         "   public static void readFromParcel($I target, Parcel parcel) {",
                         "       target.text = parcel.readString();",
-                        "       target.list1 = (List<String>) parcel.readValue(null);",
+                        "       target.list1 = (List<String>) parcel.readValue(List.class.getClassLoader());",
                         "       target.list2 = (ArrayList<String>) parcel.readSerializable();",
                         "       target.list3 = (LinkedList<Object>) parcel.readSerializable();",
-                        "       target.set1 = (Set<String>) parcel.readValue(null);",
+                        "       target.set1 = (Set<String>) parcel.readValue(Set.class.getClassLoader());",
                         "       target.set2 = (HashSet<Long>) parcel.readSerializable();",
-                        "       target.map1 = (Map<Long, String>) parcel.readValue(null);",
+                        "       target.map1 = (Map<Long, String>) parcel.readValue(Map.class.getClassLoader());",
                         "       target.map2 = (HashMap<Long, String>) parcel.readSerializable();",
                         "   }",
                         "",
@@ -479,13 +479,13 @@ public class ParcelTest extends BaseTest {
     }
 
     @Test
-    public void validParcel() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public void genericType() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         JavaFileObject a = file("com.example", "A")
                 .imports(
                         Serializable.class
                 )
                 .body(
-                        "public class $T<T> implements Serializable {",
+                        "public class $T<T> {",
                         "",
                         "}"
                 );
@@ -496,11 +496,8 @@ public class ParcelTest extends BaseTest {
                 )
                 .body(
                         "@$P",
-                        "public class $T<T extends String> implements Parcelable {",
+                        "public class $T<T extends String, S extends Long> implements Parcelable {",
                         "",
-                        "   String text;",
-                        "   boolean flag;",
-                        "   int[] array;",
                         "   A<Long> a1;",
                         "   A a2;",
                         "   A<T> a3;",
@@ -521,7 +518,9 @@ public class ParcelTest extends BaseTest {
                         android.os.Parcel.class,
                         Parcelable.class,
                         Weave.class,
-                        Override.class
+                        Override.class,
+                        String.class,
+                        Long.class
                 )
                 .body(
                         "abstract class $T {",
@@ -541,23 +540,17 @@ public class ParcelTest extends BaseTest {
                         "   };",
                         "",
                         "   @Weave(into = \">writeToParcel\", args = {\"android.os.Parcel\", \"int\"}, statement = \"com.example.$T.writeToParcel(this, $1);\")",
-                        "   public static void writeToParcel($I target, Parcel parcel) {",
-                        "       parcel.writeString(target.text);",
-                        "       parcel.writeByte((byte) (target.flag ? 1 : 0));",
-                        "       parcel.writeIntArray(target.array);",
+                        "   public static <T extends String, S extends Long> void writeToParcel($I<T, S> target, Parcel parcel) {",
                         "       parcel.writeValue(target.a1);",
                         "       parcel.writeValue(target.a2);",
                         "       parcel.writeValue(target.a3);",
                         "   }",
                         "",
                         "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
-                        "   public static void readFromParcel($I target, Parcel parcel) {",
-                        "       target.text = parcel.readString();",
-                        "       target.flag = parcel.readByte() > 0;",
-                        "       target.array = parcel.createIntArray();",
-                        "       target.a1 = (com.example.A<java.lang.Long>) parcel.readValue(null);",
+                        "   public static <T extends String, S extends Long> void readFromParcel($I<T, S> target, Parcel parcel) {",
+                        "       target.a1 = (A<Long>) parcel.readValue(A.class.getClassLoader());",
                         "       target.a2 = (A) parcel.readValue(A.class.getClassLoader());",
-                        "       target.a3 = (com.example.A<java.lang.String>) parcel.readValue(null);",
+                        "       target.a3 = (A<T>) parcel.readValue(A.class.getClassLoader());",
                         "   }",
                         "",
                         "}"
