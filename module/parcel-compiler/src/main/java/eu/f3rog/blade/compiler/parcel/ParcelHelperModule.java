@@ -7,6 +7,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeVariableName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,9 @@ import eu.f3rog.blade.compiler.parcel.p.Parceler;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addTypeVariables;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.getTypeParameterNames;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.hasSomeModifier;
 
 /**
@@ -130,9 +133,16 @@ public class ParcelHelperModule
                                 .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_WRITE_TO_PARCEL)
                                 .build()
                 )
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(targetClassName, target)
-                .addParameter(Parcel.class, parcel);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        TypeVariableName[] parameterTypes = getTypeParameterNames(targetClassName);
+        if (parameterTypes.length > 0) {
+            addTypeVariables(method, parameterTypes);
+            method.addParameter(ParameterizedTypeName.get(targetClassName, parameterTypes), target);
+        } else {
+            method.addParameter(targetClassName, target);
+        }
+        method.addParameter(Parcel.class, parcel);
 
         for (int i = 0, c = mAttributeNames.size(); i < c; i++) {
             VariableElement ve = mAttributeNames.get(i);
@@ -153,9 +163,16 @@ public class ParcelHelperModule
                                 .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_READ_FROM_PARCEL)
                                 .build()
                 )
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(targetClassName, target)
-                .addParameter(Parcel.class, parcel);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        TypeVariableName[] parameterTypes = getTypeParameterNames(targetClassName);
+        if (parameterTypes.length > 0) {
+            addTypeVariables(method, parameterTypes);
+            method.addParameter(ParameterizedTypeName.get(targetClassName, parameterTypes), target);
+        } else {
+            method.addParameter(targetClassName, target);
+        }
+        method.addParameter(Parcel.class, parcel);
 
         for (int i = 0, c = mAttributeNames.size(); i < c; i++) {
             VariableElement ve = mAttributeNames.get(i);

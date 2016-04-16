@@ -34,6 +34,7 @@ final public class Parceler {
     private static final Map<String, ClassParceler> sDirectMapper = new HashMap<>();
     private static final Map<String, ClassParceler> sArrayInheritanceMapper = new HashMap<>();
     private static final List<ClassParceler> sInheritanceLister = new ArrayList<>();
+    private static final ClassParceler sObjectParceler = new ObjectClassParceler();
 
     @Deprecated
     public static final String TEMP_STRING = "temp";
@@ -69,7 +70,6 @@ final public class Parceler {
         addInheritanceMapping(new ParcelableClassParceler());
         addInheritanceMapping(new SerializableClassParceler());
         addInheritanceMapping(new SparseArrayParceler());
-        addInheritanceMapping(new ObjectClassParceler());
 
 
         // ARRAY INHERITANCE
@@ -122,20 +122,16 @@ final public class Parceler {
         }
         TypeElement lookupType = elementsUtils.getTypeElement(tn.toString());
 
-        if (isCollection(lookupType)) {
-            return null; // collections are not supported
-        }
-
-        for (int i = 0, c = sInheritanceLister.size(); i < c; i++) {
-            parceler = sInheritanceLister.get(i);
-            if (isSubClassOf(lookupType, parceler.type())) {
-                break;
-            } else {
-                parceler = null;
+        if (lookupType != null) {
+            for (int i = 0, c = sInheritanceLister.size(); i < c; i++) {
+                parceler = sInheritanceLister.get(i);
+                if (isSubClassOf(lookupType, parceler.type())) {
+                    return parceler;
+                }
             }
         }
 
-        return parceler;
+        return sObjectParceler;
     }
 
     private static boolean isCollection(TypeElement lookupType) {

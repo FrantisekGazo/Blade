@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.Fragment;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeVariableName;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 
@@ -19,6 +21,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
@@ -241,4 +244,19 @@ public class ProcessorUtils {
         }
     }
 
+    public static TypeVariableName[] getTypeParameterNames(TypeName type) {
+        List<? extends TypeParameterElement> targetClassParameters = ProcessorUtils.getTypeElement(type).getTypeParameters();
+        TypeVariableName[] parameterTypes = new TypeVariableName[targetClassParameters.size()];
+        for (int i = 0, c = parameterTypes.length; i < c; i++) {
+            TypeVariableName typeName = TypeVariableName.get(targetClassParameters.get(i));
+            parameterTypes[i] = typeName;
+        }
+        return parameterTypes;
+    }
+
+    public static void addTypeVariables(MethodSpec.Builder method, TypeVariableName[] types) {
+        for (int i = 0, c = types.length; i < c; i++) {
+            method.addTypeVariable(types[i]);
+        }
+    }
 }
