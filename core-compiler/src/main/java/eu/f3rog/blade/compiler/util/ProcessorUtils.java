@@ -265,4 +265,24 @@ public class ProcessorUtils {
             method.addParameter(targetTypeName, parameterName);
         }
     }
+
+    public static TypeName getRawType(TypeMirror typeMirror) {
+        return getRawType(ClassName.get(typeMirror));
+    }
+
+    public static TypeName getRawType(final TypeName typeName) {
+        if (typeName instanceof ParameterizedTypeName) {
+            ParameterizedTypeName ptn = (ParameterizedTypeName) typeName;
+            return ptn.rawType;
+        } else if (typeName instanceof TypeVariableName) {
+            TypeVariableName tvn = (TypeVariableName) typeName;
+            if (!tvn.bounds.isEmpty()) {
+                return tvn.bounds.get(0);
+            } else {
+                return null;
+            }
+        } else {
+            return typeName;
+        }
+    }
 }

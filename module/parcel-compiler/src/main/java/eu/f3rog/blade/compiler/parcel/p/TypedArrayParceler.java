@@ -2,11 +2,14 @@ package eu.f3rog.blade.compiler.parcel.p;
 
 import android.os.Parcelable;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.VariableElement;
+
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.getRawType;
 
 /**
  * Class {@link TypedArrayParceler}
@@ -28,10 +31,12 @@ final class TypedArrayParceler implements ClassParceler {
 
     @Override
     public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        String t = e.asType().toString();
-        int i = t.lastIndexOf(".");
-        TypeName tn = ClassName.get(t.substring(0, i), Parceler.removeArrayParenthesis(t.substring(i + 1)));
-        method.addStatement("$N.$N = $N.createTypedArray($T.CREATOR)", object, e.getSimpleName(), parcel, tn);
+        ArrayTypeName tn = (ArrayTypeName) ClassName.get(e.asType());
+        TypeName rawType = getRawType(tn.componentType);
+        if (rawType == null) {
+            throw new IllegalStateException();
+        }
+        method.addStatement("$N.$N = $N.createTypedArray($T.CREATOR)", object, e.getSimpleName(), parcel, rawType);
     }
 
 }
