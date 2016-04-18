@@ -1,12 +1,5 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-
-import javax.lang.model.element.VariableElement;
-
-import eu.f3rog.blade.compiler.util.ProcessorUtils;
-
 /**
  * Class {@link ObjectArrayParceler}
  *
@@ -21,18 +14,13 @@ final class ObjectArrayParceler implements ClassParceler {
     }
 
     @Override
-    public void write(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.writeArray($N.$N)", parcel, object, e.getSimpleName());
+    public CallFormat writeCall() {
+        return new CallFormat("%s.writeArray(%s)", CallFormat.Arg.PARCEL, CallFormat.Arg.TARGET_GETTER);
     }
 
     @Override
-    public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        TypeName rawType = ProcessorUtils.getRawType(e.asType());
-        if (rawType != null) {
-            method.addStatement("$N.$N = ($T) $N.readArray($T.class.getClassLoader())", object, e.getSimpleName(), e.asType(), parcel, rawType);
-        } else {
-            method.addStatement("$N.$N = ($T) $N.readArray(null)", object, e.getSimpleName(), e.asType(), parcel);
-        }
+    public CallFormat readCall() {
+        return new CallFormat("(%s) %s.readArray(%s)", CallFormat.Arg.TYPE, CallFormat.Arg.PARCEL, CallFormat.Arg.CLASS_LOADER_OR_NULL);
     }
 
 }

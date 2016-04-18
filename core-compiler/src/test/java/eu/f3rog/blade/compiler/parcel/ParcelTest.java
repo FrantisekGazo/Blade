@@ -282,9 +282,9 @@ public class ParcelTest extends BaseTest {
                         "       target.doubleArray = parcel.createDoubleArray();",
                         "       target.charArray = parcel.createCharArray();",
                         "       target.stringArray = parcel.createStringArray();",
-                        "       target.objectArray = (Object[]) parcel.readArray(Object[].class.getClassLoader());",
-                        "       target.arrayO = ($O[]) parcel.readArray($O[].class.getClassLoader());",
-                        "       target.arrayDS = ($DS[]) parcel.readArray($DS[].class.getClassLoader());",
+                        "       target.objectArray = (Object[]) parcel.readArray(Object.class.getClassLoader());",
+                        "       target.arrayO = ($O[]) parcel.readArray($O.class.getClassLoader());",
+                        "       target.arrayDS = ($DS[]) parcel.readArray($DS.class.getClassLoader());",
                         "       target.arrayDP = parcel.createTypedArray($DP.CREATOR);",
                         "   }",
                         "",
@@ -406,7 +406,7 @@ public class ParcelTest extends BaseTest {
     }
 
     @Test
-    public void ignorePrivateFields() {
+    public void ignoreStaticFields() {
         JavaFileObject input = file("com.example", "MyClass")
                 .imports(
                         Parcel.class, "P",
@@ -416,11 +416,8 @@ public class ParcelTest extends BaseTest {
                 .body(
                         "@$P",
                         "public class $T implements Parcelable {",
-                        "",// only field should processed
+                        "",
                         "   String text;",
-                        "",// this fields should be ignored
-                        "   private String p1;",
-                        "   protected String p2;",
                         "   static String p3;",
                         "",
                         "   public $T(android.os.Parcel p) {}",
@@ -466,6 +463,146 @@ public class ParcelTest extends BaseTest {
                         "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
                         "   public static void readFromParcel($I target, Parcel parcel) {",
                         "       target.text = parcel.readString();",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PARCEL)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void missingGetter() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        Parcel.class, "P",
+                        Parcelable.class,
+                        List.class
+                )
+                .body(
+                        "@$P",
+                        "public class $T implements Parcelable {",
+                        "",
+                        "   private String text;",
+                        "",
+                        "   public $T(android.os.Parcel p) {}",
+                        "",
+                        "   @Override",
+                        "   public int describeContents() { return 0; }",
+                        "   @Override",
+                        "   public void writeToParcel(android.os.Parcel dest, int flags) {}",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PARCEL)
+                .failsToCompile()
+                .withErrorContaining(String.format(ParcelErrorMsg.Missing_Access_Method, "text", "getter"));
+    }
+
+    @Test
+    public void missingSetter() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        Parcel.class, "P",
+                        Parcelable.class,
+                        List.class
+                )
+                .body(
+                        "@$P",
+                        "public class $T implements Parcelable {",
+                        "",
+                        "   private String text;",
+                        "",
+                        "   public $T(android.os.Parcel p) {}",
+                        "",
+                        "   @Override",
+                        "   public int describeContents() { return 0; }",
+                        "   @Override",
+                        "   public void writeToParcel(android.os.Parcel dest, int flags) {}",
+                        "",
+                        "   public String getText() { return text; }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PARCEL)
+                .failsToCompile()
+                .withErrorContaining(String.format(ParcelErrorMsg.Missing_Access_Method, "text", "setter"));
+    }
+
+    @Test
+    public void useGetterSetter() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        Parcel.class, "P",
+                        Parcelable.class,
+                        List.class
+                )
+                .body(
+                        "@$P",
+                        "public class $T implements Parcelable {",
+                        "",
+                        "   private String text1;",
+                        "   protected String text2;",
+                        "",
+                        "   public $T(android.os.Parcel p) {}",
+                        "",
+                        "   @Override",
+                        "   public int describeContents() { return 0; }",
+                        "   @Override",
+                        "   public void writeToParcel(android.os.Parcel dest, int flags) {}",
+                        "",
+                        "   public String getText1() { return text1; }",
+                        "   public void setText1(String newText1) { text1 = newText1; }",
+                        "",
+                        "   public String getText2() { return text2; }",
+                        "   public void setText2(String newText2) { text2 = newText2; }",
+                        "",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyClass_Helper")
+                .imports(
+                        input, "I",
+                        android.os.Parcel.class,
+                        Parcelable.class,
+                        Weave.class,
+                        Override.class
+                )
+                .body(
+                        "abstract class $T {",
+                        "",
+                        "   @Weave(into = \"<FIELD>\", statement = \"com.example.$T.CREATOR\")",
+                        "   public static final Parcelable.Creator<$I> CREATOR = ",
+                        "     new Parcelable.Creator<$I>() {",
+                        "       @Override",
+                        "       public $I createFromParcel(Parcel in) {",
+                        "           return new $I(in);",
+                        "       }",
+                        "",
+                        "       @Override",
+                        "       public $I[] newArray(int size) {",
+                        "           return new $I[size];",
+                        "       }",
+                        "   };",
+                        "",
+                        "   @Weave(into = \">writeToParcel\", args = {\"android.os.Parcel\", \"int\"}, statement = \"com.example.$T.writeToParcel(this, $1);\")",
+                        "   public static void writeToParcel($I target, Parcel parcel) {",
+                        "       parcel.writeString(target.getText1());",
+                        "       parcel.writeString(target.getText2());",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
+                        "   public static void readFromParcel($I target, Parcel parcel) {",
+                        "       target.setText1(parcel.readString());",
+                        "       target.setText2(parcel.readString());",
                         "   }",
                         "",
                         "}"

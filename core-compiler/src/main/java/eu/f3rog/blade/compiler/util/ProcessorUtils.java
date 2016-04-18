@@ -3,6 +3,7 @@ package eu.f3rog.blade.compiler.util;
 import android.app.Activity;
 import android.app.Fragment;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -271,7 +272,10 @@ public class ProcessorUtils {
     }
 
     public static TypeName getRawType(final TypeName typeName) {
-        if (typeName instanceof ParameterizedTypeName) {
+        if (typeName instanceof ArrayTypeName) {
+            ArrayTypeName atn = (ArrayTypeName) typeName;
+            return getRawType(atn.componentType);
+        } else if (typeName instanceof ParameterizedTypeName) {
             ParameterizedTypeName ptn = (ParameterizedTypeName) typeName;
             return ptn.rawType;
         } else if (typeName instanceof TypeVariableName) {

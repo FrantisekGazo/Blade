@@ -2,10 +2,6 @@ package eu.f3rog.blade.compiler.parcel.p;
 
 import android.util.SparseBooleanArray;
 
-import com.squareup.javapoet.MethodSpec;
-
-import javax.lang.model.element.VariableElement;
-
 /**
  * Class {@link SparseBooleanArrayParceler}
  *
@@ -20,13 +16,12 @@ final class SparseBooleanArrayParceler implements ClassParceler {
     }
 
     @Override
-    public void write(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.writeSparseBooleanArray($N.$N)", parcel, object, e.getSimpleName());
+    public CallFormat writeCall() {
+        return new CallFormat("%s.writeSparseBooleanArray(%s)", CallFormat.Arg.PARCEL, CallFormat.Arg.TARGET_GETTER);
     }
 
     @Override
-    public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.$N = $N.readSparseBooleanArray()", object, e.getSimpleName(), parcel);
+    public CallFormat readCall() {
+        return new CallFormat("%s.readSparseBooleanArray()", CallFormat.Arg.PARCEL);
     }
-
 }

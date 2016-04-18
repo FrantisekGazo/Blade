@@ -1,9 +1,5 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import com.squareup.javapoet.MethodSpec;
-
-import javax.lang.model.element.VariableElement;
-
 /**
  * Class {@link ClassParceler}
  *
@@ -14,8 +10,13 @@ interface ClassParceler {
 
     Class type();
 
-    void write(VariableElement e, MethodSpec.Builder method, String parcel, String object);
+    /**
+     * Returns format of write call.
+     */
+    CallFormat writeCall();
 
-    void read(VariableElement e, MethodSpec.Builder method, String parcel, String object);
-
+    /**
+     * Returns format of write call.
+     */
+    CallFormat readCall();
 }
