@@ -335,8 +335,7 @@ apply plugin: 'blade'
 And create `blade.json` file in application directory with Blade modules you need: (or [download](https://github.com/FrantisekGazo/Blade/blob/master/sample/blade.json) from sample app)
 ```
 {
-    debug: false,
-    modules: [
+    "modules": [
         "arg",
         "extra",
         "state",
