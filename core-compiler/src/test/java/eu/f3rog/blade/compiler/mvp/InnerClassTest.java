@@ -36,7 +36,7 @@ public final class InnerClassTest extends BaseTest {
                 .body(
                         "public class $T implements $P<$V.MyView, String> {",
                         "",
-                        String.format(PresenterTest.PRESENTER_METHODS, "$V.MyView", "String"),
+                        PresenterTest.getPresenterImplementation("$V.MyView", "String"),
                         "}"
                 );
         JavaFileObject view = file("com.example", "Wrapper")
@@ -93,6 +93,7 @@ public final class InnerClassTest extends BaseTest {
                         "               target.mPresenter = new $P();",
                         "               $PM.put(target, param, target.mPresenter);",
                         "           }",
+                        "           target.mPresenter.setData(param);",
                         "           return tagObject.toString();",
                         "       }",
                         "   }",

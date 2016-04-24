@@ -20,6 +20,10 @@ public abstract class BasePresenter<V extends IView, D>
     }
 
     @Override
+    public void setData(D data) {
+    }
+
+    @Override
     public void destroy() {
     }
 

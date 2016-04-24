@@ -185,6 +185,7 @@ public class PresenterHelperModule extends BaseHelperModule {
                     .addStatement("$N.$N = new $T()", target, fieldName, fieldType)
                     .addStatement("$T.put($N, $N, $N.$N)", PresenterManager.class, target, param, target, fieldName)
                     .endControlFlow();
+            method.addStatement("$N.$N.setData($N)", target, fieldName, param);
         }
         if (returnsString) {
             method.addStatement("return $N.toString()", tagObject);
