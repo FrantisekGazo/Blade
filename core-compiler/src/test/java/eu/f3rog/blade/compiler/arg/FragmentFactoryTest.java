@@ -23,9 +23,21 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  */
 public final class FragmentFactoryTest extends BaseTest {
 
+    public static final String COM_EXAMPLE = "com.example";
+    public static final String BW_ARGS_NEW_BW = "       $BW args = new $BW();";
+    public static final String BLADE = "blade";
+    public static final String PUBLIC_CLASS_T = "public class $T {";
+    public static final String FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE = "       fragment.setArguments(args.getBundle());";
+    public static final String RETURN_FRAGMENT = "       return fragment;";
+    public static final String PUBLIC_CLASS_T_EXTENDS_FRAGMENT = "public class $T extends Fragment {";
+    public static final String A_INT_NUMBER = "   @$A int number;";
+    public static final String ARGS_PUT_ARG_NUMBER_NUMBER = "       args.put(\"<Arg-number>\", number);";
+    public static final String ARGS_PUT_ARG_TEXT_TEXT = "       args.put(\"<Arg-text>\", text);";
+    public static final String A_STRING_TEXT = "   @$A String text;";
+
     @Test
     public void none() {
-        JavaFileObject input = file("com.example", "SomeFragment")
+        JavaFileObject input = file(COM_EXAMPLE, "SomeFragment")
                 .imports(
                         Fragment.class,
                         Blade.class, "B"
@@ -35,19 +47,19 @@ public final class FragmentFactoryTest extends BaseTest {
                         "public class $T extends Fragment {}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "F")
+        JavaFileObject expected = generatedFile(BLADE, "F")
                 .imports(
                         input, "I",
                         BundleWrapper.class, "BW"
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   public static $I new$I() {",
                         "       $I fragment = new $I();",
-                        "       $BW args = new $BW();",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        BW_ARGS_NEW_BW,
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "}"
@@ -62,34 +74,34 @@ public final class FragmentFactoryTest extends BaseTest {
 
     @Test
     public void one() {
-        JavaFileObject input = file("com.example", "SomeFragment")
+        JavaFileObject input = file(COM_EXAMPLE, "SomeFragment")
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
                         "   @$A String mText;",
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "F")
+        JavaFileObject expected = generatedFile(BLADE, "F")
                 .imports(
                         input, "I",
                         BundleWrapper.class, "BW",
                         String.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   public static $I new$I(String mText) {",
                         "       $I fragment = new $I();",
-                        "       $BW args = new $BW();",
+                        BW_ARGS_NEW_BW,
                         "       args.put(\"<Arg-mText>\", mText);",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "}"
@@ -104,34 +116,34 @@ public final class FragmentFactoryTest extends BaseTest {
 
     @Test
     public void more() {
-        JavaFileObject input1 = file("com.example", "FirstFragment")
+        JavaFileObject input1 = file(COM_EXAMPLE, "FirstFragment")
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
-                        "   @$A int number;",
+                        A_INT_NUMBER,
                         "",
                         "}"
                 );
-        JavaFileObject input2 = file("com.example", "SecondFragment")
+        JavaFileObject input2 = file(COM_EXAMPLE, "SecondFragment")
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
-                        "   @$A String text;",
+                        A_STRING_TEXT,
                         "   @$A boolean flag;",
                         "   @$A double number;",
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "F")
+        JavaFileObject expected = generatedFile(BLADE, "F")
                 .imports(
                         input1, "I1",
                         input2, "I2",
@@ -139,24 +151,24 @@ public final class FragmentFactoryTest extends BaseTest {
                         String.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   public static $I1 new$I1(int number) {",
                         "       $I1 fragment = new $I1();",
-                        "       $BW args = new $BW();",
-                        "       args.put(\"<Arg-number>\", number);",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        BW_ARGS_NEW_BW,
+                        ARGS_PUT_ARG_NUMBER_NUMBER,
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "   public static $I2 new$I2(String text, boolean flag, double number) {",
                         "       $I2 fragment = new $I2();",
-                        "       $BW args = new $BW();",
-                        "       args.put(\"<Arg-text>\", text);",
+                        BW_ARGS_NEW_BW,
+                        ARGS_PUT_ARG_TEXT_TEXT,
                         "       args.put(\"<Arg-flag>\", flag);",
-                        "       args.put(\"<Arg-number>\", number);",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        ARGS_PUT_ARG_NUMBER_NUMBER,
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "}"
@@ -171,19 +183,19 @@ public final class FragmentFactoryTest extends BaseTest {
 
     @Test
     public void inheritance() {
-        JavaFileObject base = file("com.example", "BaseFragment")
+        JavaFileObject base = file(COM_EXAMPLE, "BaseFragment")
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
-                        "   @$A int number;",
+                        A_INT_NUMBER,
                         "",
                         "}"
                 );
-        JavaFileObject activity = file("com.example", "MyFragment")
+        JavaFileObject activity = file(COM_EXAMPLE, "MyFragment")
                 .imports(
                         Arg.class, "A",
                         base, "B"
@@ -191,12 +203,12 @@ public final class FragmentFactoryTest extends BaseTest {
                 .body(
                         "public class $T extends $B {",
                         "",
-                        "   @$A String text;",
+                        A_STRING_TEXT,
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "F")
+        JavaFileObject expected = generatedFile(BLADE, "F")
                 .imports(
                         base, "B",
                         activity, "A",
@@ -204,23 +216,23 @@ public final class FragmentFactoryTest extends BaseTest {
                         String.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   public static $B new$B(int number) {",
                         "       $B fragment = new $B();",
-                        "       $BW args = new $BW();",
-                        "       args.put(\"<Arg-number>\", number);",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        BW_ARGS_NEW_BW,
+                        ARGS_PUT_ARG_NUMBER_NUMBER,
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "   public static $A new$A(int number, String text) {",
                         "       $A fragment = new $A();",
-                        "       $BW args = new $BW();",
-                        "       args.put(\"<Arg-number>\", number);",
-                        "       args.put(\"<Arg-text>\", text);",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        BW_ARGS_NEW_BW,
+                        ARGS_PUT_ARG_NUMBER_NUMBER,
+                        ARGS_PUT_ARG_TEXT_TEXT,
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "}"
@@ -235,7 +247,7 @@ public final class FragmentFactoryTest extends BaseTest {
 
     @Test
     public void inheritanceFromAbstract() {
-        JavaFileObject base = file("com.example", "BaseFragment")
+        JavaFileObject base = file(COM_EXAMPLE, "BaseFragment")
                 .imports(
                         Arg.class, "A",
                         Fragment.class
@@ -243,11 +255,11 @@ public final class FragmentFactoryTest extends BaseTest {
                 .body(
                         "public abstract class $T extends Fragment {",
                         "",
-                        "   @$A int number;",
+                        A_INT_NUMBER,
                         "",
                         "}"
                 );
-        JavaFileObject activity = file("com.example", "MyFragment")
+        JavaFileObject activity = file(COM_EXAMPLE, "MyFragment")
                 .imports(
                         Arg.class, "A",
                         base, "B"
@@ -255,27 +267,27 @@ public final class FragmentFactoryTest extends BaseTest {
                 .body(
                         "public class $T extends $B {",
                         "",
-                        "   @$A String text;",
+                        A_STRING_TEXT,
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "F")
+        JavaFileObject expected = generatedFile(BLADE, "F")
                 .imports(
                         activity, "A",
                         BundleWrapper.class, "BW",
                         String.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   public static $A new$A(int number, String text) {",
                         "       $A fragment = new $A();",
-                        "       $BW args = new $BW();",
-                        "       args.put(\"<Arg-number>\", number);",
-                        "       args.put(\"<Arg-text>\", text);",
-                        "       fragment.setArguments(args.getBundle());",
-                        "       return fragment;",
+                        BW_ARGS_NEW_BW,
+                        ARGS_PUT_ARG_NUMBER_NUMBER,
+                        ARGS_PUT_ARG_TEXT_TEXT,
+                        FRAGMENT_SET_ARGUMENTS_ARGS_GET_BUNDLE,
+                        RETURN_FRAGMENT,
                         "   }",
                         "",
                         "}"

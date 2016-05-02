@@ -45,6 +45,10 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
  */
 public class PresenterHelperModule extends BaseHelperModule {
 
+    public static final String TARGET = "target";
+    public static final String IF_N_N_NULL = "if ($N.$N != null)";
+    public static final String S_S_THIS = "%s.%s(this);";
+
     private enum ViewType {
         ACTIVITY, VIEW
     }
@@ -137,7 +141,7 @@ public class PresenterHelperModule extends BaseHelperModule {
 
     private void addSetPresenterMethod(HelperClassBuilder builder) {
         String tagObject = "tagObject";
-        String target = "target";
+        String target = TARGET;
 
         boolean returnsString = (mViewType == ViewType.VIEW);
 
@@ -160,7 +164,7 @@ public class PresenterHelperModule extends BaseHelperModule {
         for (int i = 0; i < mPresenters.size(); i++) {
             String fieldName = mPresenters.get(i);
 
-            method.beginControlFlow("if ($N.$N != null)", target, fieldName)
+            method.beginControlFlow(IF_N_N_NULL, target, fieldName)
                     .addStatement("$N.$N.unbind()", target, fieldName)
                     .endControlFlow();
             method.addStatement("$N.$N = null", target, fieldName);
@@ -229,7 +233,7 @@ public class PresenterHelperModule extends BaseHelperModule {
     }
 
     private void addBindPresenterMethod(HelperClassBuilder builder) {
-        String target = "target";
+        String target = TARGET;
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_BIND_PRESENTERS)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -238,7 +242,7 @@ public class PresenterHelperModule extends BaseHelperModule {
         if (mViewType == ViewType.VIEW) {
             method.addAnnotation(
                     WeaveBuilder.weave().method("onAttachedToWindow")
-                            .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_BIND_PRESENTERS)
+                            .withStatement(S_S_THIS, fullName(builder.getClassName()), METHOD_NAME_BIND_PRESENTERS)
                             .withStatement(" this.%s = true;", FIELD_NAME_IS_ATTACHED)
                             .build()
             );
@@ -247,7 +251,7 @@ public class PresenterHelperModule extends BaseHelperModule {
         for (int i = 0; i < mPresenters.size(); i++) {
             String fieldName = mPresenters.get(i);
 
-            method.beginControlFlow("if ($N.$N != null)", target, fieldName)
+            method.beginControlFlow(IF_N_N_NULL, target, fieldName)
                     .addStatement("$N.$N.bind($N)", target, fieldName, target)
                     .endControlFlow();
         }
@@ -256,7 +260,7 @@ public class PresenterHelperModule extends BaseHelperModule {
     }
 
     private void addUnbindPresenterMethod(HelperClassBuilder builder) {
-        String target = "target";
+        String target = TARGET;
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_UNBIND_PRESENTERS)
                 .addAnnotation(
@@ -268,7 +272,7 @@ public class PresenterHelperModule extends BaseHelperModule {
         for (int i = 0; i < mPresenters.size(); i++) {
             String fieldName = mPresenters.get(i);
 
-            method.beginControlFlow("if ($N.$N != null)", target, fieldName)
+            method.beginControlFlow(IF_N_N_NULL, target, fieldName)
                     .addStatement("$N.$N.unbind()", target, fieldName)
                     .endControlFlow();
         }
@@ -280,12 +284,12 @@ public class PresenterHelperModule extends BaseHelperModule {
         switch (mViewType) {
             case VIEW:
                 return WeaveBuilder.weave().method("onDetachedFromWindow")
-                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
+                        .withStatement(S_S_THIS, fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
                         .withStatement(" this.%s = false;", FIELD_NAME_IS_ATTACHED)
                         .build();
             case ACTIVITY:
                 return WeaveBuilder.weave().method("onDestroy")
-                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
+                        .withStatement(S_S_THIS, fullName(builder.getClassName()), METHOD_NAME_UNBIND_PRESENTERS)
                         .build();
             default:
                 return null;

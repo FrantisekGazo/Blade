@@ -18,6 +18,14 @@ import eu.f3rog.blade.mvp.MvpActivity;
  */
 public class PresenterManager {
 
+    private static PresenterManager sInstance;
+
+    private final Map<Object, ActivityPresenterManager> mActivityPresenters;
+
+    private PresenterManager() {
+        mActivityPresenters = new HashMap<>();
+    }
+
     /**
      * Used internally by Blade library.
      */
@@ -123,19 +131,11 @@ public class PresenterManager {
     }
 
 
-    private static PresenterManager sInstance;
-
     private static PresenterManager getInstance() {
         if (sInstance == null) {
             sInstance = new PresenterManager();
         }
         return sInstance;
-    }
-
-    private final Map<Object, ActivityPresenterManager> mActivityPresenters;
-
-    private PresenterManager() {
-        mActivityPresenters = new HashMap<>();
     }
 
     private ActivityPresenterManager getActivityPresenters(Object activityId) {

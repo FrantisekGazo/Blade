@@ -172,7 +172,6 @@ public abstract class BaseClassBuilder
         // create file
         JavaFile javaFile = JavaFile.builder(getClassName().packageName(), cls).build();
         javaFile.writeTo(processingEnvironment.getFiler());
-        //javaFile.writeTo(System.out);
 
         if (LOG_SUCCESS) {
             System.out.println(String.format("Class <%s> successfully generated.", getFullName()));

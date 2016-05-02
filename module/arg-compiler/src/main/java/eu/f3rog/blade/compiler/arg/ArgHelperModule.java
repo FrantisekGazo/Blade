@@ -39,11 +39,11 @@ public class ArgHelperModule extends BaseHelperModule {
 
     private static final String ARG_ID_FORMAT = "<Arg-%s>";
 
+    private final List<String> mArgs = new ArrayList<>();
+
     public static String getArgId(String arg) {
         return String.format(ARG_ID_FORMAT, arg);
     }
-
-    private final List<String> mArgs = new ArrayList<>();
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {

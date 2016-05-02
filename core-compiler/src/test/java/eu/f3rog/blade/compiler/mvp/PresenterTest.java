@@ -31,25 +31,51 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
 public final class PresenterTest extends BaseTest {
 
     private static final String PRESENTER_METHODS =
-            " public void bind(%s view) {} " +
-                    " public void unbind() {} " +
-                    " public void create(%s o, boolean wasRestored) {} " +
-                    " public void destroy() {} " +
-                    " public void saveState(Object o) {} " +
-                    " public void restoreState(Object o) {} ";
+        " public void bind(%s view) {} " +
+                " public void unbind() {} " +
+                " public void create(%s o, boolean wasRestored) {} " +
+                " public void destroy() {} " +
+                " public void saveState(Object o) {} " +
+                " public void restoreState(Object o) {} ";
+    public static final String MY_CLASS = "MyClass";
+    public static final String COM_EXAMPLE = "com.example";
+    public static final String P_OBJECT_O = "   @$P Object o;";
+    public static final String PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V = "public class $T extends View implements $V {";
+    public static final String PUBLIC_T_CONTEXT_C_SUPER_C = "   public $T(Context c) {super(c);}";
+    public static final String STRING = "String";
+    public static final String MY_PRESENTER = "MyPresenter";
+    public static final String P_MP_M_PRESENTER = "   @$P $MP mPresenter;";
+    public static final String IF_TAG_OBJECT_NULL = "       if (tagObject == null) {";
+    public static final String IF_TARGET_M_PRESENTER_NULL_1 = "           if (target.mPresenter != null) {";
+    public static final String TARGET_M_PRESENTER_UNBIND = "               target.mPresenter.unbind();";
+    public static final String TARGET_M_PRESENTER_NULL = "           target.mPresenter = null;";
+    public static final String ELSE = "       } else {";
+    public static final String IF_TAG_OBJECT_INSTANCEOF_STRING = "           if (!(tagObject instanceof String)) {";
+    public static final String THROW_NEW_E_INCORRECT_TYPE_OF_TAG_OBJECT = "               throw new $E(\"Incorrect type of tag object.\");";
+    public static final String STRING_PARAM_STRING_TAG_OBJECT = "           String param = (String) tagObject;";
+    public static final String TARGET_M_PRESENTER_P_PM_GET_TARGET_PARAM_P_CLASS = "           target.mPresenter = ($P) $PM.get(target, param, $P.class);";
+    public static final String IF_TARGET_M_PRESENTER_NULL_2 = "           if (target.mPresenter == null) {";
+    public static final String TARGET_M_PRESENTER_NEW_P = "               target.mPresenter = new $P();";
+    public static final String PM_PUT_TARGET_PARAM_TARGET_M_PRESENTER = "               $PM.put(target, param, target.mPresenter);";
+    public static final String CLOSING_BRACE_1 = "       }";
+    public static final String IF_TARGET_M_PRESENTER_NULL_3 = "       if (target.mPresenter != null) {";
+    public static final String TARGET_M_PRESENTER_BIND_TARGET = "           target.mPresenter.bind(target);";
+    public static final String CLOSING_BRACE_2 = "   }";
+    public static final String CLOSING_BRACE_3 = "           }";
+    public static final String CLOSING_BRACE_4 = "}";
 
     @Test
     public void invalidClass() {
-        JavaFileObject input = file("com.example", "MyClass")
+        JavaFileObject input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         Presenter.class, "P"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   @$P Object o;",
+                        P_OBJECT_O,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(input)
@@ -57,7 +83,7 @@ public final class PresenterTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Invalid_class_with_Presenter);
 
-        input = file("com.example", "MyClass")
+        input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         Presenter.class, "P",
                         View.class
@@ -65,9 +91,9 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "public class $T extends View {",
                         "",
-                        "   @$P Object o;",
+                        P_OBJECT_O,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(input)
@@ -78,7 +104,7 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void invalidField() {
-        JavaFileObject input = file("com.example", "MyClass")
+        JavaFileObject input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         View.class,
                         Context.class,
@@ -86,13 +112,13 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
                         "   @$P private Object o;",
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(input)
@@ -100,7 +126,7 @@ public final class PresenterTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Presenter.class.getSimpleName()));
 
-        input = file("com.example", "MyClass")
+        input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         View.class,
                         Context.class,
@@ -108,13 +134,13 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
                         "   @$P protected Object o;",
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(input)
@@ -122,7 +148,7 @@ public final class PresenterTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Presenter.class.getSimpleName()));
 
-        input = file("com.example", "MyClass")
+        input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         View.class,
                         Context.class,
@@ -130,13 +156,13 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
                         "   @$P final Object o;",
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(input)
@@ -147,7 +173,7 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void invalidPresenterClass() {
-        JavaFileObject input = file("com.example", "MyClass")
+        JavaFileObject input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         View.class,
                         Context.class,
@@ -155,13 +181,13 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
-                        "   @$P Object o;",
+                        P_OBJECT_O,
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(input)
@@ -172,7 +198,7 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void inconsistentPresenterParameterTypes() {
-        JavaFileObject presenter1 = file("com.example", "MyPresenter1")
+        JavaFileObject presenter1 = file(COM_EXAMPLE, "MyPresenter1")
                 .imports(
                         IPresenter.class, "P",
                         IView.class, "V"
@@ -182,9 +208,9 @@ public final class PresenterTest extends BaseTest {
                         "",
                         String.format(PRESENTER_METHODS, "$V", "Long"),
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
-        JavaFileObject presenter2 = file("com.example", "MyPresenter2")
+        JavaFileObject presenter2 = file(COM_EXAMPLE, "MyPresenter2")
                 .imports(
                         IPresenter.class, "P",
                         IView.class, "V"
@@ -192,11 +218,11 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "public class $T implements $P<$V, String> {",
                         "",
-                        String.format(PRESENTER_METHODS, "$V", "String"),
+                        String.format(PRESENTER_METHODS, "$V", STRING),
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
-        JavaFileObject input = file("com.example", "MyClass")
+        JavaFileObject input = file(COM_EXAMPLE, MY_CLASS)
                 .imports(
                         presenter1, "MP1",
                         presenter2, "MP2",
@@ -206,14 +232,14 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
                         "   @$P $MP1 mPresenter1;",
                         "   @$P $MP2 mPresenter2;",
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(presenter1, presenter2, input)
@@ -224,7 +250,7 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void oneViewPresenter() {
-        JavaFileObject presenter = file("com.example", "MyPresenter")
+        JavaFileObject presenter = file(COM_EXAMPLE, MY_PRESENTER)
                 .imports(
                         IPresenter.class, "P",
                         "com.example.MyView", "V"
@@ -232,11 +258,11 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "public class $T implements $P<$V, String> {",
                         "",
-                        String.format(PRESENTER_METHODS, "$V", "String"),
+                        String.format(PRESENTER_METHODS, "$V", STRING),
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
-        JavaFileObject view = file("com.example", "MyView")
+        JavaFileObject view = file(COM_EXAMPLE, "MyView")
                 .imports(
                         presenter, "MP",
                         View.class,
@@ -245,16 +271,16 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
-                        "   @$P $MP mPresenter;",
+                        P_MP_M_PRESENTER,
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MyView_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "MyView_Helper")
                 .imports(
                         PresenterManager.class, "PM",
                         presenter, "P",
@@ -272,41 +298,41 @@ public final class PresenterTest extends BaseTest {
                         "",
                         "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); if (this.mIsAttached) { com.example.$T.bindPresenters(this); } return;\")",
                         "   public static String setPresenters($V target, Object tagObject) {",
-                        "       if (tagObject == null) {",
-                        "           if (target.mPresenter != null) {",
-                        "               target.mPresenter.unbind();",
-                        "           }",
-                        "           target.mPresenter = null;",
+                        IF_TAG_OBJECT_NULL,
+                        IF_TARGET_M_PRESENTER_NULL_1,
+                        TARGET_M_PRESENTER_UNBIND,
+                        CLOSING_BRACE_1,
+                        TARGET_M_PRESENTER_NULL,
                         "           return null;",
-                        "       } else {",
-                        "           if (!(tagObject instanceof String)) {",
-                        "               throw new $E(\"Incorrect type of tag object.\");",
-                        "           }",
-                        "           String param = (String) tagObject;",
-                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
-                        "           if (target.mPresenter == null) {",
-                        "               target.mPresenter = new $P();",
-                        "               $PM.put(target, param, target.mPresenter);",
-                        "           }",
+                        ELSE,
+                        IF_TAG_OBJECT_INSTANCEOF_STRING,
+                        THROW_NEW_E_INCORRECT_TYPE_OF_TAG_OBJECT,
+                        CLOSING_BRACE_3,
+                        STRING_PARAM_STRING_TAG_OBJECT,
+                        TARGET_M_PRESENTER_P_PM_GET_TARGET_PARAM_P_CLASS,
+                        IF_TARGET_M_PRESENTER_NULL_2,
+                        TARGET_M_PRESENTER_NEW_P,
+                        PM_PUT_TARGET_PARAM_TARGET_M_PRESENTER,
+                        CLOSING_BRACE_3,
                         "           return tagObject.toString();",
-                        "       }",
-                        "   }",
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
                         "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this); this.mIsAttached = true;\")",
                         "   public static void bindPresenters($V target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.bind(target);",
-                        "       }",
-                        "   }",
+                        IF_TARGET_M_PRESENTER_NULL_3,
+                        TARGET_M_PRESENTER_BIND_TARGET,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
                         "   @Weave(into = \"onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this); this.mIsAttached = false;\")",
                         "   public static void unbindPresenters($V target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.unbind();",
-                        "       }",
-                        "   }",
+                        IF_TARGET_M_PRESENTER_NULL_3,
+                        TARGET_M_PRESENTER_UNBIND,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(presenter, view)
@@ -318,7 +344,7 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void oneViewBasePresenter() {
-        JavaFileObject presenter = file("com.example", "MyPresenter")
+        JavaFileObject presenter = file(COM_EXAMPLE, MY_PRESENTER)
                 .imports(
                         BasePresenter.class, "P",
                         "com.example.MyView", "V"
@@ -326,9 +352,9 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "public class $T extends $P<$V, String> {",
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
-        JavaFileObject view = file("com.example", "MyView")
+        JavaFileObject view = file(COM_EXAMPLE, "MyView")
                 .imports(
                         presenter, "MP",
                         View.class,
@@ -337,16 +363,16 @@ public final class PresenterTest extends BaseTest {
                         IView.class, "V"
                 )
                 .body(
-                        "public class $T extends View implements $V {",
+                        PUBLIC_CLASS_T_EXTENDS_VIEW_IMPLEMENTS_V,
                         "",
-                        "   @$P $MP mPresenter;",
+                        P_MP_M_PRESENTER,
                         "",
-                        "   public $T(Context c) {super(c);}",
+                        PUBLIC_T_CONTEXT_C_SUPER_C,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MyView_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "MyView_Helper")
                 .imports(
                         PresenterManager.class, "PM",
                         presenter, "P",
@@ -364,41 +390,41 @@ public final class PresenterTest extends BaseTest {
                         "",
                         "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); if (this.mIsAttached) { com.example.$T.bindPresenters(this); } return;\")",
                         "   public static String setPresenters($V target, Object tagObject) {",
-                        "       if (tagObject == null) {",
-                        "           if (target.mPresenter != null) {",
-                        "               target.mPresenter.unbind();",
-                        "           }",
-                        "           target.mPresenter = null;",
+                        IF_TAG_OBJECT_NULL,
+                        IF_TARGET_M_PRESENTER_NULL_1,
+                        TARGET_M_PRESENTER_UNBIND,
+                        CLOSING_BRACE_3,
+                        TARGET_M_PRESENTER_NULL,
                         "           return null;",
-                        "       } else {",
-                        "           if (!(tagObject instanceof String)) {",
-                        "               throw new $E(\"Incorrect type of tag object.\");",
-                        "           }",
-                        "           String param = (String) tagObject;",
-                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
-                        "           if (target.mPresenter == null) {",
-                        "               target.mPresenter = new $P();",
-                        "               $PM.put(target, param, target.mPresenter);",
-                        "           }",
+                        ELSE,
+                        IF_TAG_OBJECT_INSTANCEOF_STRING,
+                        THROW_NEW_E_INCORRECT_TYPE_OF_TAG_OBJECT,
+                        CLOSING_BRACE_3,
+                        STRING_PARAM_STRING_TAG_OBJECT,
+                        TARGET_M_PRESENTER_P_PM_GET_TARGET_PARAM_P_CLASS,
+                        IF_TARGET_M_PRESENTER_NULL_2,
+                        TARGET_M_PRESENTER_NEW_P,
+                        PM_PUT_TARGET_PARAM_TARGET_M_PRESENTER,
+                        CLOSING_BRACE_3,
                         "           return tagObject.toString();",
-                        "       }",
-                        "   }",
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
                         "   @Weave(into = \"onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this); this.mIsAttached = true;\")",
                         "   public static void bindPresenters($V target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.bind(target);",
-                        "       }",
-                        "   }",
+                        IF_TARGET_M_PRESENTER_NULL_3,
+                        TARGET_M_PRESENTER_BIND_TARGET,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
                         "   @Weave(into = \"onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this); this.mIsAttached = false;\")",
                         "   public static void unbindPresenters($V target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.unbind();",
-                        "       }",
-                        "   }",
+                        IF_TARGET_M_PRESENTER_NULL_3,
+                        TARGET_M_PRESENTER_UNBIND,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(presenter, view)
@@ -410,15 +436,15 @@ public final class PresenterTest extends BaseTest {
 
     @Test
     public void oneActivityPresenter() {
-        JavaFileObject viewInterface = file("com.example", "IMyView")
+        JavaFileObject viewInterface = file(COM_EXAMPLE, "IMyView")
                 .imports(
                         IView.class, "V"
                 )
                 .body(
                         "public interface $T extends $V {",
-                        "}"
+                        CLOSING_BRACE_4
                 );
-        JavaFileObject presenter = file("com.example", "MyPresenter")
+        JavaFileObject presenter = file(COM_EXAMPLE, MY_PRESENTER)
                 .imports(
                         IPresenter.class, "P",
                         viewInterface, "MV"
@@ -426,11 +452,11 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "public class $T implements $P<$MV, String> {",
                         "",
-                        String.format(PRESENTER_METHODS, "$MV", "String"),
+                        String.format(PRESENTER_METHODS, "$MV", STRING),
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
-        JavaFileObject activity = file("com.example", "MyActivity")
+        JavaFileObject activity = file(COM_EXAMPLE, "MyActivity")
                 .imports(
                         Activity.class,
                         viewInterface, "MV",
@@ -441,14 +467,14 @@ public final class PresenterTest extends BaseTest {
                 .body(
                         "public class $T extends Activity implements $MV {",
                         "",
-                        "   @$P $MP mPresenter;",
+                        P_MP_M_PRESENTER,
                         "",
                         "   public void setTag(Object o) {}",
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MyActivity_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "MyActivity_Helper")
                 .imports(
                         Weave.class,
                         activity, "A",
@@ -464,38 +490,38 @@ public final class PresenterTest extends BaseTest {
                         "",
                         "   @Weave(into = \"setTag\", args = {\"java.lang.Object\"}, statement = \"com.example.$T.setPresenters(this, $1); com.example.$T.bindPresenters(this);\")",
                         "   public static void setPresenters($A target, Object tagObject) {",
-                        "       if (tagObject == null) {",
-                        "           if (target.mPresenter != null) {",
-                        "               target.mPresenter.unbind();",
-                        "           }",
-                        "           target.mPresenter = null;",
-                        "       } else {",
-                        "           if (!(tagObject instanceof String)) {",
-                        "               throw new $E(\"Incorrect type of tag object.\");",
-                        "           }",
-                        "           String param = (String) tagObject;",
-                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
-                        "           if (target.mPresenter == null) {",
-                        "               target.mPresenter = new $P();",
-                        "               $PM.put(target, param, target.mPresenter);",
-                        "           }",
-                        "       }",
-                        "   }",
+                        IF_TAG_OBJECT_NULL,
+                        IF_TARGET_M_PRESENTER_NULL_1,
+                        TARGET_M_PRESENTER_UNBIND,
+                        CLOSING_BRACE_3,
+                        TARGET_M_PRESENTER_NULL,
+                        ELSE,
+                        IF_TAG_OBJECT_INSTANCEOF_STRING,
+                        THROW_NEW_E_INCORRECT_TYPE_OF_TAG_OBJECT,
+                        CLOSING_BRACE_3,
+                        STRING_PARAM_STRING_TAG_OBJECT,
+                        TARGET_M_PRESENTER_P_PM_GET_TARGET_PARAM_P_CLASS,
+                        IF_TARGET_M_PRESENTER_NULL_2,
+                        TARGET_M_PRESENTER_NEW_P,
+                        PM_PUT_TARGET_PARAM_TARGET_M_PRESENTER,
+                        CLOSING_BRACE_3,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
                         "   public static void bindPresenters($A target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.bind(target);",
-                        "       }",
-                        "   }",
+                        IF_TARGET_M_PRESENTER_NULL_3,
+                        TARGET_M_PRESENTER_BIND_TARGET,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
                         "   @Weave(into = \"onDestroy\", statement = \"com.example.$T.unbindPresenters(this);\")",
                         "   public static void unbindPresenters($A target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.unbind();",
-                        "       }",
-                        "   }",
+                        IF_TARGET_M_PRESENTER_NULL_3,
+                        TARGET_M_PRESENTER_UNBIND,
+                        CLOSING_BRACE_1,
+                        CLOSING_BRACE_2,
                         "",
-                        "}"
+                        CLOSING_BRACE_4
                 );
 
         assertFiles(viewInterface, presenter, activity)

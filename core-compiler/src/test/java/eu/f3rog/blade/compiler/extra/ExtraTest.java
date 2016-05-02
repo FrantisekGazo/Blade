@@ -30,16 +30,29 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  */
 public final class ExtraTest extends BaseTest {
 
+    public static final String MAIN_ACTIVITY = "MainActivity";
+    public static final String COM_EXAMPLE = "com.example";
+    public static final String E_STRING_M_EXTRA_STRING = "   @$E String mExtraString;";
+    public static final String PUBLIC_CLASS_T_EXTENDS_ACTIVITY = "public class $T extends Activity {";
+    public static final String E_INT_M_A = "   @$E int mA;";
+    public static final String ABSTRACT_CLASS_T = "abstract class $T {";
+    public static final String IF_INTENT_NULL_INTENT_GET_EXTRAS_NULL = "       if (intent == null || intent.getExtras() == null) {";
+    public static final String RETURN = "           return;";
+    public static final String BUNDLE_WRAPPER_EXTRAS_BUNDLE_WRAPPER_FROM_INTENT_GET_EXTRAS = "       BundleWrapper extras = BundleWrapper.from(intent.getExtras());";
+    public static final String TARGET_M_EXTRA_STRING_EXTRAS_GET_EXTRA_M_EXTRA_STRING_TARGET_M_EXTRA_STRING = "       target.mExtraString = extras.get(\"<Extra-mExtraString>\", target.mExtraString);";
+    public static final String TARGET_M_A_EXTRAS_GET_EXTRA_M_A_TARGET_M_A = "       target.mA = extras.get(\"<Extra-mA>\", target.mA);";
+    public static final String CLOSING_BRACE = "       }";
+
     @Test
     public void invalidCLass() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_ACTIVITY)
                 .imports(
                         Extra.class, "E"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   @$E String mExtraString;",
+                        E_STRING_M_EXTRA_STRING,
                         "",
                         "}"
                 );
@@ -52,13 +65,13 @@ public final class ExtraTest extends BaseTest {
 
     @Test
     public void invalidField() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_ACTIVITY)
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
                         "   @$E private String mExtraString;",
                         "",
@@ -70,13 +83,13 @@ public final class ExtraTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName()));
 
-        input = file("com.example", "MainActivity")
+        input = file(COM_EXAMPLE, MAIN_ACTIVITY)
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
                         "   @$E protected String mExtraString;",
                         "",
@@ -88,13 +101,13 @@ public final class ExtraTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName()));
 
-        input = file("com.example", "MainActivity")
+        input = file(COM_EXAMPLE, MAIN_ACTIVITY)
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
                         "   @$E final String mExtraString;",
                         "",
@@ -109,7 +122,7 @@ public final class ExtraTest extends BaseTest {
 
     @Test
     public void activityNone() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_ACTIVITY)
                 .imports(
                         Blade.class, "B",
                         Activity.class
@@ -128,21 +141,21 @@ public final class ExtraTest extends BaseTest {
 
     @Test
     public void activityOne() {
-        JavaFileObject input = file("com.example", "MainActivity")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_ACTIVITY)
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
-                        "   @$E String mExtraString;",
-                        "   @$E int mA;",
+                        E_STRING_M_EXTRA_STRING,
+                        E_INT_M_A,
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainActivity_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "MainActivity_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class,
@@ -150,17 +163,17 @@ public final class ExtraTest extends BaseTest {
                         Intent.class
                 )
                 .body(
-                        "abstract class $T {",
+                        ABSTRACT_CLASS_T,
                         "",
                         "   @Weave(into = \"onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",
                         "       Intent intent = target.getIntent();",
-                        "       if (intent == null || intent.getExtras() == null) {",
-                        "           return;",
-                        "       }",
-                        "       BundleWrapper extras = BundleWrapper.from(intent.getExtras());",
-                        "       target.mExtraString = extras.get(\"<Extra-mExtraString>\", target.mExtraString);",
-                        "       target.mA = extras.get(\"<Extra-mA>\", target.mA);",
+                        IF_INTENT_NULL_INTENT_GET_EXTRAS_NULL,
+                        RETURN,
+                        CLOSING_BRACE,
+                        BUNDLE_WRAPPER_EXTRAS_BUNDLE_WRAPPER_FROM_INTENT_GET_EXTRAS,
+                        TARGET_M_EXTRA_STRING_EXTRAS_GET_EXTRA_M_EXTRA_STRING_TARGET_M_EXTRA_STRING,
+                        TARGET_M_A_EXTRAS_GET_EXTRA_M_A_TARGET_M_A,
                         "   }",
                         "",
                         "}"
@@ -175,7 +188,7 @@ public final class ExtraTest extends BaseTest {
 
     @Test
     public void serviceOne() {
-        JavaFileObject input = file("com.example", "SomeService")
+        JavaFileObject input = file(COM_EXAMPLE, "SomeService")
                 .imports(
                         Extra.class, "E",
                         Service.class,
@@ -185,8 +198,8 @@ public final class ExtraTest extends BaseTest {
                 .body(
                         "public class $T extends Service {",
                         "",
-                        "   @$E String mExtraString;",
-                        "   @$E int mA;",
+                        E_STRING_M_EXTRA_STRING,
+                        E_INT_M_A,
                         "",
                         "   public IBinder onBind(Intent intent) {",
                         "       return null;",
@@ -195,7 +208,7 @@ public final class ExtraTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "SomeService_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "SomeService_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class,
@@ -203,16 +216,16 @@ public final class ExtraTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "abstract class $T {",
+                        ABSTRACT_CLASS_T,
                         "",
                         "   @Weave(into = \"onStartCommand\", args = {\"android.content.Intent\", \"int\", \"int\"}, statement = \"com.example.$T.inject(this, $1);\")",
                         "   public static void inject($I target, Intent intent) {",
-                        "       if (intent == null || intent.getExtras() == null) {",
-                        "           return;",
-                        "       }",
-                        "       BundleWrapper extras = BundleWrapper.from(intent.getExtras());",
-                        "       target.mExtraString = extras.get(\"<Extra-mExtraString>\", target.mExtraString);",
-                        "       target.mA = extras.get(\"<Extra-mA>\", target.mA);",
+                        IF_INTENT_NULL_INTENT_GET_EXTRAS_NULL,
+                        RETURN,
+                        CLOSING_BRACE,
+                        BUNDLE_WRAPPER_EXTRAS_BUNDLE_WRAPPER_FROM_INTENT_GET_EXTRAS,
+                        TARGET_M_EXTRA_STRING_EXTRAS_GET_EXTRA_M_EXTRA_STRING_TARGET_M_EXTRA_STRING,
+                        TARGET_M_A_EXTRAS_GET_EXTRA_M_A_TARGET_M_A,
                         "   }",
                         "",
                         "}"
@@ -227,7 +240,7 @@ public final class ExtraTest extends BaseTest {
 
     @Test
     public void intentServiceOne() {
-        JavaFileObject input = file("com.example", "SomeService")
+        JavaFileObject input = file(COM_EXAMPLE, "SomeService")
                 .imports(
                         Extra.class, "E",
                         IntentService.class,
@@ -238,7 +251,7 @@ public final class ExtraTest extends BaseTest {
                         "public class $T extends IntentService {",
                         "",
                         "   @$E String mExtraString;",
-                        "   @$E int mA;",
+                        E_INT_M_A,
                         "",
                         "   public $T() {super(\"Test\");}",
                         "",
@@ -248,7 +261,7 @@ public final class ExtraTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "SomeService_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "SomeService_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class,
@@ -256,16 +269,16 @@ public final class ExtraTest extends BaseTest {
                         Weave.class
                 )
                 .body(
-                        "abstract class $T {",
+                        ABSTRACT_CLASS_T,
                         "",
                         "   @Weave(into = \"onHandleIntent\", args = {\"android.content.Intent\"}, statement = \"com.example.$T.inject(this, $1);\")",
                         "   public static void inject($I target, Intent intent) {",
-                        "       if (intent == null || intent.getExtras() == null) {",
-                        "           return;",
-                        "       }",
-                        "       BundleWrapper extras = BundleWrapper.from(intent.getExtras());",
-                        "       target.mExtraString = extras.get(\"<Extra-mExtraString>\", target.mExtraString);",
-                        "       target.mA = extras.get(\"<Extra-mA>\", target.mA);",
+                        IF_INTENT_NULL_INTENT_GET_EXTRAS_NULL,
+                        RETURN,
+                        CLOSING_BRACE,
+                        BUNDLE_WRAPPER_EXTRAS_BUNDLE_WRAPPER_FROM_INTENT_GET_EXTRAS,
+                        TARGET_M_EXTRA_STRING_EXTRAS_GET_EXTRA_M_EXTRA_STRING_TARGET_M_EXTRA_STRING,
+                        TARGET_M_A_EXTRAS_GET_EXTRA_M_A_TARGET_M_A,
                         "   }",
                         "",
                         "}"

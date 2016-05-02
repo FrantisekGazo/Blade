@@ -52,7 +52,6 @@ public class ProcessorUtils {
     }
 
     public static String fullName(ClassName className) {
-        //return String.format("%s.%s", className.packageName(), className.simpleName());
         StringBuilder sb = new StringBuilder();
 
         sb.append(className.packageName());

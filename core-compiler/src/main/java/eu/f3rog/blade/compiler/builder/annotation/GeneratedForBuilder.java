@@ -13,6 +13,8 @@ import eu.f3rog.blade.core.GeneratedFor;
  */
 public class GeneratedForBuilder {
 
+    private GeneratedForBuilder() {}
+
     public static AnnotationSpec buildFor(Class cls) {
         return AnnotationSpec.builder(GeneratedFor.class)
                 .addMember("value", "$T.class", cls)

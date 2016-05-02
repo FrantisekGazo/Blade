@@ -26,9 +26,23 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  */
 public final class IntentManagerTest extends BaseTest {
 
+    public static final String COM_EXAMPLE = "com.example";
+    public static final String BLADE = "blade";
+    public static final String PUBLIC_CLASS_T = "public class $T {";
+    public static final String GF_A_CLASS = "   @$GF($A.class)";
+    public static final String INTENT_INTENT_NEW_INTENT_CONTEXT_A_CLASS = "       Intent intent = new Intent(context, $A.class);";
+    public static final String BW_EXTRAS_NEW_BW = "       $BW extras = new $BW();";
+    public static final String INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE = "       intent.putExtras(extras.getBundle());";
+    public static final String RETURN_INTENT = "       return intent;";
+    public static final String PUBLIC_CLASS_T_EXTENDS_ACTIVITY = "public class $T extends Activity {";
+    public static final String E_INT_NUMBER = "   @$E int number;";
+    public static final String E_STRING_TEXT = "   @$E String text;";
+    public static final String EXTRAS_PUT_EXTRA_NUMBER_NUMBER = "       extras.put(\"<Extra-number>\", number);";
+    public static final String EXTRAS_PUT_EXTRA_TEXT_TEXT = "       extras.put(\"<Extra-text>\", text);";
+
     @Test
     public void activityNone() {
-        JavaFileObject input = file("com.example", "SomeActivity")
+        JavaFileObject input = file(COM_EXAMPLE, "SomeActivity")
                 .imports(
                         Blade.class, "B",
                         Activity.class
@@ -38,7 +52,7 @@ public final class IntentManagerTest extends BaseTest {
                         "public class $T extends Activity {}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "I")
+        JavaFileObject expected = generatedFile(BLADE, "I")
                 .imports(
                         GeneratedFor.class, "GF",
                         input, "A",
@@ -47,17 +61,17 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static Intent for$A(Context context) {",
-                        "       Intent intent = new Intent(context, $A.class);",
-                        "       $BW extras = new $BW();",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        INTENT_INTENT_NEW_INTENT_CONTEXT_A_CLASS,
+                        BW_EXTRAS_NEW_BW,
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static void start$A(Context context) {",
                         "       context.startActivity(for$A(context));",
                         "   }",
@@ -74,20 +88,20 @@ public final class IntentManagerTest extends BaseTest {
 
     @Test
     public void activityOne() {
-        JavaFileObject input = file("com.example", "SomeActivity")
+        JavaFileObject input = file(COM_EXAMPLE, "SomeActivity")
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
                         "   @$E String mText;",
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "I")
+        JavaFileObject expected = generatedFile(BLADE, "I")
                 .imports(
                         GeneratedFor.class, "GF",
                         input, "A",
@@ -97,18 +111,18 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static Intent for$A(Context context, String mText) {",
-                        "       Intent intent = new Intent(context, $A.class);",
-                        "       $BW extras = new $BW();",
+                        INTENT_INTENT_NEW_INTENT_CONTEXT_A_CLASS,
+                        BW_EXTRAS_NEW_BW,
                         "       extras.put(\"<Extra-mText>\", mText);",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static void start$A(Context context, String mText) {",
                         "       context.startActivity(for$A(context, mText));",
                         "   }",
@@ -125,34 +139,34 @@ public final class IntentManagerTest extends BaseTest {
 
     @Test
     public void activityMore() {
-        JavaFileObject input1 = file("com.example", "FirstActivity")
+        JavaFileObject input1 = file(COM_EXAMPLE, "FirstActivity")
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
-                        "   @$E int number;",
+                        E_INT_NUMBER,
                         "",
                         "}"
                 );
-        JavaFileObject input2 = file("com.example", "SecondActivity")
+        JavaFileObject input2 = file(COM_EXAMPLE, "SecondActivity")
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
-                        "   @$E String text;",
+                        E_STRING_TEXT,
                         "   @$E boolean flag;",
                         "   @$E double number;",
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "I")
+        JavaFileObject expected = generatedFile(BLADE, "I")
                 .imports(
                         GeneratedFor.class, "GF",
                         input1, "A1",
@@ -163,15 +177,15 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   @$GF($A1.class)",
                         "   public static Intent for$A1(Context context, int number) {",
                         "       Intent intent = new Intent(context, $A1.class);",
-                        "       $BW extras = new $BW();",
-                        "       extras.put(\"<Extra-number>\", number);",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        BW_EXTRAS_NEW_BW,
+                        EXTRAS_PUT_EXTRA_NUMBER_NUMBER,
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
                         "   @$GF($A1.class)",
@@ -182,12 +196,12 @@ public final class IntentManagerTest extends BaseTest {
                         "   @$GF($A2.class)",
                         "   public static Intent for$A2(Context context, String text, boolean flag, double number) {",
                         "       Intent intent = new Intent(context, $A2.class);",
-                        "       $BW extras = new $BW();",
-                        "       extras.put(\"<Extra-text>\", text);",
+                        BW_EXTRAS_NEW_BW,
+                        EXTRAS_PUT_EXTRA_TEXT_TEXT,
                         "       extras.put(\"<Extra-flag>\", flag);",
-                        "       extras.put(\"<Extra-number>\", number);",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        EXTRAS_PUT_EXTRA_NUMBER_NUMBER,
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
                         "   @$GF($A2.class)",
@@ -207,19 +221,19 @@ public final class IntentManagerTest extends BaseTest {
 
     @Test
     public void activityInheritance() {
-        JavaFileObject base = file("com.example", "BaseActivity")
+        JavaFileObject base = file(COM_EXAMPLE, "BaseActivity")
                 .imports(
                         Extra.class, "E",
                         Activity.class
                 )
                 .body(
-                        "public class $T extends Activity {",
+                        PUBLIC_CLASS_T_EXTENDS_ACTIVITY,
                         "",
-                        "   @$E int number;",
+                        E_INT_NUMBER,
                         "",
                         "}"
                 );
-        JavaFileObject activity = file("com.example", "MyActivity")
+        JavaFileObject activity = file(COM_EXAMPLE, "MyActivity")
                 .imports(
                         Extra.class, "E",
                         base, "B"
@@ -227,12 +241,12 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T extends $B {",
                         "",
-                        "   @$E String text;",
+                        E_STRING_TEXT,
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "I")
+        JavaFileObject expected = generatedFile(BLADE, "I")
                 .imports(
                         GeneratedFor.class, "GF",
                         base, "B",
@@ -243,15 +257,15 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
                         "   @$GF($B.class)",
                         "   public static Intent for$B(Context context, int number) {",
                         "       Intent intent = new Intent(context, $B.class);",
-                        "       $BW extras = new $BW();",
-                        "       extras.put(\"<Extra-number>\", number);",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        BW_EXTRAS_NEW_BW,
+                        EXTRAS_PUT_EXTRA_NUMBER_NUMBER,
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
                         "   @$GF($B.class)",
@@ -259,17 +273,17 @@ public final class IntentManagerTest extends BaseTest {
                         "       context.startActivity(for$B(context, number));",
                         "   }",
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static Intent for$A(Context context, int number, String text) {",
-                        "       Intent intent = new Intent(context, $A.class);",
-                        "       $BW extras = new $BW();",
-                        "       extras.put(\"<Extra-number>\", number);",
-                        "       extras.put(\"<Extra-text>\", text);",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        INTENT_INTENT_NEW_INTENT_CONTEXT_A_CLASS,
+                        BW_EXTRAS_NEW_BW,
+                        EXTRAS_PUT_EXTRA_NUMBER_NUMBER,
+                        EXTRAS_PUT_EXTRA_TEXT_TEXT,
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static void start$A(Context context, int number, String text) {",
                         "       context.startActivity(for$A(context, number, text));",
                         "   }",
@@ -286,7 +300,7 @@ public final class IntentManagerTest extends BaseTest {
 
     @Test
     public void activityInheritanceFromAbstract() {
-        JavaFileObject base = file("com.example", "BaseActivity")
+        JavaFileObject base = file(COM_EXAMPLE, "BaseActivity")
                 .imports(
                         Extra.class, "E",
                         Activity.class
@@ -294,11 +308,11 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public abstract class $T extends Activity {",
                         "",
-                        "   @$E int number;",
+                        E_INT_NUMBER,
                         "",
                         "}"
                 );
-        JavaFileObject activity = file("com.example", "MyActivity")
+        JavaFileObject activity = file(COM_EXAMPLE, "MyActivity")
                 .imports(
                         Extra.class, "E",
                         base, "B"
@@ -306,12 +320,12 @@ public final class IntentManagerTest extends BaseTest {
                 .body(
                         "public class $T extends $B {",
                         "",
-                        "   @$E String text;",
+                        E_STRING_TEXT,
                         "",
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("blade", "I")
+        JavaFileObject expected = generatedFile(BLADE, "I")
                 .imports(
                         GeneratedFor.class, "GF",
                         activity, "A",
@@ -321,19 +335,19 @@ public final class IntentManagerTest extends BaseTest {
                         Context.class
                 )
                 .body(
-                        "public class $T {",
+                        PUBLIC_CLASS_T,
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static Intent for$A(Context context, int number, String text) {",
-                        "       Intent intent = new Intent(context, $A.class);",
-                        "       $BW extras = new $BW();",
-                        "       extras.put(\"<Extra-number>\", number);",
-                        "       extras.put(\"<Extra-text>\", text);",
-                        "       intent.putExtras(extras.getBundle());",
-                        "       return intent;",
+                        INTENT_INTENT_NEW_INTENT_CONTEXT_A_CLASS,
+                        BW_EXTRAS_NEW_BW,
+                        EXTRAS_PUT_EXTRA_NUMBER_NUMBER,
+                        EXTRAS_PUT_EXTRA_TEXT_TEXT,
+                        INTENT_PUT_EXTRAS_EXTRAS_GET_BUNDLE,
+                        RETURN_INTENT,
                         "   }",
                         "",
-                        "   @$GF($A.class)",
+                        GF_A_CLASS,
                         "   public static void start$A(Context context, int number, String text) {",
                         "       context.startActivity(for$A(context, number, text));",
                         "   }",

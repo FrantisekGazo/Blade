@@ -35,14 +35,6 @@ public class File implements IImports, IBody {
     private static final CharSequence KEY_SIGN = "$";
     private static final String KEY_FORMAT = "\\" + KEY_SIGN + "%s";
 
-    public static IImports file(String pack, String name) {
-        return new File(pack, name);
-    }
-
-    public static IImports generatedFile(String pack, String name) {
-        return new File(pack, name, Generated.class);
-    }
-
     private final String mName;
     private final String mPackage;
     private LinkedHashSet<Object> mImportClasses;
@@ -64,6 +56,15 @@ public class File implements IImports, IBody {
         mMapping = new HashMap<>();
         mMapping.put(CLASS, mName);
     }
+
+    public static IImports file(String pack, String name) {
+        return new File(pack, name);
+    }
+
+    public static IImports generatedFile(String pack, String name) {
+        return new File(pack, name, Generated.class);
+    }
+
 
     @Override
     public IBody imports(Object... classes) {

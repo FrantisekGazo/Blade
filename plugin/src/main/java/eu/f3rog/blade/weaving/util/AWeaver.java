@@ -33,7 +33,7 @@ public abstract class AWeaver implements IWeaver {
 
     protected void log(String msg, Object... args) {
         if (mDebug) {
-            String format = String.format("@ %s : %s\n", getClass().getSimpleName(), msg);
+            String format = String.format("@ %s : %s%n", getClass().getSimpleName(), msg);
             System.out.printf(format, args);
         }
     }

@@ -10,6 +10,8 @@ import com.squareup.javapoet.ClassName;
  */
 public class GN {
 
+    private GN() {}
+
     public static ClassName className(GCN genClassName, String arg, GPN... packages) {
         return ClassName.get(GPN.toString(packages), genClassName.formatName(arg));
     }

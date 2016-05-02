@@ -8,6 +8,8 @@ package eu.f3rog.blade.compiler.util;
  */
 public class StringUtils {
 
+    private StringUtils() {}
+
     public static String startLowerCase(final String className) {
         return className.substring(0, 1).toLowerCase()
                 + className.substring(1);
