@@ -14,11 +14,12 @@ import javassist.bytecode.AnnotationsAttribute;
  */
 public class WeavingUtil {
 
+    private WeavingUtil() {}
+
     public static boolean isSubclassOf(CtClass clazz, String superClassName) throws NotFoundException {
         CtClass superClass = clazz;
 
         do {
-            //System.out.printf("isSubclassOf %s : %s\n", superClassName, superClass.getName());
             if (superClass.getName().equals(superClassName)) return true;
             superClass = superClass.getSuperclass();
         } while (superClass != null);

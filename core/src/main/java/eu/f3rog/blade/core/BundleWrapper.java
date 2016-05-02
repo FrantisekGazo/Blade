@@ -14,10 +14,6 @@ import java.io.Serializable;
  */
 public class BundleWrapper {
 
-    public static BundleWrapper from(Bundle bundle) {
-        return new BundleWrapper(bundle);
-    }
-
     private Bundle mBundle;
 
     public BundleWrapper(Bundle bundle) {
@@ -30,6 +26,10 @@ public class BundleWrapper {
 
     public Bundle getBundle() {
         return mBundle;
+    }
+
+    public static BundleWrapper from(Bundle bundle) {
+        return new BundleWrapper(bundle);
     }
 
     //region PUT ----------------------------

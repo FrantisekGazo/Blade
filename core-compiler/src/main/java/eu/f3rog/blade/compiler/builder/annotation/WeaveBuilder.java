@@ -124,19 +124,19 @@ public final class WeaveBuilder {
             }
             return array;
         }
-    }
 
-    private static String formatFor(String f, final int count) {
-        StringBuilder format = new StringBuilder();
-        format.append("{");
-        for (int i = 0; i < count; i++) {
-            if (i > 0) {
-                format.append(", ");
+        private static String formatFor(String f, final int count) {
+            StringBuilder format = new StringBuilder();
+            format.append("{");
+            for (int i = 0; i < count; i++) {
+                if (i > 0) {
+                    format.append(", ");
+                }
+                format.append(f);
             }
-            format.append(f);
+            format.append("}");
+            return format.toString();
         }
-        format.append("}");
-        return format.toString();
     }
 
 }

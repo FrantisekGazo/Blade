@@ -25,7 +25,15 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
 public class ClassManager
         implements IBuildable {
 
+    private final Map<Class, BaseClassBuilder> mSpecialClasses;
+    private final Map<ClassName, HelperClassBuilder> mHelpers;
+
     private static ClassManager sInstance;
+
+    private ClassManager() {
+        mSpecialClasses = new HashMap<>();
+        mHelpers = new HashMap<>();
+    }
 
     public static void init() {
         sInstance = new ClassManager();
@@ -33,14 +41,6 @@ public class ClassManager
 
     public static ClassManager getInstance() {
         return sInstance;
-    }
-
-    private final Map<Class, BaseClassBuilder> mSpecialClasses;
-    private final Map<ClassName, HelperClassBuilder> mHelpers;
-
-    private ClassManager() {
-        mSpecialClasses = new HashMap<>();
-        mHelpers = new HashMap<>();
     }
 
     public HelperClassBuilder getHelper(TypeElement e) throws ProcessorError {

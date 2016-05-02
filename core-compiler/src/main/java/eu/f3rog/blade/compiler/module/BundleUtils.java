@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class BundleUtils {
 
+    private BundleUtils() {}
+
     public static void getFromBundle(MethodSpec.Builder method,
                                      String targetName,
                                      List<String> fields,

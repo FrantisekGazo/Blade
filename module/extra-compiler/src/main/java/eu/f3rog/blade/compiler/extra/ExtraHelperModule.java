@@ -47,12 +47,12 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
+    private List<String> mExtras = new ArrayList<>();
+    private Injected mInjected;
+
     public static String getExtraId(String extra) {
         return String.format(EXTRA_ID_FORMAT, extra);
     }
-
-    private List<String> mExtras = new ArrayList<>();
-    private Injected mInjected;
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {

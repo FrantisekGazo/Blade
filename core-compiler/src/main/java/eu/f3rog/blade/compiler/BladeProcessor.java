@@ -57,7 +57,6 @@ public class BladeProcessor extends BaseProcessor {
                 Class<ProcessorModule> moduleClass = (Class<ProcessorModule>) Class.forName(moduleClassName.toString());
                 ProcessorModule module = moduleClass.newInstance();
                 mModules.add(module);
-                //System.out.println("> APT using " + moduleClass.getSimpleName());
             } catch (Exception ignore) {
                 // module is not accessible
             }

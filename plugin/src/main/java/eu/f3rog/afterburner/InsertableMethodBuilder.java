@@ -51,15 +51,6 @@ public class InsertableMethodBuilder {
         return new StateTargetClassSet();
     }
 
-    private void doInsertBodyInFullMethod() {
-        if (fullMethod != null) {
-            if (!fullMethod.contains(InsertableMethod.BODY_TAG)) {
-                log.info("Full method doesn't contain body tag (InsertableMethod.BODY_TAG=" + InsertableMethod.BODY_TAG + ")");
-            }
-            fullMethod = fullMethod.replace(InsertableMethod.BODY_TAG, body);
-        }
-    }
-
     protected void checkFields() throws AfterBurnerImpossibleException {
         if (classToInsertInto == null || targetMethod == null
                 || body == null || fullMethod == null) {
@@ -74,6 +65,11 @@ public class InsertableMethodBuilder {
 
 
     public class StateTargetClassSet {
+
+        public static final String CLASS_S_DOESN_T_CONTAIN_ANY_METHOD_NAMED_S = "Class %s doesn't contain any method named %s";
+        public static final String OPENING_BRACE_NEW_LINE_CHARACTER = " { \n";
+        public static final String CREATING_OVERRIDE = "Creating override ";
+
         public StateTargetMethodSet inMethodIfExists(String targetMethod, CtClass... targetMethodParams) {
             InsertableMethodBuilder.this.targetMethod = targetMethod;
             InsertableMethodBuilder.this.targetMethodParams = targetMethodParams;
@@ -86,16 +82,16 @@ public class InsertableMethodBuilder {
             // set no insertion method ! (it will be insert at the beginning)
             CtMethod overridenMethod = findTargetMethod(targetMethod, targetMethodParams);
             if (overridenMethod == null) {
-                throw new NotFoundException(String.format("Class %s doesn't contain any method named %s", classToInsertInto.getName(), targetMethod));
+                throw new NotFoundException(String.format(CLASS_S_DOESN_T_CONTAIN_ANY_METHOD_NAMED_S, classToInsertInto.getName(), targetMethod));
             }
             fullMethod = signatureExtractor
                     .createJavaSignature(overridenMethod)
-                    + " { \n"
+                    + OPENING_BRACE_NEW_LINE_CHARACTER
                     + InsertableMethod.BODY_TAG
                     + "\n"
                     + ((!overridenMethod.getReturnType().toString().equals("void")) ? "return " : "")
                     + signatureExtractor.invokeSuper(overridenMethod) + "}\n";
-            log.info("Creating override " + fullMethod);
+            log.info(CREATING_OVERRIDE + fullMethod);
             return new StateInsertionPointAndFullMethodSet();
         }
 
@@ -105,15 +101,15 @@ public class InsertableMethodBuilder {
             InsertableMethodBuilder.this.insertionBeforeMethod = targetMethod;
             CtMethod overridenMethod = findTargetMethod(targetMethod, targetMethodParams);
             if (overridenMethod == null) {
-                throw new NotFoundException(String.format("Class %s doesn't contain any method named %s", classToInsertInto.getName(), targetMethod));
+                throw new NotFoundException(String.format(CLASS_S_DOESN_T_CONTAIN_ANY_METHOD_NAMED_S, classToInsertInto.getName(), targetMethod));
             }
             fullMethod = signatureExtractor
                     .createJavaSignature(overridenMethod)
-                    + " { \n"
+                    + OPENING_BRACE_NEW_LINE_CHARACTER
                     + InsertableMethod.BODY_TAG
                     + "\n"
                     + signatureExtractor.invokeSuper(overridenMethod) + "}\n";
-            log.info("Creating override " + fullMethod);
+            log.info(CREATING_OVERRIDE + fullMethod);
             return new StateInsertionPointAndFullMethodSet();
         }
 
@@ -122,15 +118,15 @@ public class InsertableMethodBuilder {
             InsertableMethodBuilder.this.insertionAfterMethod = targetMethod;
             CtMethod overridenMethod = findTargetMethod(targetMethod, targetMethodParams);
             if (overridenMethod == null) {
-                throw new NotFoundException(String.format("Class %s doesn't contain any method named %s", classToInsertInto.getName(), targetMethod));
+                throw new NotFoundException(String.format(CLASS_S_DOESN_T_CONTAIN_ANY_METHOD_NAMED_S, classToInsertInto.getName(), targetMethod));
             }
             fullMethod = signatureExtractor
                     .createJavaSignature(overridenMethod)
-                    + " { \n"
+                    + OPENING_BRACE_NEW_LINE_CHARACTER
                     + signatureExtractor.invokeSuper(overridenMethod)
                     + "\n"
                     + InsertableMethod.BODY_TAG + "}\n";
-            log.info("Creating override " + fullMethod);
+            log.info(CREATING_OVERRIDE + fullMethod);
             return new StateInsertionPointAndFullMethodSet();
         }
 
@@ -207,6 +203,15 @@ public class InsertableMethodBuilder {
     }
 
     public class StateComplete {
+
+        private void doInsertBodyInFullMethod() {
+            if (fullMethod != null) {
+                if (!fullMethod.contains(InsertableMethod.BODY_TAG)) {
+                    log.info("Full method doesn't contain body tag (InsertableMethod.BODY_TAG=" + InsertableMethod.BODY_TAG + ")");
+                }
+                fullMethod = fullMethod.replace(InsertableMethod.BODY_TAG, body);
+            }
+        }
 
         public InsertableMethod createInsertableMethod() throws AfterBurnerImpossibleException {
             checkFields();

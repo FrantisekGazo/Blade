@@ -12,6 +12,8 @@ import javassist.NotFoundException;
  */
 public class Utils {
 
+    private Utils() {}
+
     public static CtMethod findTargetMethod(CtClass ctClass, String targetMethod, CtClass... targetMethodParams) {
         CtMethod overriddenMethod = null;
         try {

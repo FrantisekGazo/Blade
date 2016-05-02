@@ -12,6 +12,8 @@ public class Component {
 
     private static AppComponent sAppComponent = null;
 
+    private Component() {}
+
     public static AppComponent forApp() {
         if (sAppComponent == null) {
             sAppComponent = DaggerAppComponent

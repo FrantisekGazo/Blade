@@ -26,9 +26,13 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  */
 public final class ArgTest extends BaseTest {
 
+    public static final String MAIN_FRAGMENT = "MainFragment";
+    public static final String COM_EXAMPLE = "com.example";
+    public static final String PUBLIC_CLASS_T_EXTENDS_FRAGMENT = "public class $T extends Fragment {";
+
     @Test
     public void invalidCLass() {
-        JavaFileObject input = file("com.example", "MainFragment")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_FRAGMENT)
                 .imports(
                         Arg.class, "A"
                 )
@@ -48,13 +52,13 @@ public final class ArgTest extends BaseTest {
 
     @Test
     public void invalidField() {
-        JavaFileObject input = file("com.example", "MainFragment")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_FRAGMENT)
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
                         "   @$A private String mExtraString;",
                         "",
@@ -66,13 +70,13 @@ public final class ArgTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName()));
 
-        input = file("com.example", "MainFragment")
+        input = file(COM_EXAMPLE, MAIN_FRAGMENT)
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
                         "   @$A protected String mExtraString;",
                         "",
@@ -84,13 +88,13 @@ public final class ArgTest extends BaseTest {
                 .failsToCompile()
                 .withErrorContaining(String.format(ErrorMsg.Invalid_field_with_annotation, Arg.class.getSimpleName()));
 
-        input = file("com.example", "MainFragment")
+        input = file(COM_EXAMPLE, MAIN_FRAGMENT)
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
                         "   @$A final String mExtraString;",
                         "",
@@ -105,13 +109,13 @@ public final class ArgTest extends BaseTest {
 
     @Test
     public void one() {
-        JavaFileObject input = file("com.example", "MainFragment")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_FRAGMENT)
                 .imports(
                         Arg.class, "A",
                         Fragment.class
                 )
                 .body(
-                        "public class $T extends Fragment {",
+                        PUBLIC_CLASS_T_EXTENDS_FRAGMENT,
                         "",
                         "   @$A String mExtraString;",
                         "   @$A int mA;",
@@ -119,7 +123,7 @@ public final class ArgTest extends BaseTest {
                         "}"
                 );
 
-        JavaFileObject expected = generatedFile("com.example", "MainFragment_Helper")
+        JavaFileObject expected = generatedFile(COM_EXAMPLE, "MainFragment_Helper")
                 .imports(
                         input, "I",
                         BundleWrapper.class,
@@ -150,7 +154,7 @@ public final class ArgTest extends BaseTest {
 
     @Test
     public void none() {
-        JavaFileObject input = file("com.example", "MainFragment")
+        JavaFileObject input = file(COM_EXAMPLE, MAIN_FRAGMENT)
                 .imports(
                         Blade.class, "B",
                         Fragment.class
