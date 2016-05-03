@@ -36,7 +36,7 @@ public final class InnerClassTest extends BaseTest {
                 .body(
                         "public class $T implements $P<$V.MyView, String> {",
                         "",
-                        String.format(PresenterTest.PRESENTER_METHODS, "$V.MyView", "String"),
+                        PresenterTest.getPresenterImplementation("$V.MyView", "String"),
                         "}"
                 );
         JavaFileObject view = file("com.example", "Wrapper")

@@ -6,6 +6,5 @@ package blade.mvp;
 public interface IView {
 
     void setTag(Object data);
-
 }
 
