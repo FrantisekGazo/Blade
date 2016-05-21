@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -23,6 +22,7 @@ import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isFragmentSubClass;
@@ -62,8 +62,8 @@ public class ArgHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addMethodToFragmentFactory(processingEnvironment, builder);
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
+        addMethodToFragmentFactory(builder);
         if (!mArgs.isEmpty()) {
             // add inject() only if there is something
             addInjectMethod(builder);
@@ -78,8 +78,9 @@ public class ArgHelperModule extends BaseHelperModule {
                 .addAnnotation(WeaveBuilder.weave().method("onCreate", Bundle.class)
                         .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build())
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
 
         method.beginControlFlow("if ($N.getArguments() == null)", target)
                 .addStatement("return")
@@ -93,10 +94,10 @@ public class ArgHelperModule extends BaseHelperModule {
         builder.getBuilder().addMethod(method.build());
     }
 
-    private void addMethodToFragmentFactory(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToFragmentFactory(HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(FragmentFactoryBuilder.class)
-                .addMethodFor(processingEnvironment, builder.getTypeElement());
+                .addMethodFor(builder.getTypeElement());
     }
 
 }

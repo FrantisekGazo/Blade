@@ -17,8 +17,9 @@ Android library for boilerplate destruction - *"Just code what is worth coding"*
 This library is divided into several **modules**. Each module provides different annotation and support classes:
 * **arg** provides [@Arg](https://github.com/FrantisekGazo/Blade#arg)
 * **extra** provides [@Extra](https://github.com/FrantisekGazo/Blade#extra)
-* **state** provides [@State](https://github.com/FrantisekGazo/Blade#state)
 * **mvp** provides [@Presenter](https://github.com/FrantisekGazo/Blade#presenter)
+* **parcel** provides [@Parcel](https://github.com/FrantisekGazo/Blade#parcel) and [@ParcelIgnore](https://github.com/FrantisekGazo/Blade#parcelignore)
+* **state** provides [@State](https://github.com/FrantisekGazo/Blade#state)
 
 Special annotation:
 * [@Blade](https://github.com/FrantisekGazo/Blade#blade)
@@ -83,6 +84,7 @@ And given values will be set to corresponding attributes annotated with `@Arg` a
 
 Class `blade.F` is not `final` so that you can extend it and add more methods.
 
+
 ## @Extra
 Annotation for generating `newIntent()` methods for your [Activity](http://developer.android.com/reference/android/app/Activity.html) or [Service](http://developer.android.com/reference/android/app/Service.html) classes.
 
@@ -142,56 +144,111 @@ And given values will be set to corresponding attributes annotated with `@Extra`
 
 Class `blade.I` is not `final` so that you can extend it and add more methods. 
 
-## @State
-Annotation for simplifying state management.
 
-For each class containing attributes annotated with `@State` Blade will generate helper class named NameOfClass`_Helper` with 2 static methods for state management:
-* `saveState(Bundle)`
-* `restoreState(Bundle)`
-
-Classes extending from `Fragment`, `Activity` or `View` are managed automatically, so you don't need to call `saveState(Bundle)` or `restoreState(Bundle)`.
-But other classes has to call these 2 generated methods when needed. 
+## @Parcel
+Annotation for generating [Parcelable](http://developer.android.com/reference/android/os/Parcelable.html) implementation.
 
 Without using this library you would have to write this:
 
 ```Java
-public class MyActivity extends Activity {
-
-    private static final String EXTRA_TEXT = "extra_text";
-    private static final String EXTRA_DATA = "arg_data";
-
-    private String mText;
-    private MyData mData;
-    
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelable(EXTRA_DATA, mData);
-        outState.putString(EXTRA_TEXT, mText);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mData = savedInstanceState.getParcelable(EXTRA_DATA);
-        mText = (MyData) savedInstanceState.getString(EXTRA_TEXT);
-    }   
-    
+public class MyClass implements Parcelable {
+                         
+     String text;
+     int number;
+     boolean flag;
+     double[] doubleArray;
+ 
+     protected MyClass(Parcel in) {
+         text = in.readString();
+         number = in.readInt();
+         flag = in.readByte() != 0;
+         doubleArray = in.createDoubleArray();
+     }
+ 
+     public static final Creator<MyClass> CREATOR = new Creator<MyClass>() {
+         @Override
+         public MyClass createFromParcel(Parcel in) {
+             return new MyClass(in);
+         }
+ 
+         @Override
+         public MyClass[] newArray(int size) {
+             return new MyClass[size];
+         }
+     };
+ 
+     @Override
+     public int describeContents() {
+         return 0;
+     }
+ 
+     @Override
+     public void writeToParcel(Parcel dest, int flags) {
+         dest.writeString(text);
+         dest.writeInt(number);
+         dest.writeByte((byte) (flag ? 1 : 0));
+         dest.writeDoubleArray(doubleArray);
+     }
 }
 ```
 
 But with this library you can write this:
 
 ```Java
-public class MyActivity extends Activity {
-
-    @State 
-    String mText;
-    @State
-    MyData mData;
-  
+@blade.Parcel
+public class MyClass implements Parcelable {
+                         
+     String text;
+     int number;
+     boolean flag;
+     double[] doubleArray;
+ 
+     protected MyClass(Parcel in) {
+     }
+ 
+     @Override
+     public int describeContents() {
+         return 0;
+     }
+ 
+     @Override
+     public void writeToParcel(Parcel dest, int flags) {
+     }
 }
 ```
+
+Class with `@Parcel` has to:
+* implement [Parcelable](http://developer.android.com/reference/android/os/Parcelable.html) interface (empty methods are enough)
+* contain constructor with parameter of type [Parcel](http://developer.android.com/reference/android/os/Parcel.html)
+
+Getter and setter is required for every **private** or **protected** field!
+
+
+## @ParcelIgnore
+Use this annotation if you want **Blade** to ignore some field, when writing/reading instance of given class to/from parcel.
+
+```Java
+@blade.Parcel
+public class MyClass implements Parcelable {
+ 
+     int number; // this field will be processed             
+     @blade.ParcelIgnore 
+     String text; // this field will be ignored
+ 
+     protected MyClass(Parcel in) {
+     }
+ 
+     @Override
+     public int describeContents() {
+         return 0;
+     }
+ 
+     @Override
+     public void writeToParcel(Parcel dest, int flags) {
+     }
+}
+```
+
 
 ## @Presenter
 Annotation for implementing MVP architecture.
@@ -298,6 +355,58 @@ public class MyPresenter extends blade.mvp.BasePresenter<IMyView, Data> {
 When presenter is recreated from state `create(data, boolean)` method has `true` as second parameter to indicate this.
 
 
+## @State
+Annotation for simplifying state management.
+
+For each class containing attributes annotated with `@State` Blade will generate helper class named NameOfClass`_Helper` with 2 static methods for state management:
+* `saveState(Bundle)`
+* `restoreState(Bundle)`
+
+Classes extending from `Fragment`, `Activity` or `View` are managed automatically, so you don't need to call `saveState(Bundle)` or `restoreState(Bundle)`.
+But other classes has to call these 2 generated methods when needed. 
+
+Without using this library you would have to write this:
+
+```Java
+public class MyActivity extends Activity {
+
+    private static final String EXTRA_TEXT = "extra_text";
+    private static final String EXTRA_DATA = "arg_data";
+
+    private String mText;
+    private MyData mData;
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(EXTRA_DATA, mData);
+        outState.putString(EXTRA_TEXT, mText);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mData = savedInstanceState.getParcelable(EXTRA_DATA);
+        mText = (MyData) savedInstanceState.getString(EXTRA_TEXT);
+    }   
+    
+}
+```
+
+But with this library you can write this:
+
+```Java
+public class MyActivity extends Activity {
+
+    @State 
+    String mText;
+    @State
+    MyData mData;
+  
+}
+```
+
+
 ## @Blade
 If you do not use any `@Extra` inside your class, but you want the library to generate methods in `blade.I` for this class, 
 then just annotate the class with `@Blade`, like this:
@@ -321,9 +430,9 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.0'
+        classpath 'com.android.tools.build:gradle:1.5.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:2.1.0'
+        classpath 'eu.f3rog.blade:plugin:2.2.0-beta4'
     }
 }
 
@@ -338,8 +447,9 @@ And create `blade.json` file in application directory with Blade modules you nee
     "modules": [
         "arg",
         "extra",
-        "state",
-        "mvp"
+        "mvp",
+        "parcel",
+        "state"
     ]
 }
 ```

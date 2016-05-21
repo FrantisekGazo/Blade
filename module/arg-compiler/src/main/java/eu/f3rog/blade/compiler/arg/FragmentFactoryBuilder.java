@@ -3,11 +3,11 @@ package eu.f3rog.blade.compiler.arg;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.sun.tools.javac.code.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -17,7 +17,9 @@ import blade.Arg;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
+import eu.f3rog.blade.compiler.name.NameUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
+import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 /**
@@ -40,14 +42,14 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.PUBLIC);
     }
 
-    public void addMethodFor(ProcessingEnvironment processingEnvironment, TypeElement typeElement) throws ProcessorError {
+    public void addMethodFor(TypeElement typeElement) throws ProcessorError {
         if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
             return;
         }
 
         List<VariableElement> args = new ArrayList<>();
 
-        List<? extends Element> elements = processingEnvironment.getElementUtils().getAllMembers(typeElement);
+        List<? extends Element> elements = ProcessorUtils.getElementUtils().getAllMembers(typeElement);
         for (Element e : elements) {
             if (e instanceof VariableElement && e.getAnnotation(Arg.class) != null) {
                 args.add((VariableElement) e);
@@ -69,7 +71,8 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
 
         for (int i = 0; i < allArgs.size(); i++) {
             VariableElement arg = allArgs.get(i);
-            TypeName typeName = ClassName.get(arg.asType());
+            Type type = ProcessorUtils.getBoundedType(arg);
+            TypeName typeName = ClassName.get(type);
             String name = arg.getSimpleName().toString();
             forMethod.addParameter(typeName, name);
             forMethod.addStatement("$N.put($S, $N)", args, ArgHelperModule.getArgId(name), name);
@@ -81,8 +84,7 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
         getBuilder().addMethod(forMethod.build());
     }
 
-    private String getMethodName(String format, ClassName activityName) {
-        return String.format(format, activityName.simpleName());
+    private String getMethodName(String format, ClassName fragmentClassName) {
+        return String.format(format, NameUtils.getNestedName(fragmentClassName, ""));
     }
-
 }

@@ -2,6 +2,11 @@ language : android
 
 jdk: oraclejdk8
 
+branches:
+  only:
+    - master
+    - develop
+
 android:
  components:
     # Uncomment the lines below if you want to
@@ -17,7 +22,7 @@ android:
 
     # Additional components
     #- extra-google-google_play_services
-    - extra-google-m2repository
+    #- extra-google-m2repository
     - extra-android-m2repository
     - extra-android-support
     #- addon-google_apis-google-19
@@ -31,4 +36,5 @@ install:
     - ./gradlew install
 
 script:
-    - ./gradlew test
+    - ./gradlew :core-compiler:test
+    - ./gradlew :plugin:test

@@ -1,7 +1,10 @@
 package eu.f3rog.blade.weaving;
 
+import com.sun.tools.javac.util.Pair;
+
 import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
 import eu.f3rog.afterburner.inserts.InsertableConstructor;
+import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
 import eu.f3rog.blade.weaving.util.AWeaver;
@@ -38,13 +41,13 @@ public class BladeWeaver extends AWeaver {
 
     @Override
     public void weave(CtClass helperClass, CtClass intoClass) {
-        log("Applying transformation to %s", intoClass.getName());
+        lognl("Weaving starts (%s)", intoClass.getSimpleName());
         try {
             ClassPool classPool = intoClass.getClassPool();
 
             // weave field metadata
             for (CtField field : helperClass.getDeclaredFields()) {
-                log("field named \"%s\"", field.getName());
+                lognl("field '%s'", field.getName());
 
                 Metadata[] metadata = loadWeaveMetadata(classPool, field);
                 weave(metadata, intoClass, field);
@@ -52,7 +55,7 @@ public class BladeWeaver extends AWeaver {
 
             // weave method metadata
             for (CtMethod method : helperClass.getDeclaredMethods()) {
-                log("method named \"%s\"", method.getName());
+                lognl("method '%s'", method.getName());
 
                 Metadata[] metadata = loadWeaveMetadata(classPool, method);
                 weave(metadata, intoClass, null);
@@ -60,12 +63,16 @@ public class BladeWeaver extends AWeaver {
 
             // weave interfaces
             for (CtClass interfaceClass : helperClass.getInterfaces()) {
+                lognl("interface '%s'", interfaceClass.getName());
+
                 Interfaces.weaveInterface(interfaceClass, intoClass, getAfterBurner());
             }
 
-            log("Transformation done");
+            lognl("Weaving done (%s)", intoClass.getSimpleName());
         } catch (Exception e) {
-            log("Transformation failed!");
+            lognl("");
+            lognl("Weaving failed! (%s)", intoClass.getSimpleName());
+            lognl("");
             e.printStackTrace();
             throw new IllegalStateException(e);
         }
@@ -76,7 +83,7 @@ public class BladeWeaver extends AWeaver {
             Metadata metadata = m[i];
 
             if (metadata == null) {
-                log(" -> nowhere");
+                lognl(" ~x nowhere");
                 continue;
             }
 
@@ -85,24 +92,48 @@ public class BladeWeaver extends AWeaver {
                 CtField f = new CtField(helperField.getType(), helperField.getName(), intoClass);
                 f.setModifiers(helperField.getModifiers());
 
+                log(" ~> field '%s'", f.getName());
                 if (metadata.statement != null) {
-                    log(" -> field %s with statement %s", f.getName(), metadata.statement);
+                    lognl(" ~~~ %s", metadata.statement);
                     intoClass.addField(f, CtField.Initializer.byExpr(metadata.statement));
                 } else {
-                    log(" -> field with no statement", f.getName());
+                    lognl(" ~~~ without statement");
                     intoClass.addField(f);
                 }
             } else {
                 String body = "{ " + metadata.statement + " }";
 
                 if (Weave.WEAVE_CONSTRUCTOR.equals(metadata.into)) {
+                    log(" ~> constructor");
                     // weave into constructor
                     getAfterBurner().insertConstructor(new SpecificConstructor(body, intoClass, metadata.args));
-                    log(" -> %s weaved into constructor", body);
+                    lognl(" ~~~ %s", body);
                 } else {
                     // weave into method
-                    getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, metadata.into, metadata.args);
-                    log(" -> %s weaved into %s", body, metadata.into);
+                    Pair<WeaveBuilder.MethodWeaveType, String> methodInfo = WeaveBuilder.parseMethodName(metadata.into);
+                    log(" ~> method '%s' %s", methodInfo.snd, methodInfo.fst);
+                    switch (methodInfo.fst) {
+                        case AT_BEGINNIG:
+                            getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
+                            break;
+                        case BEFORE_SUPER:
+                            try {
+                                getAfterBurner().beforeOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
+                            } catch (Exception e) { // put at beginning if super not found
+                                getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
+                            }
+                            break;
+                        case AFTER_SUPER:
+                            try {
+                                getAfterBurner().afterOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
+                            } catch (Exception e) { // put at beginning if super not found
+                                getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException();
+                    }
+                    lognl(" ~~~ %s", body);
                 }
             }
         }

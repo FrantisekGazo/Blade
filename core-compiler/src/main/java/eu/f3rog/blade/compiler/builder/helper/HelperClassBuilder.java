@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
@@ -83,14 +82,14 @@ public class HelperClassBuilder
     }
 
     @Override
-    public void build(ProcessingEnvironment processingEnvironment) throws ProcessorError, IOException {
+    public void build() throws ProcessorError, IOException {
         boolean hasSomething = false;
         for (Map.Entry<Class<? extends IHelperModule>, IHelperModule> entry : mImplementations.entrySet()) {
-            hasSomething |= entry.getValue().implement(processingEnvironment, this);
+            hasSomething |= entry.getValue().implement(this);
         }
         // do not build empty helper class
         if (hasSomething) {
-            super.build(processingEnvironment);
+            super.build();
         }
     }
 

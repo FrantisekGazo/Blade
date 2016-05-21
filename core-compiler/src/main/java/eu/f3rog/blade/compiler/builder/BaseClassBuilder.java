@@ -8,11 +8,11 @@ import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 
 import javax.annotation.Generated;
-import javax.annotation.processing.ProcessingEnvironment;
 
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.util.ProcessorError;
+import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.compiler.util.StringUtils;
 
 /**
@@ -162,16 +162,14 @@ public abstract class BaseClassBuilder
 
     /**
      * Builds Java file for generated class.
-     *
-     * @param processingEnvironment Processing environment.
      */
     @Override
-    public void build(ProcessingEnvironment processingEnvironment) throws ProcessorError, IOException {
+    public void build() throws ProcessorError, IOException {
         end();
         TypeSpec cls = mBuilder.build();
         // create file
         JavaFile javaFile = JavaFile.builder(getClassName().packageName(), cls).build();
-        javaFile.writeTo(processingEnvironment.getFiler());
+        javaFile.writeTo(ProcessorUtils.getFiler());
         //javaFile.writeTo(System.out);
 
         if (LOG_SUCCESS) {

@@ -1,6 +1,7 @@
 package eu.f3rog.blade.compiler.builder.annotation;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.sun.tools.javac.util.Pair;
 
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
@@ -13,17 +14,52 @@ import eu.f3rog.blade.core.Weaves;
  */
 public final class WeaveBuilder {
 
+    public enum MethodWeaveType {
+        AT_BEGINNIG("^"), BEFORE_SUPER("<"), AFTER_SUPER(">");
+
+        private String mSign;
+
+        MethodWeaveType(String sign) {
+            mSign = sign;
+        }
+
+        public String getSign() {
+            return mSign;
+        }
+
+        public static MethodWeaveType from(String into) {
+            for (MethodWeaveType i : values()) {
+                if (i.getSign().equals(into)) {
+                    return i;
+                }
+            }
+            return null;
+        }
+    }
+
+    public static Pair<MethodWeaveType, String> parseMethodName(final String methodName) {
+        MethodWeaveType weaveType = MethodWeaveType.from(methodName.substring(0, 1));
+        String actualName = methodName.substring(1);
+        return new Pair<>(weaveType, actualName);
+    }
+
     public static IWeaveInto weave() {
         return new Implementation();
     }
 
     public interface IWeaveInto extends IWeaveBuild {
 
-        IWeaveStatement method(String methodName, Class... args);
+        IMethodWeaveStatement method(String methodName, Class... args);
 
         IWeaveStatement constructor(Class... args);
 
         IWeaveStatement field();
+
+    }
+
+    public interface IMethodWeaveStatement extends IWeaveStatement {
+
+        IWeaveStatement placed(MethodWeaveType type);
 
     }
 
@@ -42,17 +78,25 @@ public final class WeaveBuilder {
     }
 
     private static final class Implementation
-            implements IWeaveInto, IWeaveStatement {
+            implements IWeaveInto, IMethodWeaveStatement {
 
         private AnnotationSpec.Builder mContainerAnnotationBuilder;
         private String mInto;
         private Object[] mIntoArgs;
         private StringBuilder mStatement = new StringBuilder();
+        private MethodWeaveType mMethodWeaveType = null;
 
         @Override
-        public IWeaveStatement method(String methodName, Class... args) {
+        public IMethodWeaveStatement method(String methodName, Class... args) {
             mInto = methodName;
             mIntoArgs = toString(args);
+            mMethodWeaveType = MethodWeaveType.AT_BEGINNIG;
+            return this;
+        }
+
+        @Override
+        public IWeaveStatement placed(MethodWeaveType type) {
+            mMethodWeaveType = type;
             return this;
         }
 
@@ -106,8 +150,12 @@ public final class WeaveBuilder {
                     return build(false);
                 }
             } else {
+                String into = mInto;
+                if (mMethodWeaveType != null) {
+                    into = mMethodWeaveType.getSign() + into;
+                }
                 AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class)
-                        .addMember("into", "$S", mInto);
+                        .addMember("into", "$S", into);
 
                 if (mIntoArgs != null && mIntoArgs.length > 0) {
                     a.addMember("args", formatFor("$S", mIntoArgs.length), mIntoArgs);

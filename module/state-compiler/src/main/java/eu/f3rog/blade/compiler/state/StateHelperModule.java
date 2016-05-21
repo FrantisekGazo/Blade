@@ -11,7 +11,6 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -27,6 +26,7 @@ import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isFragmentSubClass;
@@ -101,7 +101,7 @@ public class StateHelperModule
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
         if (!mStatefulFields.isEmpty()) {
             // add methods only if there is something stateful
             addSaveStateMethod(builder);
@@ -115,10 +115,14 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
-                .addAnnotation(weaveSave(builder.getClassName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target)
-                .addParameter(Bundle.class, state);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
+        method.addParameter(Bundle.class, state);
+
+        if (mHelpedClassType != HelpedClassType.OTHER) {
+            method.addAnnotation(weaveSave(builder.getClassName()));
+        }
 
         String bundleWrapper = "bundleWrapper";
         method.beginControlFlow("if ($N == null)", state)
@@ -135,10 +139,14 @@ public class StateHelperModule
         String target = "target";
         String state = "state";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
-                .addAnnotation(weaveRestore(builder.getClassName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target)
-                .addParameter(Bundle.class, state);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
+        method.addParameter(Bundle.class, state);
+
+        if (mHelpedClassType != HelpedClassType.OTHER) {
+            method.addAnnotation(weaveRestore(builder.getClassName()));
+        }
 
         String bundleWrapper = "bundleWrapper";
         method.beginControlFlow("if ($N == null)", state)

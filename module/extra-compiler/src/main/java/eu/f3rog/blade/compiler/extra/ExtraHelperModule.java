@@ -11,7 +11,6 @@ import com.squareup.javapoet.MethodSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -27,6 +26,7 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.cannotHaveAnnotation;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.fullName;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
@@ -77,8 +77,8 @@ public class ExtraHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
-        addMethodToIntentManager(processingEnvironment, builder);
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
+        addMethodToIntentManager(builder);
         if (!mExtras.isEmpty()) {
             // add inject() only if there is something
             addInjectMethod(builder);
@@ -92,8 +92,9 @@ public class ExtraHelperModule extends BaseHelperModule {
         String intent = "intent";
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
                 .addAnnotation(weaveAnnotation(builder))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(builder.getArgClassName(), target);
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+
+        addClassAsParameter(method, builder.getArgClassName(), target);
 
         if (mInjected == Injected.ACTIVITY) {
             method.addStatement("$T $N = $N.getIntent()", Intent.class, intent, target);
@@ -132,10 +133,10 @@ public class ExtraHelperModule extends BaseHelperModule {
         }
     }
 
-    private void addMethodToIntentManager(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToIntentManager(HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(IntentBuilderBuilder.class)
-                .addMethodsFor(processingEnvironment, builder.getTypeElement());
+                .addMethodsFor(builder.getTypeElement());
     }
 
 }

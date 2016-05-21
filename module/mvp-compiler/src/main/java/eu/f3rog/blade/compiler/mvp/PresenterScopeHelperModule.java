@@ -2,7 +2,6 @@ package eu.f3rog.blade.compiler.mvp;
 
 import com.squareup.javapoet.ClassName;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
@@ -28,7 +27,7 @@ public class PresenterScopeHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public boolean implement(ProcessingEnvironment processingEnvironment, HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
         // add interface
         builder.getBuilder().addSuperinterface(ClassName.get(MvpActivity.class));
 
