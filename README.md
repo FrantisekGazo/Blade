@@ -225,7 +225,7 @@ Getter and setter is required for every **private** or **protected** field!
 
 
 ## @ParcelIgnore
-Use this annotation if you want **Blade** to ignore some field.
+Use this annotation if you want **Blade** to ignore some field, when writing/reading instance of given class to/from parcel.
 
 ```Java
 @blade.Parcel

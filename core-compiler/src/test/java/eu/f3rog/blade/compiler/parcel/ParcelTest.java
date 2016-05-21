@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.tools.JavaFileObject;
 
 import blade.Parcel;
+import blade.ParcelIgnore;
 import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.core.Weave;
@@ -603,6 +604,151 @@ public class ParcelTest extends BaseTest {
                         "   public static void readFromParcel($I target, Parcel parcel) {",
                         "       target.setText1(parcel.readString());",
                         "       target.setText2(parcel.readString());",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PARCEL)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void testParcelIgnore() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        Parcel.class, "P",
+                        ParcelIgnore.class, "PI",
+                        Parcelable.class,
+                        List.class
+                )
+                .body(
+                        "@$P",
+                        "public class $T implements Parcelable {",
+                        "",
+                        "   String text1;",
+                        "   @$PI",
+                        "   String text2;",
+                        "",
+                        "   public $T(android.os.Parcel p) {}",
+                        "",
+                        "   @Override",
+                        "   public int describeContents() { return 0; }",
+                        "   @Override",
+                        "   public void writeToParcel(android.os.Parcel dest, int flags) {}",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyClass_Helper")
+                .imports(
+                        input, "I",
+                        android.os.Parcel.class,
+                        Parcelable.class,
+                        Weave.class,
+                        Override.class
+                )
+                .body(
+                        "abstract class $T {",
+                        "",
+                        "   @Weave(into = \"<FIELD>\", statement = \"com.example.$T.CREATOR\")",
+                        "   public static final Parcelable.Creator<$I> CREATOR = ",
+                        "     new Parcelable.Creator<$I>() {",
+                        "       @Override",
+                        "       public $I createFromParcel(Parcel in) {",
+                        "           return new $I(in);",
+                        "       }",
+                        "",
+                        "       @Override",
+                        "       public $I[] newArray(int size) {",
+                        "           return new $I[size];",
+                        "       }",
+                        "   };",
+                        "",
+                        "   @Weave(into = \">writeToParcel\", args = {\"android.os.Parcel\", \"int\"}, statement = \"com.example.$T.writeToParcel(this, $1);\")",
+                        "   public static void writeToParcel($I target, Parcel parcel) {",
+                        "       parcel.writeString(target.text1);",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
+                        "   public static void readFromParcel($I target, Parcel parcel) {",
+                        "       target.text1 = parcel.readString();",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PARCEL)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void testParcelIgnoreOnPrivateField() {
+        JavaFileObject input = file("com.example", "MyClass")
+                .imports(
+                        Parcel.class, "P",
+                        ParcelIgnore.class, "PI",
+                        Parcelable.class,
+                        List.class
+                )
+                .body(
+                        "@$P",
+                        "public class $T implements Parcelable {",
+                        "",
+                        "   private String text1;",
+                        "   @$PI",
+                        "   protected String aText2;",
+                        "",
+                        "   public $T(android.os.Parcel p) {}",
+                        "",
+                        "   @Override",
+                        "   public int describeContents() { return 0; }",
+                        "   @Override",
+                        "   public void writeToParcel(android.os.Parcel dest, int flags) {}",
+                        "",
+                        "   public String getText1() { return text1; }",
+                        "   public void setText1(String newText1) { text1 = newText1; }",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "MyClass_Helper")
+                .imports(
+                        input, "I",
+                        android.os.Parcel.class,
+                        Parcelable.class,
+                        Weave.class,
+                        Override.class
+                )
+                .body(
+                        "abstract class $T {",
+                        "",
+                        "   @Weave(into = \"<FIELD>\", statement = \"com.example.$T.CREATOR\")",
+                        "   public static final Parcelable.Creator<$I> CREATOR = ",
+                        "     new Parcelable.Creator<$I>() {",
+                        "       @Override",
+                        "       public $I createFromParcel(Parcel in) {",
+                        "           return new $I(in);",
+                        "       }",
+                        "",
+                        "       @Override",
+                        "       public $I[] newArray(int size) {",
+                        "           return new $I[size];",
+                        "       }",
+                        "   };",
+                        "",
+                        "   @Weave(into = \">writeToParcel\", args = {\"android.os.Parcel\", \"int\"}, statement = \"com.example.$T.writeToParcel(this, $1);\")",
+                        "   public static void writeToParcel($I target, Parcel parcel) {",
+                        "       parcel.writeString(target.getText1());",
+                        "   }",
+                        "",
+                        "   @Weave(into = \"\", args = {\"android.os.Parcel\"}, statement = \"com.example.$T.readFromParcel(this, $1);\")",
+                        "   public static void readFromParcel($I target, Parcel parcel) {",
+                        "       target.setText1(parcel.readString());",
                         "   }",
                         "",
                         "}"
