@@ -22,7 +22,7 @@ class BladePlugin implements Plugin<Project> {
     static String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
 
     static String LIB_GROUP_ID = "eu.f3rog.blade"
-    static String LIB_VERSION = "2.2.0-beta7"
+    static String LIB_VERSION = "2.2.0"
     static String LIB_CONFIG_FILE_NAME = "blade.json"
     static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 

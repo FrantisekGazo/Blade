@@ -432,7 +432,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
         // Add Blade plugin
-        classpath 'eu.f3rog.blade:plugin:2.2.0-beta4'
+        classpath 'eu.f3rog.blade:plugin:2.2.0'
     }
 }
 
