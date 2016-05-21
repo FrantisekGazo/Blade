@@ -15,5 +15,6 @@ public interface ParcelErrorMsg extends ErrorMsg {
     String Parcel_class_without_constructor = "Class annotated with @" + Parcel.class.getSimpleName()
             + " has to have public constructor with parameter of type 'android.os.Parcel'"
             + " with empty body or calling 'super(parcel)' for inheritance.";
+    String Missing_Access_Method = "Field '%s' is missing %s. Class with @" + Parcel.class.getSimpleName() + " has to have getter and setter for private and protected fields.";
 
 }

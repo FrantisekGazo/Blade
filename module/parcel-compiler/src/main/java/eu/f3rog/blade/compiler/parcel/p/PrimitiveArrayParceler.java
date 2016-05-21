@@ -1,9 +1,5 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import com.squareup.javapoet.MethodSpec;
-
-import javax.lang.model.element.VariableElement;
-
 /**
  * Class {@link PrimitiveArrayParceler}
  *
@@ -26,13 +22,12 @@ final class PrimitiveArrayParceler implements ClassParceler {
     }
 
     @Override
-    public void write(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.write" + mArrayType + "Array($N.$N)", parcel, object, e.getSimpleName());
+    public CallFormat writeCall() {
+        return new CallFormat("%s.write" + mArrayType + "Array(%s)", CallFormat.Arg.PARCEL, CallFormat.Arg.TARGET_GETTER);
     }
 
     @Override
-    public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.$N = $N.create" + mArrayType + "Array()", object, e.getSimpleName(), parcel);
+    public CallFormat readCall() {
+        return new CallFormat("%s.create" + mArrayType + "Array()", CallFormat.Arg.PARCEL);
     }
-
 }

@@ -1,10 +1,6 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import com.squareup.javapoet.MethodSpec;
-
 import java.io.Serializable;
-
-import javax.lang.model.element.VariableElement;
 
 /**
  * Class {@link SerializableClassParceler}
@@ -20,13 +16,12 @@ final class SerializableClassParceler implements ClassParceler {
     }
 
     @Override
-    public void write(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.writeSerializable($N.$N)", parcel, object, e.getSimpleName());
+    public CallFormat writeCall() {
+        return new CallFormat("%s.writeSerializable(%s)", CallFormat.Arg.PARCEL, CallFormat.Arg.TARGET_GETTER);
     }
 
     @Override
-    public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.$N = ($T) $N.readSerializable()", object, e.getSimpleName(), e.asType(), parcel);
+    public CallFormat readCall() {
+        return new CallFormat("(%s) %s.readSerializable()", CallFormat.Arg.TYPE, CallFormat.Arg.PARCEL);
     }
-
 }

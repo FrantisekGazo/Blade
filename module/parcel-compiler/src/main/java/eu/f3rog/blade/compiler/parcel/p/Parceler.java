@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
@@ -137,23 +136,25 @@ final public class Parceler {
     }
 
     /**
-     * Adds write to <code>parcel</code> statement to given <code>method</code>
+     * Returns write call format.
      */
-    public static void write(VariableElement e, MethodSpec.Builder method, String parcel, String object) throws ProcessorError {
-        ClassParceler parceler = findParceler(e);
-        if (parceler != null) {
-            parceler.write(e, method, parcel, object);
+    public static CallFormat writeCall(VariableElement variable) throws ProcessorError {
+        ClassParceler parceler = findParceler(variable);
+        if (parceler == null) {
+            throw null;
         }
+        return parceler.writeCall();
     }
 
     /**
      * Adds read from <code>parcel</code> statement to given <code>method</code>
      */
-    public static void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) throws ProcessorError {
+    public static CallFormat readCall(VariableElement e) throws ProcessorError {
         ClassParceler parceler = findParceler(e);
-        if (parceler != null) {
-            parceler.read(e, method, parcel, object);
+        if (parceler == null) {
+            return null;
         }
+        return parceler.readCall();
     }
 
     public static String removeArrayParenthesis(String typeName) {

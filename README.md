@@ -218,15 +218,14 @@ public class MyClass implements Parcelable {
 ```
 
 Class with `@Parcel` has to:
-* implement [Parcelable](http://developer.android.com/reference/android/os/Parcelable.html) interface
+* implement [Parcelable](http://developer.android.com/reference/android/os/Parcelable.html) interface (empty methods are enough)
 * contain constructor with parameter of type [Parcel](http://developer.android.com/reference/android/os/Parcel.html)
 
-All fields that are **private** or **protected** will be **ignored!**
-If these fields are also needed in parcel, you need to add code for them inside `writeToParcel(Parcel, int)` and `constructor(Parcel)`.
+Getter and setter is required for every **private** or **protected** field!
 
 
 ## @ParcelIgnore
-Use this annotation if you want **Blade** to ignore some field.
+Use this annotation if you want **Blade** to ignore some field, when writing/reading instance of given class to/from parcel.
 
 ```Java
 @blade.Parcel

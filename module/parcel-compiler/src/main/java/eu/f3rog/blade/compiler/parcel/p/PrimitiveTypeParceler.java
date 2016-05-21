@@ -1,9 +1,5 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import com.squareup.javapoet.MethodSpec;
-
-import javax.lang.model.element.VariableElement;
-
 import static eu.f3rog.blade.compiler.util.StringUtils.startUpperCase;
 
 /**
@@ -30,13 +26,12 @@ final class PrimitiveTypeParceler implements ClassParceler {
     }
 
     @Override
-    public void write(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.write" + typeName() + "($N.$N)", parcel, object, e.getSimpleName());
+    public CallFormat writeCall() {
+        return new CallFormat("%s.write" + typeName() + "(%s)", CallFormat.Arg.PARCEL, CallFormat.Arg.TARGET_GETTER);
     }
 
     @Override
-    public void read(VariableElement e, MethodSpec.Builder method, String parcel, String object) {
-        method.addStatement("$N.$N = $N.read" + typeName() + "()", object, e.getSimpleName(), parcel);
+    public CallFormat readCall() {
+        return new CallFormat("%s.read" + typeName() + "()", CallFormat.Arg.PARCEL);
     }
-
 }
