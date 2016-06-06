@@ -259,7 +259,7 @@ Annotation for implementing MVP architecture.
 
 1. Create an interface for your view by extending [IView](https://github.com/FrantisekGazo/Blade/blob/master/module/mvp/src/main/java/blade/mvp/IView.java).
     ```Java
-    public interface IMyView implements blade.mvp.IView {
+    public interface IMyView extends blade.mvp.IView {
         void show(String something);  
     }
     ```
