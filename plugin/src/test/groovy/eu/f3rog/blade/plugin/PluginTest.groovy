@@ -39,10 +39,38 @@ class PluginTest extends Specification {
 
         then:
         e != null
-        e.getMessage().contains(BladePlugin.ANDROID_PLUGIN_REQUIRED)
+        e.getMessage().contains(BladePlugin.Error.ANDROID_PLUGIN_REQUIRED)
 
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0']
+    }
+
+    @Unroll
+    def "fail if non-existing module name used - gradleToolsVersion #gradleToolsVersion, gradleVersion #gradleVersion"() {
+        given:
+        testProjectDir.addBladeFile(bladeModules)
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true)
+
+        when:
+        Exception e = null
+        try {
+            GradleRunner.create()
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(testProjectDir.root)
+                    .withArguments(':build')
+                    .build()
+        } catch (Exception ex) {
+            e = ex
+        }
+
+        then:
+        e != null
+        e.getMessage().contains(String.format(BladePlugin.Error.MODULE_DOES_NOT_EXIST, "fake"))
+
+        where:
+        gradleToolsVersion << ['1.5.0', '2.0.0']
+        gradleVersion << ['2.9', '2.10']
+        bladeModules << [Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake")]
     }
 
     @Unroll
@@ -74,7 +102,7 @@ class PluginTest extends Specification {
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0']
         gradleVersion << ['2.9', '2.10']
-        bladeModules << [Arrays.asList("extra", "mvp", "state"), Arrays.asList("arg")]
+        bladeModules << [Arrays.asList("Extra", "Mvp", "State"), Arrays.asList("arg")] // also test case insensitivity
     }
 
     @Unroll
