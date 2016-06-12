@@ -8,7 +8,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class BladePlugin implements Plugin<Project> {
+public class BladePlugin implements Plugin<Project> {
 
     private static class BladeConfig {
 
@@ -18,16 +18,14 @@ class BladePlugin implements Plugin<Project> {
         String[] modules = LIB_MODULES
     }
 
-    interface Error {
-        String GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later."
-        String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
-        String MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'."
-    }
+    public static String ERROR_GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later."
+    public static String ERROR_ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
+    public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'."
 
-    static String LIB_GROUP_ID = "eu.f3rog.blade"
-    static String LIB_VERSION = "2.2.1-beta2"
-    static String LIB_CONFIG_FILE_NAME = "blade.json"
-    static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
+    public static String LIB_GROUP_ID = "eu.f3rog.blade"
+    public static String LIB_VERSION = "2.2.1-beta3"
+    public static String LIB_CONFIG_FILE_NAME = "blade.json"
+    public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
     private BladeConfig mConfig;
 
@@ -37,12 +35,12 @@ class BladePlugin implements Plugin<Project> {
         boolean isAndroidApp = project.plugins.withType(AppPlugin)
         boolean isAndroidLib = project.plugins.withType(LibraryPlugin)
         if (!isAndroidApp && !isAndroidLib) {
-            throw new GradleException(Error.ANDROID_PLUGIN_REQUIRED)
+            throw new GradleException(ERROR_ANDROID_PLUGIN_REQUIRED)
         }
 
         // check gradle plugin
         if (!isTransformAvailable()) {
-            throw new GradleException(Error.GRADLE_TOOLS_1_5_0_REQUIRED)
+            throw new GradleException(ERROR_GRADLE_TOOLS_1_5_0_REQUIRED)
         }
 
         prepareConfig(project)
@@ -106,7 +104,7 @@ class BladePlugin implements Plugin<Project> {
                     mConfig.modules = value.collect {
                         String moduleName = it.toLowerCase() // ignore case
                         if (!LIB_MODULES.contains(moduleName)) { // check if module exists
-                            throw new IllegalStateException(String.format(Error.MODULE_DOES_NOT_EXIST, it))
+                            throw new IllegalStateException(String.format(ERROR_MODULE_DOES_NOT_EXIST, it))
                         }
                         return moduleName
                     }

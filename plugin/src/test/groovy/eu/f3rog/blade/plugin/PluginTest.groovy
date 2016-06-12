@@ -39,7 +39,7 @@ class PluginTest extends Specification {
 
         then:
         e != null
-        e.getMessage().contains(BladePlugin.Error.ANDROID_PLUGIN_REQUIRED)
+        e.getMessage().contains(BladePlugin.ERROR_ANDROID_PLUGIN_REQUIRED)
 
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0']
@@ -65,7 +65,7 @@ class PluginTest extends Specification {
 
         then:
         e != null
-        e.getMessage().contains(String.format(BladePlugin.Error.MODULE_DOES_NOT_EXIST, "fake"))
+        e.getMessage().contains(String.format(BladePlugin.ERROR_MODULE_DOES_NOT_EXIST, "fake"))
 
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0']
