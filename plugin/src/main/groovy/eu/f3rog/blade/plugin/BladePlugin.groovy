@@ -25,7 +25,7 @@ class BladePlugin implements Plugin<Project> {
     }
 
     static String LIB_GROUP_ID = "eu.f3rog.blade"
-    static String LIB_VERSION = "2.2.1-beta1"
+    static String LIB_VERSION = "2.2.1-beta2"
     static String LIB_CONFIG_FILE_NAME = "blade.json"
     static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
@@ -103,7 +103,7 @@ class BladePlugin implements Plugin<Project> {
                     mConfig.debug = value
                     break
                 case "modules":
-                    mConfig.modules = value.each {
+                    mConfig.modules = value.collect {
                         String moduleName = it.toLowerCase() // ignore case
                         if (!LIB_MODULES.contains(moduleName)) { // check if module exists
                             throw new IllegalStateException(String.format(Error.MODULE_DOES_NOT_EXIST, it))
