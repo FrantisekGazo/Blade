@@ -6,6 +6,8 @@ branches:
   only:
     - master
     - develop
+    - /^feature\/.*$/
+    - /^hotfix\/.*$/
 
 android:
  components:
@@ -36,5 +38,7 @@ install:
     - ./gradlew install
 
 script:
+    # Run annotation processor tests
     - ./gradlew :core-compiler:test
+    # Run plugin tests
     - ./gradlew :plugin:test

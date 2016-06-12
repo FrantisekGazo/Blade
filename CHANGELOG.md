@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.2.0 *(2016-05-21)*
+----------------------------
+
+ * New: Added module for Parcelable implementation - using `@Parcel` annotation.
+ * Optimization: Support of generic and inner classes.
+
 Version 2.1.0 *(2016-03-23)*
 ----------------------------
 
