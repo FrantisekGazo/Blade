@@ -22,7 +22,7 @@ class BladePlugin implements Plugin<Project> {
     static String ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
 
     static String LIB_GROUP_ID = "eu.f3rog.blade"
-    static String LIB_VERSION = "2.2.0"
+    static String LIB_VERSION = "2.2.1-beta1"
     static String LIB_CONFIG_FILE_NAME = "blade.json"
     static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
@@ -100,7 +100,13 @@ class BladePlugin implements Plugin<Project> {
                     mConfig.debug = value
                     break
                 case "modules":
-                    mConfig.modules = value
+                    mConfig.modules = value.each {
+                        String moduleName = it.toLowerCase() // ignore case
+                        if (!LIB_MODULES.contains(moduleName)) { // check if module exists
+                            throw new IllegalStateException("Blade does not have module '$it'.")
+                        }
+                        return moduleName
+                    }
                     break
                 default:
                     throw new IllegalStateException("'$key' is not supported in $LIB_CONFIG_FILE_NAME.")
