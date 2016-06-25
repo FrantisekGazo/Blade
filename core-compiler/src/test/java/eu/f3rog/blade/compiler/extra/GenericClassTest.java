@@ -53,7 +53,7 @@ public final class GenericClassTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
+                        "   @Weave(into = \"0^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static <T> void inject($I<T> target) {",
                         "       Intent intent = target.getIntent();",
                         "       if (intent == null || intent.getExtras() == null) {",
@@ -129,7 +129,7 @@ public final class GenericClassTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
+                        "   @Weave(into = \"0^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static <T extends Serializable> void inject($I<T> target) {",
                         "       Intent intent = target.getIntent();",
                         "       if (intent == null || intent.getExtras() == null) {",

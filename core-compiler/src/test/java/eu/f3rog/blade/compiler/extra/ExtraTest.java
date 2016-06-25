@@ -152,7 +152,7 @@ public final class ExtraTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
+                        "   @Weave(into = \"0^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
                         "   public static void inject($I target) {",
                         "       Intent intent = target.getIntent();",
                         "       if (intent == null || intent.getExtras() == null) {",
@@ -205,7 +205,7 @@ public final class ExtraTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"^onStartCommand\", args = {\"android.content.Intent\", \"int\", \"int\"}, statement = \"com.example.$T.inject(this, $1);\")",
+                        "   @Weave(into = \"0^onStartCommand\", args = {\"android.content.Intent\", \"int\", \"int\"}, statement = \"com.example.$T.inject(this, $1);\")",
                         "   public static void inject($I target, Intent intent) {",
                         "       if (intent == null || intent.getExtras() == null) {",
                         "           return;",
@@ -258,7 +258,7 @@ public final class ExtraTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"^onHandleIntent\", args = {\"android.content.Intent\"}, statement = \"com.example.$T.inject(this, $1);\")",
+                        "   @Weave(into = \"0^onHandleIntent\", args = {\"android.content.Intent\"}, statement = \"com.example.$T.inject(this, $1);\")",
                         "   public static void inject($I target, Intent intent) {",
                         "       if (intent == null || intent.getExtras() == null) {",
                         "           return;",

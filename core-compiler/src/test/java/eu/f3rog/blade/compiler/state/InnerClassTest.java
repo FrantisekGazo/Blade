@@ -56,7 +56,7 @@ public final class InnerClassTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"^onSaveInstanceState\", ",
+                        "   @Weave(into = \"0^onSaveInstanceState\", ",
                         "       statement = \"android.os.Bundle bundle = new android.os.Bundle();bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());com.example.$T.saveState(this, bundle);return bundle;\")",
                         "   public static void saveState(A.B target, Bundle state) {",
                         "       if (state == null) {",
@@ -67,7 +67,7 @@ public final class InnerClassTest extends BaseTest {
                         "       bundleWrapper.put(\"<Stateful-mNumber>\", target.mNumber);",
                         "   }",
                         "",
-                        "   @Weave(into = \"^onRestoreInstanceState\", args = {\"android.os.Parcelable\"}, ",
+                        "   @Weave(into = \"0^onRestoreInstanceState\", args = {\"android.os.Parcelable\"}, ",
                         "       statement = \"if ($1 instanceof android.os.Bundle) {android.os.Bundle bundle = (android.os.Bundle) $1;com.example.$T.restoreState(this, bundle);super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));} else {super.onRestoreInstanceState($1);}return;\")",
                         "   public static void restoreState(A.B target, Bundle state) {",
                         "       if (state == null) {",
