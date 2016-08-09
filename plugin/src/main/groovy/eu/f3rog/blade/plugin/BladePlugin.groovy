@@ -25,7 +25,7 @@ public class BladePlugin implements Plugin<Project> {
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
     public static String LIB_VERSION = "2.2.1-beta4"
     public static String LIB_CONFIG_FILE_NAME = "blade.json"
-    public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
+    public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "prefs", "state"]
 
     private BladeConfig mConfig;
 
