@@ -30,18 +30,19 @@ import eu.f3rog.blade.core.BundleWrapper;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
 
 /**
- * Class {@link IntentBuilderBuilder}
+ * Class {@link IntentManagerClassBuilder}
  *
  * @author FrantisekGazo
  * @version 2015-10-21
  */
-public class IntentBuilderBuilder extends BaseClassBuilder {
+public final class IntentManagerClassBuilder
+        extends BaseClassBuilder {
 
     private static final String METHOD_NAME_FOR = "for%s";
     private static final String METHOD_NAME_START = "start%s";
 
-    public IntentBuilderBuilder() throws ProcessorError {
-        super(GCN.INTENT_MANAGER, GPN.BLADE);
+    public IntentManagerClassBuilder() throws ProcessorError {
+        super(new GCN("I"), GPN.BLADE);
     }
 
     @Override

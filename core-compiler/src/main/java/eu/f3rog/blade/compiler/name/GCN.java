@@ -3,21 +3,19 @@ package eu.f3rog.blade.compiler.name;
 import com.squareup.javapoet.ClassName;
 
 /**
- * Enum {@link GCN}
+ * Class {@link GCN} for Generated Class Names
  *
  * @author FrantisekGazo
- * @version 2015-10-16
+ * @version 2016-08-09
  */
-public enum GCN {
+public class GCN {
 
-    HELPER("%s_Helper"),
-    FRAGMENT_FACTORY("F"),
-    INTENT_MANAGER("I"),
-    ;
+    /** HELPER */
+    public static final GCN HELPER = new GCN("%s_Helper");
 
     private String mName;
 
-    GCN(String mName) {
+    public GCN(String mName) {
         this.mName = mName;
     }
 

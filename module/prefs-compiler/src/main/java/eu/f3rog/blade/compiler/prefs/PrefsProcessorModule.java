@@ -17,7 +17,8 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * @author FrantisekGazo
  * @version 2016-08-09
  */
-public class PrefsProcessorModule implements ProcessorModule {
+public final class PrefsProcessorModule
+        implements ProcessorModule {
 
     @Override
     public void process(TypeElement bladeElement) throws ProcessorError {
@@ -28,7 +29,7 @@ public class PrefsProcessorModule implements ProcessorModule {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Prefs.class);
         for (Element e : elements) {
             ClassManager.getInstance()
-                    .getHelper((TypeElement) e.getEnclosingElement())
+                    .getHelper((TypeElement) e)
                     .getModule(PrefsHelperModule.class)
                     .add((TypeElement) e);
         }

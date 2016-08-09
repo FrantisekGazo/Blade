@@ -23,17 +23,18 @@ import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 /**
- * Class {@link FragmentFactoryBuilder}
+ * Class {@link FragmentFactoryClassBuilder}
  *
  * @author FrantisekGazo
  * @version 2015-12-19
  */
-public class FragmentFactoryBuilder extends BaseClassBuilder {
+public final class FragmentFactoryClassBuilder
+        extends BaseClassBuilder {
 
     private static final String METHOD_NAME_NEW = "new%s";
 
-    public FragmentFactoryBuilder() throws ProcessorError {
-        super(GCN.FRAGMENT_FACTORY, GPN.BLADE);
+    public FragmentFactoryClassBuilder() throws ProcessorError {
+        super(new GCN("F"), GPN.BLADE);
     }
 
     @Override

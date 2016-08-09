@@ -37,7 +37,8 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
  * @author FrantisekGazo
  * @version 2015-12-15
  */
-public class ExtraHelperModule extends BaseHelperModule {
+public final class ExtraHelperModule
+        extends BaseHelperModule {
 
     private enum Injected {
         ACTIVITY, SERVICE, INTENT_SERVICE
@@ -135,7 +136,7 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     private void addMethodToIntentManager(HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
-                .getSpecialClass(IntentBuilderBuilder.class)
+                .getSpecialClass(IntentManagerClassBuilder.class)
                 .addMethodsFor(builder.getTypeElement());
     }
 

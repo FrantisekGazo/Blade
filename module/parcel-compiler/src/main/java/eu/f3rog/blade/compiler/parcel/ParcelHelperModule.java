@@ -40,7 +40,7 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.hasSomeModifier;
  * @author FrantisekGazo
  * @version 2015-12-19
  */
-public class ParcelHelperModule
+public final class ParcelHelperModule
         extends BaseHelperModule {
 
     private static class Field {

@@ -18,7 +18,7 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * @author FrantisekGazo
  * @version 2015-12-19
  */
-public class ParcelProcessorModule
+public final class ParcelProcessorModule
         implements ProcessorModule {
 
     @Override

@@ -1,5 +1,6 @@
 package eu.f3rog.blade.compiler.prefs;
 
+import blade.Prefs;
 import eu.f3rog.blade.compiler.ErrorMsg;
 
 /**
@@ -10,4 +11,5 @@ import eu.f3rog.blade.compiler.ErrorMsg;
  */
 public interface PrefsErrorMsg extends ErrorMsg {
 
+    String Invalid_type_with_Prefs = "Only interface can be annotated with @" + Prefs.class.getSimpleName() + ".";
 }

@@ -18,7 +18,8 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * @author FrantisekGazo
  * @version 2015-12-19
  */
-public class MvpProcessorModule implements ProcessorModule {
+public final class MvpProcessorModule
+        implements ProcessorModule {
 
     @Override
     public void process(TypeElement bladeElement) throws ProcessorError {

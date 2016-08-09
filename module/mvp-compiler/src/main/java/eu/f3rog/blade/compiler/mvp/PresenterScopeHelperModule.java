@@ -17,7 +17,8 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
  * @author FrantisekGazo
  * @version 2015-12-15
  */
-public class PresenterScopeHelperModule extends BaseHelperModule {
+public final class PresenterScopeHelperModule
+        extends BaseHelperModule {
 
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {

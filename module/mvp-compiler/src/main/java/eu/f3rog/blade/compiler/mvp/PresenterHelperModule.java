@@ -42,7 +42,8 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
  * @author FrantisekGazo
  * @version 2015-12-15
  */
-public class PresenterHelperModule extends BaseHelperModule {
+public final class PresenterHelperModule
+        extends BaseHelperModule {
 
     private enum ViewType {
         ACTIVITY, VIEW

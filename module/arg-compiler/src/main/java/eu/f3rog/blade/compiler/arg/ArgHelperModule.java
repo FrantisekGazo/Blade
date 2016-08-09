@@ -33,7 +33,8 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isFragmentSubClass;
  * @author FrantisekGazo
  * @version 2015-12-15
  */
-public class ArgHelperModule extends BaseHelperModule {
+public final class ArgHelperModule
+        extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
 
@@ -96,7 +97,7 @@ public class ArgHelperModule extends BaseHelperModule {
 
     private void addMethodToFragmentFactory(HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
-                .getSpecialClass(FragmentFactoryBuilder.class)
+                .getSpecialClass(FragmentFactoryClassBuilder.class)
                 .addMethodFor(builder.getTypeElement());
     }
 

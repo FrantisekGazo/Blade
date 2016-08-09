@@ -38,7 +38,7 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
  * @author FrantisekGazo
  * @version 2015-12-19
  */
-public class StateHelperModule
+public final class StateHelperModule
         extends BaseHelperModule {
 
     private static final ClassName PRESENTER_CLASS_NAME = ClassName.get("blade.mvp", "IPresenter");
