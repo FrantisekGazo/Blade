@@ -140,7 +140,7 @@ public class BladeWeaver extends AWeaver {
                 WeaveBuilder.Into into = WeaveBuilder.parseInto(metadata.into);
                 log(" ~> method '%s' %s with %s priority", into.getMethodName(), into.getMethodWeaveType(), into.getPriority());
                 switch (into.getMethodWeaveType()) {
-                    case AT_BEGINNIG:
+                    case AT_BEGINNING:
                         getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, into.getMethodName(), metadata.args);
                         break;
                     case BEFORE_SUPER:
