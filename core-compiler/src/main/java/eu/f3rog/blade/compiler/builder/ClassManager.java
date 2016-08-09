@@ -36,10 +36,12 @@ public class ClassManager
 
     private final Map<Class, BaseClassBuilder> mSpecialClasses;
     private final Map<ClassName, HelperClassBuilder> mHelpers;
+    private final List<BaseClassBuilder> mOtherBuilders;
 
     private ClassManager() {
         mSpecialClasses = new HashMap<>();
         mHelpers = new HashMap<>();
+        mOtherBuilders = new ArrayList<>();
     }
 
     public HelperClassBuilder getHelper(TypeElement e) throws ProcessorError {
@@ -85,6 +87,14 @@ public class ClassManager
         for (Map.Entry<Class, BaseClassBuilder> entry : mSpecialClasses.entrySet()) {
             entry.getValue().build();
         }
+
+        // build other builders
+        for (int i = 0; i < mOtherBuilders.size(); i++) {
+            mOtherBuilders.get(i).build();
+        }
     }
 
+    public void add(final BaseClassBuilder builder) {
+        mOtherBuilders.add(builder);
+    }
 }

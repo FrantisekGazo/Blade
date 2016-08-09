@@ -9,6 +9,7 @@ import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 
 import static eu.f3rog.blade.compiler.util.File.file;
+import static eu.f3rog.blade.compiler.util.File.generatedFile;
 
 /**
  * Class {@link PrefsTest}
@@ -19,15 +20,14 @@ import static eu.f3rog.blade.compiler.util.File.file;
 public final class PrefsTest extends BaseTest {
 
     @Test
-    public void invalidClass() {
-        JavaFileObject input = file("com.example", "MyClass")
+    public void invalidUsageClass() {
+        JavaFileObject input = file("com.example", "Test")
                 .imports(
                         Prefs.class, "P"
                 )
                 .body(
                         "@$P",
-                        "public class $T {",
-                        "}"
+                        "public class $T {}"
                 );
 
         assertFiles(input)
@@ -37,15 +37,14 @@ public final class PrefsTest extends BaseTest {
     }
 
     @Test
-    public void invalidAnnotation() {
-        JavaFileObject input = file("com.example", "MyClass")
+    public void invalidUsageAnnotation() {
+        JavaFileObject input = file("com.example", "Test")
                 .imports(
                         Prefs.class, "P"
                 )
                 .body(
                         "@$P",
-                        "public @interface $T {",
-                        "}"
+                        "public @interface $T {}"
                 );
 
         assertFiles(input)
@@ -55,15 +54,14 @@ public final class PrefsTest extends BaseTest {
     }
 
     @Test
-    public void invalidEnum() {
-        JavaFileObject input = file("com.example", "MyClass")
+    public void invalidUsageEnum() {
+        JavaFileObject input = file("com.example", "Test")
                 .imports(
                         Prefs.class, "P"
                 )
                 .body(
                         "@$P",
-                        "public enum $T {",
-                        "}"
+                        "public enum $T {}"
                 );
 
         assertFiles(input)
@@ -73,19 +71,43 @@ public final class PrefsTest extends BaseTest {
     }
 
     @Test
-    public void validInterface() {
-        JavaFileObject input = file("com.example", "MyClass")
+    public void validUsageInterface() {
+        JavaFileObject input = file("com.example", "Test")
                 .imports(
                         Prefs.class, "P"
                 )
                 .body(
                         "@$P",
-                        "public interface $T {",
-                        "}"
+                        "public interface $T {}"
                 );
 
         assertFiles(input)
                 .with(BladeProcessor.Module.PREFS)
                 .compilesWithoutError();
+    }
+
+    @Test
+    public void correctNameOfGeneratedClass() {
+        JavaFileObject input = file("com.example", "Test")
+                .imports(
+                        Prefs.class, "P"
+                )
+                .body(
+                        "@$P",
+                        "public interface $T {}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "Test_Prefs")
+                .imports(
+                )
+                .body(
+                        "public class $T {}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PREFS)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
     }
 }

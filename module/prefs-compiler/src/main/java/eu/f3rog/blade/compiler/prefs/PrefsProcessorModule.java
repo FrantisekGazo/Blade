@@ -28,10 +28,8 @@ public final class PrefsProcessorModule
     public void process(RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Prefs.class);
         for (Element e : elements) {
-            ClassManager.getInstance()
-                    .getHelper((TypeElement) e)
-                    .getModule(PrefsHelperModule.class)
-                    .add((TypeElement) e);
+            PrefsClassBuilder builder = new PrefsClassBuilder((TypeElement) e);
+            ClassManager.getInstance().add(builder);
         }
     }
 
