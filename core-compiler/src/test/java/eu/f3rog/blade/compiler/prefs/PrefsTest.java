@@ -87,7 +87,7 @@ public final class PrefsTest extends BaseTest {
     }
 
     @Test
-    public void correctNameOfGeneratedClass() {
+    public void nameOfGeneratedClass() {
         JavaFileObject input = file("com.example", "Test")
                 .imports(
                         Prefs.class, "P"
@@ -102,6 +102,77 @@ public final class PrefsTest extends BaseTest {
                 )
                 .body(
                         "public class $T {}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PREFS)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void generatedConstructor() {
+        JavaFileObject input = file("com.example", "Test")
+                .imports(
+                        Prefs.class, "P"
+                )
+                .body(
+                        "@$P",
+                        "public interface $T {}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "Test_Prefs")
+                .imports(
+                )
+                .body(
+                        "public class $T {",
+                        "",
+                        "   public $T() {",
+                        "       TODO",
+                        "   }",
+                        "}"
+                );
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PREFS)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void stringProperty() {
+        JavaFileObject input = file("com.example", "Test")
+                .imports(
+                        Prefs.class, "P"
+                )
+                .body(
+                        "@$P",
+                        "public interface $T {",
+                        "",
+                        "   String text;",
+                        "}"
+                );
+
+        JavaFileObject expected = generatedFile("com.example", "Test_Prefs")
+                .imports(
+                )
+                .body(
+                        "public class $T {",
+                        "",
+                        "   public String getText() {",
+                        "       return TODO",
+                        "   }",
+                        "",
+                        "   public String getText(String defaultValue) {",
+                        "       return TODO",
+                        "   }",
+                        "",
+                        "   public String setText(final String text) {",
+                        "       return TODO",
+                        "   }",
+                        "}"
                 );
 
         assertFiles(input)
