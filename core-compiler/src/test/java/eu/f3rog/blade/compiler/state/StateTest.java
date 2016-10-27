@@ -111,7 +111,7 @@ public final class StateTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"0^onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
+                        "   @Weave(into = \"0>onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
                         "   public static void saveState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
@@ -168,7 +168,7 @@ public final class StateTest extends BaseTest {
                 .body(
                         "abstract class $T {",
                         "",
-                        "   @Weave(into = \"0^onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
+                        "   @Weave(into = \"0>onSaveInstanceState\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.saveState(this, $1);\")",
                         "   public static void saveState($I target, Bundle state) {",
                         "       if (state == null) {",
                         "           throw new $E(\"State cannot be null!\");",
