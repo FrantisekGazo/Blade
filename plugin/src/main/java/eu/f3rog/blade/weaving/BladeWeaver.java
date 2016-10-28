@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
-import eu.f3rog.afterburner.inserts.InsertableConstructor;
+import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
@@ -25,7 +24,8 @@ import javassist.bytecode.annotation.MemberValue;
 
 import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
 
-public class BladeWeaver extends AWeaver {
+public final class BladeWeaver
+        extends AWeaver {
 
     private static class Metadata {
         String into;
@@ -33,7 +33,8 @@ public class BladeWeaver extends AWeaver {
         String statement;
     }
 
-    private final static class MetadataComparator implements Comparator<Metadata> {
+    private final static class MetadataComparator
+            implements Comparator<Metadata> {
 
         @Override
         public int compare(Metadata l, Metadata r) {
@@ -88,7 +89,7 @@ public class BladeWeaver extends AWeaver {
             for (CtClass interfaceClass : helperClass.getInterfaces()) {
                 lognl("interface '%s'", interfaceClass.getName());
 
-                Interfaces.weaveInterface(interfaceClass, intoClass, getAfterBurner());
+                Interfaces.weaveInterface(interfaceClass, intoClass, getJavassistHelper());
             }
 
             lognl("Weaving done (%s)", intoClass.getSimpleName());
@@ -133,28 +134,31 @@ public class BladeWeaver extends AWeaver {
             if (Weave.WEAVE_CONSTRUCTOR.equals(metadata.into)) {
                 log(" ~> constructor");
                 // weave into constructor
-                getAfterBurner().insertConstructor(new SpecificConstructor(body, intoClass, metadata.args));
+                getJavassistHelper().insertConstructor(body, intoClass, metadata.args);
                 lognl(" ~~~ %s", body);
             } else {
                 // weave into method
                 WeaveBuilder.Into into = WeaveBuilder.parseInto(metadata.into);
                 log(" ~> method '%s' %s with %s priority", into.getMethodName(), into.getMethodWeaveType(), into.getPriority());
                 switch (into.getMethodWeaveType()) {
-                    case AT_BEGINNING:
-                        getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, into.getMethodName(), metadata.args);
+                    case BEFORE_BODY:
+                        getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
+                        break;
+                    case AFTER_BODY:
+                        getJavassistHelper().insertAfterBody(body, intoClass, into.getMethodName(), metadata.args);
                         break;
                     case BEFORE_SUPER:
                         try {
-                            getAfterBurner().beforeOverrideMethod(body, intoClass, into.getMethodName(), metadata.args);
+                            getJavassistHelper().insertBeforeSuper(body, intoClass, into.getMethodName(), metadata.args);
                         } catch (Exception e) { // put at beginning if super not found
-                            getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, into.getMethodName(), metadata.args);
+                            getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
                         }
                         break;
                     case AFTER_SUPER:
                         try {
-                            getAfterBurner().afterOverrideMethod(body, intoClass, into.getMethodName(), metadata.args);
+                            getJavassistHelper().insertAfterSuper(body, intoClass, into.getMethodName(), metadata.args);
                         } catch (Exception e) { // put at beginning if super not found
-                            getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, into.getMethodName(), metadata.args);
+                            getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
                         }
                         break;
                     default:
@@ -266,35 +270,4 @@ public class BladeWeaver extends AWeaver {
             return Collections.emptyList();
         }
     }
-
-    private final class SpecificConstructor extends InsertableConstructor {
-
-        private final CtClass[] mRequiredParams;
-        private final String mBody;
-
-        public SpecificConstructor(String body, CtClass classToInsertInto, CtClass... params) {
-            super(classToInsertInto);
-            mRequiredParams = params;
-            mBody = body;
-        }
-
-        @Override
-        public String getConstructorBody(CtClass[] paramClasses) throws AfterBurnerImpossibleException {
-            return mBody;
-        }
-
-        @Override
-        public boolean acceptParameters(CtClass[] paramClasses) throws AfterBurnerImpossibleException {
-            if (paramClasses.length != mRequiredParams.length) {
-                return false;
-            }
-            for (int i = 0, c = mRequiredParams.length; i < c; i++) {
-                if (!mRequiredParams[i].equals(paramClasses[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
 }

@@ -2,6 +2,7 @@ package eu.f3rog.blade.sample.state;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import blade.Blade;
@@ -29,4 +30,9 @@ public class TestStateActivity extends AppCompatActivity {
         mCounts++;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.e(TestStateActivity.class.getCanonicalName(), "exec some code before @State code");
+        super.onSaveInstanceState(outState);
+    }
 }
