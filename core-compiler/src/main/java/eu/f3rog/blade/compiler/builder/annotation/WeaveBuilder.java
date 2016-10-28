@@ -15,7 +15,7 @@ public final class WeaveBuilder {
 
     public enum MethodWeaveType {
 
-        AT_BEGINNING("^"), BEFORE_SUPER("<"), AFTER_SUPER(">");
+        BEFORE_BODY("^"), AFTER_BODY("_"), BEFORE_SUPER("<"), AFTER_SUPER(">");
 
         private String mSign;
 
@@ -145,7 +145,7 @@ public final class WeaveBuilder {
         public IMethodWeaveStatement method(String methodName, Class... args) {
             mInto = methodName;
             mIntoArgs = toString(args);
-            mMethodWeaveType = MethodWeaveType.AT_BEGINNING;
+            mMethodWeaveType = MethodWeaveType.BEFORE_BODY;
             mWeavePriority = WeavePriority.NORMAL;
             return this;
         }

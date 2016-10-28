@@ -1,6 +1,6 @@
 package eu.f3rog.blade.weaving.util;
 
-import eu.f3rog.afterburner.AfterBurner;
+import eu.f3rog.javassist.JavassistHelper;
 
 /**
  * Class {@link AWeaver} is used for bytecode weaving.
@@ -11,7 +11,7 @@ import eu.f3rog.afterburner.AfterBurner;
 public abstract class AWeaver implements IWeaver {
 
     private boolean mDebug;
-    private AfterBurner mAfterBurner;
+    private JavassistHelper mJavassistHelper;
 
     /**
      * Constructor
@@ -20,15 +20,15 @@ public abstract class AWeaver implements IWeaver {
      */
     public AWeaver(boolean debug) {
         this.mDebug = debug;
-        this.mAfterBurner = new AfterBurner();
+        this.mJavassistHelper = new JavassistHelper();
     }
 
     protected boolean isDebug() {
         return mDebug;
     }
 
-    protected AfterBurner getAfterBurner() {
-        return mAfterBurner;
+    protected JavassistHelper getJavassistHelper() {
+        return mJavassistHelper;
     }
 
     protected void log(String msg, Object... args) {

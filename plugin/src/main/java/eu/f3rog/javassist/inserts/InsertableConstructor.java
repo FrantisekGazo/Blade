@@ -1,15 +1,16 @@
-package eu.f3rog.afterburner.inserts;
+package eu.f3rog.javassist.inserts;
 
-import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
+import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 
 import javassist.CtClass;
 
 /**
- * Base class of all insertable constructors through AfterBurner.
+ * Base class of all insertable constructors through JavassistHelper.
  * Inserts code in all constructors of a target class. 
  * @author SNI
  */
-public abstract class InsertableConstructor extends Insertable {
+public abstract class InsertableConstructor
+        extends Insertable {
 
     public InsertableConstructor(CtClass classToInsertInto) {
         super(classToInsertInto);
