@@ -163,6 +163,7 @@ public class StateHelperModule
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
                 return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState, Bundle.class)
+                        .placed(WeaveBuilder.MethodWeaveType.AFTER_SUPER)
                         .withStatement("%s.%s(this, $1);", helperName, METHOD_NAME_SAVE_SATE)
                         .build();
 
@@ -186,6 +187,7 @@ public class StateHelperModule
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
                 return WeaveBuilder.weave().method(WEAVE_onCreate, Bundle.class)
+                        .withPriority(WeaveBuilder.WeavePriority.HIGHER)
                         .withStatement("%s.%s(this, $1);", helperName, METHOD_NAME_RESTORE_SATE)
                         .build();
 

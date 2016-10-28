@@ -3,8 +3,8 @@ package eu.f3rog.blade.weaving;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.f3rog.afterburner.AfterBurner;
-import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
+import eu.f3rog.javassist.JavassistHelper;
+import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -23,7 +23,7 @@ public class Interfaces {
 
     private static Map<String, InterfaceWeaver> sSupportedInterfaces = null;
 
-    public static void weaveInterface(CtClass interfaceClass, CtClass targetClass, AfterBurner afterBurner) throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException {
+    public static void weaveInterface(CtClass interfaceClass, CtClass targetClass, JavassistHelper javassistHelper) throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException {
         if (sSupportedInterfaces == null) {
             initSupportedInterfaces();
         }
@@ -32,7 +32,7 @@ public class Interfaces {
         if (weaver == null) {
             throw new IllegalArgumentException("Interface not supported");
         }
-        weaver.weave(interfaceClass, targetClass, afterBurner);
+        weaver.weave(interfaceClass, targetClass, javassistHelper);
     }
 
     private static void initSupportedInterfaces() {
@@ -42,13 +42,13 @@ public class Interfaces {
     }
 
     private interface InterfaceWeaver {
-        void weave(CtClass interfaceClass, CtClass targetClass, AfterBurner afterBurner) throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException;
+        void weave(CtClass interfaceClass, CtClass targetClass, JavassistHelper javassistHelper) throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException;
     }
 
     private static final class MvpActivityIW implements InterfaceWeaver {
 
         @Override
-        public void weave(CtClass interfaceClass, CtClass targetClass, AfterBurner afterBurner) throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException {
+        public void weave(CtClass interfaceClass, CtClass targetClass, JavassistHelper javassistHelper) throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException {
             ClassPool classPool = targetClass.getClassPool();
 
             // add interface
@@ -71,20 +71,20 @@ public class Interfaces {
                     .append("this.mActivityId = blade.mvp.PresenterManager.getActivityId($1);")
                     .append("blade.mvp.PresenterManager.restorePresentersFor(this, $1);");
             body.append("}");
-            afterBurner.atBeginningOfOverrideMethod(body.toString(), targetClass, "onCreate", classPool.get("android.os.Bundle"));
+            javassistHelper.insertBeforeBody(body.toString(), targetClass, "onCreate", classPool.get("android.os.Bundle"));
             // add to onSaveInstanceState
             body.setLength(0);
             body.append("{")
                     .append("blade.mvp.PresenterManager.putActivityId($1, this.mActivityId);")
                     .append("blade.mvp.PresenterManager.savePresentersFor(this, $1);");
             body.append("}");
-            afterBurner.atBeginningOfOverrideMethod(body.toString(), targetClass, "onSaveInstanceState", classPool.get("android.os.Bundle"));
+            javassistHelper.insertBeforeBody(body.toString(), targetClass, "onSaveInstanceState", classPool.get("android.os.Bundle"));
             // add to onDestroy
             body.setLength(0);
             body.append("{")
                     .append("blade.mvp.PresenterManager.removePresentersFor(this);");
             body.append("}");
-            afterBurner.atBeginningOfOverrideMethod(body.toString(), targetClass, "onDestroy");
+            javassistHelper.insertBeforeBody(body.toString(), targetClass, "onDestroy");
 
             targetClass.addMethod(getIdMethod);
         }

@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 2.3.0 *(2016-10-28)*
+----------------------------
+
+ * New: Add more plugin tests
+ * Fix: Refactor code for bytecode weaving
+ * Fix: Handle order of weaved code correctly
+
 Version 2.2.0 *(2016-05-21)*
 ----------------------------
 

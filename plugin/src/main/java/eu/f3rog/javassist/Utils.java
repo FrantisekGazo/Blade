@@ -1,40 +1,30 @@
-package eu.f3rog.afterburner;
+package eu.f3rog.javassist;
 
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 
-/**
- * Class {@link Utils}
- *
- * @author FrantisekGazo
- * @version 2016-01-02
- */
 public class Utils {
 
-    public static CtMethod findTargetMethod(CtClass ctClass, String targetMethod, CtClass... targetMethodParams) {
+    public static CtMethod findTargetMethod(CtClass ctClass, String targetMethod, CtClass... targetMethodParams) throws NotFoundException {
         CtMethod overriddenMethod = null;
         try {
             overriddenMethod = ctClass.getDeclaredMethod(targetMethod, targetMethodParams);
         } catch (Exception e) {
             for (CtMethod method : ctClass.getMethods()) {
-                CtClass[] params;
-                try {
-                    params = method.getParameterTypes();
-                } catch (NotFoundException nfe) {
-                    continue;
-                }
-                if (method.getName().equals(targetMethod)
-                        && compareArrays(params, targetMethodParams)) {
+                if (method.getName().equals(targetMethod) && equalArrays(method.getParameterTypes(), targetMethodParams)) {
                     overriddenMethod = method;
                     break;
                 }
             }
         }
+        if (overriddenMethod == null) {
+            throw new NotFoundException(String.format("Class %s doesn't contain any method named %s", ctClass.getName(), targetMethod));
+        }
         return overriddenMethod;
     }
 
-    private static boolean compareArrays(CtClass[] a, CtClass[] a2) {
+    public static boolean equalArrays(CtClass[] a, CtClass[] a2) {
         if (a == a2) { // checks for same array reference
             return true;
         }
@@ -42,7 +32,7 @@ public class Utils {
             return false;
         }
 
-        int length = a.length;
+        final int length = a.length;
         if (a2.length != length) { // arrays should be of equal length
             return false;
         }
@@ -55,5 +45,4 @@ public class Utils {
 
         return true;
     }
-
 }

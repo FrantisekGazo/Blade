@@ -1,7 +1,7 @@
-package eu.f3rog.afterburner.exception;
+package eu.f3rog.javassist.exception;
 
 @SuppressWarnings("serial")
-public class AfterBurnerImpossibleException extends Exception {
+public final class AfterBurnerImpossibleException extends Exception {
 
     public AfterBurnerImpossibleException() {
         super();

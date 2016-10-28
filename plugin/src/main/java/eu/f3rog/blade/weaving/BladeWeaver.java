@@ -1,9 +1,11 @@
 package eu.f3rog.blade.weaving;
 
-import com.sun.tools.javac.util.Pair;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-import eu.f3rog.afterburner.exception.AfterBurnerImpossibleException;
-import eu.f3rog.afterburner.inserts.InsertableConstructor;
+import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
@@ -22,12 +24,29 @@ import javassist.bytecode.annotation.MemberValue;
 
 import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
 
-public class BladeWeaver extends AWeaver {
+public final class BladeWeaver
+        extends AWeaver {
 
     private static class Metadata {
         String into;
         CtClass[] args;
         String statement;
+    }
+
+    private final static class MetadataComparator
+            implements Comparator<Metadata> {
+
+        @Override
+        public int compare(Metadata l, Metadata r) {
+            // order descending based on 'into' value - higher priority should be first
+            if (l == null || l.into == null) {
+                return 1;
+            }
+            if (r == null || r.into == null) {
+                return -1;
+            }
+            return -l.into.compareTo(r.into);
+        }
     }
 
     private static final String HELPER_NAME_FORMAT = "%s.%s_Helper";
@@ -49,15 +68,20 @@ public class BladeWeaver extends AWeaver {
             for (CtField field : helperClass.getDeclaredFields()) {
                 lognl("field '%s'", field.getName());
 
-                Metadata[] metadata = loadWeaveMetadata(classPool, field);
+                List<Metadata> metadata = loadWeaveMetadata(classPool, field);
                 weave(metadata, intoClass, field);
             }
 
             // weave method metadata
+            List<Metadata> allMethodMetadata = new ArrayList<>();
             for (CtMethod method : helperClass.getDeclaredMethods()) {
                 lognl("method '%s'", method.getName());
-
-                Metadata[] metadata = loadWeaveMetadata(classPool, method);
+                List<Metadata> metadata = loadWeaveMetadata(classPool, method);
+                allMethodMetadata.addAll(metadata);
+            }
+            // sort them based on priority
+            Collections.sort(allMethodMetadata, new MetadataComparator());
+            for (Metadata metadata : allMethodMetadata) {
                 weave(metadata, intoClass, null);
             }
 
@@ -65,7 +89,7 @@ public class BladeWeaver extends AWeaver {
             for (CtClass interfaceClass : helperClass.getInterfaces()) {
                 lognl("interface '%s'", interfaceClass.getName());
 
-                Interfaces.weaveInterface(interfaceClass, intoClass, getAfterBurner());
+                Interfaces.weaveInterface(interfaceClass, intoClass, getJavassistHelper());
             }
 
             lognl("Weaving done (%s)", intoClass.getSimpleName());
@@ -78,63 +102,69 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private void weave(Metadata[] m, CtClass intoClass, CtField helperField) throws NotFoundException, CannotCompileException, AfterBurnerImpossibleException {
-        for (int i = 0; i < m.length; i++) {
-            Metadata metadata = m[i];
+    private void weave(List<Metadata> m, CtClass intoClass, CtField helperField) throws NotFoundException, CannotCompileException, AfterBurnerImpossibleException {
+        for (int i = 0, c = m.size(); i < c; i++) {
+            Metadata metadata = m.get(i);
+            weave(metadata, intoClass, helperField);
+        }
+    }
 
-            if (metadata == null) {
-                lognl(" ~x nowhere");
-                continue;
-            }
+    private void weave(Metadata metadata, CtClass intoClass, CtField helperField) throws NotFoundException, CannotCompileException, AfterBurnerImpossibleException {
+        if (metadata == null) {
+            lognl(" ~x nowhere");
+            return;
+        }
 
-            if (helperField != null && Weave.WEAVE_FIELD.equals(metadata.into)) {
-                // weave field
-                CtField f = new CtField(helperField.getType(), helperField.getName(), intoClass);
-                f.setModifiers(helperField.getModifiers());
+        if (helperField != null && Weave.WEAVE_FIELD.equals(metadata.into)) {
+            // weave field
+            CtField f = new CtField(helperField.getType(), helperField.getName(), intoClass);
+            f.setModifiers(helperField.getModifiers());
 
-                log(" ~> field '%s'", f.getName());
-                if (metadata.statement != null) {
-                    lognl(" ~~~ %s", metadata.statement);
-                    intoClass.addField(f, CtField.Initializer.byExpr(metadata.statement));
-                } else {
-                    lognl(" ~~~ without statement");
-                    intoClass.addField(f);
-                }
+            log(" ~> field '%s'", f.getName());
+            if (metadata.statement != null) {
+                lognl(" ~~~ %s", metadata.statement);
+                intoClass.addField(f, CtField.Initializer.byExpr(metadata.statement));
             } else {
-                String body = "{ " + metadata.statement + " }";
+                lognl(" ~~~ without statement");
+                intoClass.addField(f);
+            }
+        } else {
+            String body = "{ " + metadata.statement + " }";
 
-                if (Weave.WEAVE_CONSTRUCTOR.equals(metadata.into)) {
-                    log(" ~> constructor");
-                    // weave into constructor
-                    getAfterBurner().insertConstructor(new SpecificConstructor(body, intoClass, metadata.args));
-                    lognl(" ~~~ %s", body);
-                } else {
-                    // weave into method
-                    Pair<WeaveBuilder.MethodWeaveType, String> methodInfo = WeaveBuilder.parseMethodName(metadata.into);
-                    log(" ~> method '%s' %s", methodInfo.snd, methodInfo.fst);
-                    switch (methodInfo.fst) {
-                        case AT_BEGINNIG:
-                            getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
-                            break;
-                        case BEFORE_SUPER:
-                            try {
-                                getAfterBurner().beforeOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
-                            } catch (Exception e) { // put at beginning if super not found
-                                getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
-                            }
-                            break;
-                        case AFTER_SUPER:
-                            try {
-                                getAfterBurner().afterOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
-                            } catch (Exception e) { // put at beginning if super not found
-                                getAfterBurner().atBeginningOfOverrideMethod(body, intoClass, methodInfo.snd, metadata.args);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException();
-                    }
-                    lognl(" ~~~ %s", body);
+            if (Weave.WEAVE_CONSTRUCTOR.equals(metadata.into)) {
+                log(" ~> constructor");
+                // weave into constructor
+                getJavassistHelper().insertConstructor(body, intoClass, metadata.args);
+                lognl(" ~~~ %s", body);
+            } else {
+                // weave into method
+                WeaveBuilder.Into into = WeaveBuilder.parseInto(metadata.into);
+                log(" ~> method '%s' %s with %s priority", into.getMethodName(), into.getMethodWeaveType(), into.getPriority());
+                switch (into.getMethodWeaveType()) {
+                    case BEFORE_BODY:
+                        getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
+                        break;
+                    case AFTER_BODY:
+                        getJavassistHelper().insertAfterBody(body, intoClass, into.getMethodName(), metadata.args);
+                        break;
+                    case BEFORE_SUPER:
+                        try {
+                            getJavassistHelper().insertBeforeSuper(body, intoClass, into.getMethodName(), metadata.args);
+                        } catch (Exception e) { // put at beginning if super not found
+                            getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
+                        }
+                        break;
+                    case AFTER_SUPER:
+                        try {
+                            getJavassistHelper().insertAfterSuper(body, intoClass, into.getMethodName(), metadata.args);
+                        } catch (Exception e) { // put at beginning if super not found
+                            getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException();
                 }
+                lognl(" ~~~ %s", body);
             }
         }
     }
@@ -152,30 +182,30 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private Metadata[] loadWeaveMetadata(ClassPool classPool, CtMethod method) throws NotFoundException {
+    private List<Metadata> loadWeaveMetadata(ClassPool classPool, CtMethod method) throws NotFoundException {
         AnnotationsAttribute attr = getAnnotations(method);
         if (attr != null) {
             return loadWeaveMetadata(classPool, attr);
         }
 
-        return new Metadata[0];
+        return Collections.emptyList();
     }
 
-    private Metadata[] loadWeaveMetadata(ClassPool classPool, CtField field) throws NotFoundException {
+    private List<Metadata> loadWeaveMetadata(ClassPool classPool, CtField field) throws NotFoundException {
         AnnotationsAttribute attr = getAnnotations(field);
         if (attr != null) {
             return loadWeaveMetadata(classPool, attr);
         }
 
-        return new Metadata[0];
+        return Collections.emptyList();
     }
 
-    private Metadata[] loadWeaveMetadata(ClassPool classPool, AnnotationsAttribute attr) throws NotFoundException {
+    private List<Metadata> loadWeaveMetadata(ClassPool classPool, AnnotationsAttribute attr) throws NotFoundException {
         Annotation a;
 
         a = attr.getAnnotation(Weave.class.getName());
         if (a != null) {
-            return new Metadata[]{readWeaveAnnotation(a, classPool)};
+            return Collections.singletonList(readWeaveAnnotation(a, classPool));
         }
 
         a = attr.getAnnotation(Weaves.class.getName());
@@ -183,7 +213,7 @@ public class BladeWeaver extends AWeaver {
             return readWeavesAnnotation(a, classPool);
         }
 
-        return new Metadata[0];
+        return Collections.emptyList();
     }
 
 
@@ -225,49 +255,19 @@ public class BladeWeaver extends AWeaver {
         }
     }
 
-    private Metadata[] readWeavesAnnotation(Annotation weavesAnnotation, ClassPool classPool) throws NotFoundException {
+    private List<Metadata> readWeavesAnnotation(Annotation weavesAnnotation, ClassPool classPool) throws NotFoundException {
         ArrayMemberValue arrayMemberValue = (ArrayMemberValue) weavesAnnotation.getMemberValue("value");
         if (arrayMemberValue != null) {
             MemberValue[] memberValues = arrayMemberValue.getValue();
-            Metadata[] annotations = new Metadata[memberValues.length];
+            List<Metadata> annotations = new ArrayList<>(memberValues.length);
             for (int i = 0; i < memberValues.length; i++) {
                 AnnotationMemberValue memberValue = (AnnotationMemberValue) memberValues[i];
-                annotations[i] = readWeaveAnnotation(memberValue.getValue(), classPool);
+                Metadata m = readWeaveAnnotation(memberValue.getValue(), classPool);
+                annotations.add(m);
             }
             return annotations;
         } else {
-            return new Metadata[0];
+            return Collections.emptyList();
         }
     }
-
-    private final class SpecificConstructor extends InsertableConstructor {
-
-        private final CtClass[] mRequiredParams;
-        private final String mBody;
-
-        public SpecificConstructor(String body, CtClass classToInsertInto, CtClass... params) {
-            super(classToInsertInto);
-            mRequiredParams = params;
-            mBody = body;
-        }
-
-        @Override
-        public String getConstructorBody(CtClass[] paramClasses) throws AfterBurnerImpossibleException {
-            return mBody;
-        }
-
-        @Override
-        public boolean acceptParameters(CtClass[] paramClasses) throws AfterBurnerImpossibleException {
-            if (paramClasses.length != mRequiredParams.length) {
-                return false;
-            }
-            for (int i = 0, c = mRequiredParams.length; i < c; i++) {
-                if (!mRequiredParams[i].equals(paramClasses[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
 }

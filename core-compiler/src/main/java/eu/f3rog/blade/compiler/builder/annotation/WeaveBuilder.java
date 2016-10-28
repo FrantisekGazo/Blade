@@ -1,7 +1,6 @@
 package eu.f3rog.blade.compiler.builder.annotation;
 
 import com.squareup.javapoet.AnnotationSpec;
-import com.sun.tools.javac.util.Pair;
 
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
@@ -15,7 +14,8 @@ import eu.f3rog.blade.core.Weaves;
 public final class WeaveBuilder {
 
     public enum MethodWeaveType {
-        AT_BEGINNIG("^"), BEFORE_SUPER("<"), AFTER_SUPER(">");
+
+        BEFORE_BODY("^"), AFTER_BODY("_"), BEFORE_SUPER("<"), AFTER_SUPER(">");
 
         private String mSign;
 
@@ -37,10 +37,62 @@ public final class WeaveBuilder {
         }
     }
 
-    public static Pair<MethodWeaveType, String> parseMethodName(final String methodName) {
-        MethodWeaveType weaveType = MethodWeaveType.from(methodName.substring(0, 1));
-        String actualName = methodName.substring(1);
-        return new Pair<>(weaveType, actualName);
+    public enum WeavePriority {
+
+        NORMAL(0), HIGHER(1);
+
+        private final int mNum;
+
+        WeavePriority(int num) {
+            mNum = num;
+        }
+
+        public int getNum() {
+            return mNum;
+        }
+
+        public static WeavePriority from(int number) {
+            for (WeavePriority p : values()) {
+                if (p.getNum() == number) {
+                    return p;
+                }
+            }
+            return null;
+        }
+    }
+
+    public static final class Into {
+
+        private final MethodWeaveType mMethodWeaveType;
+        private final WeavePriority mPriority;
+        private final String mMethodName;
+
+        public Into(MethodWeaveType methodWeaveType, WeavePriority priority, String methodName) {
+            mPriority = priority;
+            mMethodWeaveType = methodWeaveType;
+            mMethodName = methodName;
+        }
+
+        public MethodWeaveType getMethodWeaveType() {
+            return mMethodWeaveType;
+        }
+
+        public WeavePriority getPriority() {
+            return mPriority;
+        }
+
+        public String getMethodName() {
+            return mMethodName;
+        }
+    }
+
+    public static Into parseInto(final String into) {
+        int number = Integer.valueOf(into.substring(0, 1));
+        WeavePriority priority = WeavePriority.from(number);
+        String type = into.substring(1, 2);
+        MethodWeaveType weaveType = MethodWeaveType.from(type);
+        String actualName = into.substring(2);
+        return new Into(weaveType, priority, actualName);
     }
 
     public static IWeaveInto weave() {
@@ -59,7 +111,9 @@ public final class WeaveBuilder {
 
     public interface IMethodWeaveStatement extends IWeaveStatement {
 
-        IWeaveStatement placed(MethodWeaveType type);
+        IMethodWeaveStatement placed(MethodWeaveType type);
+
+        IMethodWeaveStatement withPriority(WeavePriority priority);
 
     }
 
@@ -85,18 +139,26 @@ public final class WeaveBuilder {
         private Object[] mIntoArgs;
         private StringBuilder mStatement = new StringBuilder();
         private MethodWeaveType mMethodWeaveType = null;
+        private WeavePriority mWeavePriority = null;
 
         @Override
         public IMethodWeaveStatement method(String methodName, Class... args) {
             mInto = methodName;
             mIntoArgs = toString(args);
-            mMethodWeaveType = MethodWeaveType.AT_BEGINNIG;
+            mMethodWeaveType = MethodWeaveType.BEFORE_BODY;
+            mWeavePriority = WeavePriority.NORMAL;
             return this;
         }
 
         @Override
-        public IWeaveStatement placed(MethodWeaveType type) {
+        public IMethodWeaveStatement placed(MethodWeaveType type) {
             mMethodWeaveType = type;
+            return this;
+        }
+
+        @Override
+        public IMethodWeaveStatement withPriority(WeavePriority priority) {
+            mWeavePriority = priority;
             return this;
         }
 
@@ -153,6 +215,9 @@ public final class WeaveBuilder {
                 String into = mInto;
                 if (mMethodWeaveType != null) {
                     into = mMethodWeaveType.getSign() + into;
+                }
+                if (mWeavePriority != null) {
+                    into = mWeavePriority.getNum() + into;
                 }
                 AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class)
                         .addMember("into", "$S", into);

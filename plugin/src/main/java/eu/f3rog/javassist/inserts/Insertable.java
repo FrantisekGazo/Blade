@@ -1,12 +1,12 @@
-package eu.f3rog.afterburner.inserts;
+package eu.f3rog.javassist.inserts;
 
 import javassist.CtClass;
 
 /**
- * Base class of all insertable pieces of code through AfterBurner. 
+ * Base class of all insertable pieces of code through JavassistHelper.
  * @author SNI
  */
-public class Insertable {
+public abstract class Insertable {
 
     /** The target class into which to insert code. */
     private CtClass classToInsertInto;
