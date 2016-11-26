@@ -18,7 +18,7 @@ public class ProjectFolder extends TemporaryFolder {
         return file
     }
 
-    public File addGradleBuildFile(String gradleToolsVersion, String bladeVersion, boolean android) {
+    public File addGradleBuildFile(String gradleToolsVersion, String bladeVersion, boolean android, deps = []) {
         File file = this.newFile('build.gradle')
         file << """
             buildscript {
@@ -71,8 +71,16 @@ public class ProjectFolder extends TemporaryFolder {
                     }
                 }
 
+            """
+
+            file << """
                 dependencies {
                     compile fileTree(dir: 'libs', include: ['*.jar'])
+            """
+            for (dep in deps) {
+                file << dep
+            }
+            file << """
                 }
             """
         }

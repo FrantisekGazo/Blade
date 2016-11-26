@@ -10,8 +10,8 @@ dependencies {
     compile localGroovy()
 
     /* Gradle plugin */
+    compileOnly deps.gradle_plugin
     compile deps.apt_plugin
-    compile deps.gradle_plugin
     compile deps.javassist_helper
 
     /* Android */

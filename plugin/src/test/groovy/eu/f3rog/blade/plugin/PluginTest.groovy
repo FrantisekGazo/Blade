@@ -69,7 +69,7 @@ class PluginTest extends Specification {
 
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
-        gradleVersion << ['2.9', '2.10', '2.14']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
         bladeModules << [Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake")]
     }
 
@@ -101,7 +101,7 @@ class PluginTest extends Specification {
 
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
-        gradleVersion << ['2.9', '2.10', '2.14']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
         bladeModules << [Arrays.asList("Extra", "Mvp", "State"), Arrays.asList("arg"), Arrays.asList("arg")] // also test case insensitivity
     }
 
@@ -120,12 +120,39 @@ class PluginTest extends Specification {
 
         then:
         result.task(":build").outcome == SUCCESS
-        result.task(":transformClassesWithBladeTransformerForDebug").outcome == SUCCESS
-        result.task(":transformClassesWithBladeTransformerForRelease").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
 
         where:
         gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
-        gradleVersion << ['2.9', '2.10', '2.14']
-        bladeModules << [Arrays.asList("extra"), Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg", "mvp")]
+        gradleVersion << ['2.9', '2.10', '2.14.1']
+        bladeModules << [Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg")]
+    }
+
+    @Unroll
+    def "build successfully mvp module - for android gradle tools #gradleToolsVersion"() {
+        given:
+        testProjectDir.addBladeFile(bladeModules)
+        def deps = [
+                "compile 'com.google.dagger:dagger:2.0.2'"
+        ]
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true, deps)
+
+        when:
+        BuildResult result = GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir.root)
+                .withArguments(':build')
+                .build()
+
+        then:
+        result.task(":build").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
+
+        where:
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
+        bladeModules << [Arrays.asList("mvp"), Arrays.asList("mvp"), Arrays.asList("mvp")]
     }
 }
