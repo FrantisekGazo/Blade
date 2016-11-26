@@ -31,13 +31,13 @@ final class WeavedMvpFragmentIW
         DaggerMiddleMan daggerMiddleMan = new DaggerMiddleMan();
         daggerMiddleMan.weaveFor(targetClass, presenterFieldNames, PM + ".get", javassistHelper);
 
-        // ~> onCreateView
+        // ~> onCreate
         StringBuilder body = new StringBuilder();
         body.append("{")
-                .append("this.setWeavedState($3);") // initialize view STATE
+                .append("this.setWeavedState($1);") // initialize view STATE
                 .append("this.setWeavedId(").append(PM).append(".getFragmentId(this, this.getActivity()));") // initialize view ID
                 .append("}");
-        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onCreateView", classPool.get("android.view.LayoutInflater"), classPool.get("android.view.ViewGroup"), classPool.get("android.os.Bundle"));
+        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onCreate", classPool.get("android.os.Bundle"));
 
         // ~> onSaveInstanceState
         body.setLength(0);

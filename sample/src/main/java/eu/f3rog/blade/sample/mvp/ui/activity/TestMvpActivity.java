@@ -7,8 +7,10 @@ import android.widget.TextView;
 import javax.inject.Inject;
 
 import blade.Blade;
+import blade.F;
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import eu.f3rog.blade.sample.R;
 import eu.f3rog.blade.sample.mvp.di.component.Component;
 import eu.f3rog.blade.sample.mvp.model.Data;
@@ -31,6 +33,11 @@ public final class TestMvpActivity
 
     @Bind(R.id.txt_activity_value)
     TextView mTextView;
+
+    @OnClick(R.id.btn_show_dialog)
+    void showDialog() {
+        F.newTestMvpDialogFragment().show(getSupportFragmentManager(), "mvp-dialog-tag");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
