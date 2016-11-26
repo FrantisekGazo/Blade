@@ -1,335 +1,330 @@
 package blade.mvp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import eu.f3rog.blade.mvp.MvpActivity;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Provider;
+
+import eu.f3rog.blade.mvp.WeavedMvpActivity;
+import eu.f3rog.blade.mvp.WeavedMvpFragment;
+import eu.f3rog.blade.mvp.WeavedMvpView;
 
 /**
  * Class {@link PresenterManager}
  *
  * @author FrantisekGazo
- * @version 2016-02-12
  */
 public class PresenterManager {
 
-    /**
-     * Used internally by Blade library.
-     */
-    public static <V extends IView, D> void put(V view, D data, IPresenter<V, D> presenter) {
-        assert view != null;
-        assert data != null;
-        assert presenter != null;
+    private static final PresenterManager sInstance = new PresenterManager();
+    private static final String STATE_VIEW_ID = "blade:view-id";
+    private static final String STATE_VIEW_PRESENTER = "blade:view-%s";
+    private static final String ID_SEPARATOR = ">-<";
 
-        if (view instanceof View) {
-            View v = (View) view;
-            forParentActivity(v).put(v, data, presenter);
-        } else if (view instanceof Activity) {
-            Activity a = (Activity) view;
-            forActivity(a).put(data, presenter);
-        } else {
-            throw new IllegalArgumentException("View has to be instance of android View or Activity.");
-        }
-    }
-
-    /**
-     * Used internally by Blade library.
-     */
-    public static <V extends IView, D> IPresenter get(V view, D data, Class presenterClass) {
-        assert view != null;
-        assert data != null;
-        assert presenterClass != null;
-
-        if (view instanceof View) {
-            View v = (View) view;
-            return forParentActivity(v).get(v, data, presenterClass);
-        } else if (view instanceof Activity) {
-            Activity a = (Activity) view;
-            return forActivity(a).get(data, presenterClass);
-        } else {
-            throw new IllegalArgumentException("View has to be instance of android View or Activity.");
-        }
-    }
-
-    public static void removePresentersFor(View view) {
-        assert view != null;
-
-        forParentActivity(view).removeFor(view);
-    }
-
-    public static void removePresentersFor(Activity activity) {
-        assert activity != null;
-
-        if (!activity.isFinishing()) {
-            return;
-        }
-
-        Object activityId = buildActivityId(activity);
-        getInstance().removeActivityPresenters(activityId);
-    }
-
-    public static void savePresentersFor(Activity activity, Bundle state) {
-        assert activity != null;
-        assert state != null;
-
-        forActivity(activity).saveInto(state);
-    }
-
-    public static void restorePresentersFor(Activity activity, Bundle state) {
-        assert activity != null;
-
-        if (state == null) {
-            return;
-        }
-
-        forActivity(activity).restoreFrom(state);
-    }
-
-    public static String getActivityId(Bundle state) {
-        return (state != null) ? state.getString("blade:activity_id") : UUID.randomUUID().toString();
-    }
-
-    public static void putActivityId(Bundle state, String activityId) {
-        state.putString("blade:activity_id", activityId);
-    }
-
-    // ------------------------------------------------------------------------------------
-
-    private static ActivityPresenterManager forParentActivity(View view) {
-        assert view != null;
-
-        return forActivity((Activity) view.getContext());
-    }
-
-    private static ActivityPresenterManager forActivity(Activity activity) {
-        assert activity != null;
-
-        Object activityId = buildActivityId(activity);
-        return getInstance().getActivityPresenters(activityId);
-    }
-
-    private static Object buildActivityId(Activity activity) {
-        if (activity instanceof MvpActivity) {
-            MvpActivity a = (MvpActivity) activity;
-            return String.format("%s:%s", activity.getClass().getCanonicalName(), a.getId());
-        } else {
-            throw new IllegalStateException("Activity is missing @Blade annotation.");
-        }
-    }
-
-
-    private static PresenterManager sInstance;
-
-    private static PresenterManager getInstance() {
-        if (sInstance == null) {
-            sInstance = new PresenterManager();
-        }
+    public static PresenterManager getInstance() {
         return sInstance;
     }
 
-    private final Map<Object, ActivityPresenterManager> mActivityPresenters;
+    private final Map<String, ActivityPresenterManager> mActivityManagers;
 
     private PresenterManager() {
-        mActivityPresenters = new HashMap<>();
+        mActivityManagers = new HashMap<>();
     }
 
-    private ActivityPresenterManager getActivityPresenters(Object activityId) {
-        assert activityId != null;
+    //region ID management
 
-        if (!mActivityPresenters.containsKey(activityId)) {
-            mActivityPresenters.put(activityId, new ActivityPresenterManager());
+    @Nonnull
+    public String getActivityId(@Nonnull WeavedMvpView view) {
+        nonNull(view, "view");
+
+        String id = null;
+
+        Bundle viewState = view.getWeavedState();
+        if (viewState != null) {
+            id = viewState.getString(STATE_VIEW_ID);
         }
 
-        return mActivityPresenters.get(activityId);
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+
+        return id;
     }
 
-    private void removeActivityPresenters(Object activityId) {
-        ActivityPresenterManager apm = mActivityPresenters.remove(activityId);
-        if (apm != null) {
+    @Nonnull
+    public String getFragmentId(@Nonnull WeavedMvpView view, @Nonnull Context activityContext) {
+        nonNull(view, "view");
+        nonNull(view, "activityContext");
+
+        if (activityContext instanceof WeavedMvpActivity) {
+            String id = null;
+
+            Bundle viewState = view.getWeavedState();
+            if (viewState != null) {
+                id = viewState.getString(STATE_VIEW_ID);
+            }
+
+            if (id == null) {
+                WeavedMvpActivity mvpActivity = (WeavedMvpActivity) activityContext;
+
+                id = mvpActivity.getWeavedId() + ID_SEPARATOR + UUID.randomUUID().toString();
+            }
+
+            return id;
+        } else {
+            throw new IllegalStateException(String.format(
+                    "View %s is in activity that does not support MVP. Annotate %s with @Blade to solve the problem.",
+                    view, activityContext.getClass().getCanonicalName())
+            );
+        }
+    }
+
+    public void saveViewId(@Nonnull Bundle state, @Nonnull String id) {
+        state.putString(STATE_VIEW_ID, id);
+    }
+
+    @Nonnull
+    private String getActivityIdPart(@Nonnull WeavedMvpFragment view) {
+        String fragmentId = view.getWeavedId();
+        String[] ids = fragmentId.split(ID_SEPARATOR);
+        return ids[0];
+    }
+
+    //endregion ID management
+
+    //region provide/create/bind presenter
+
+    @Nonnull
+    public <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+    P get(@Nonnull V view, @Nonnull String fieldName, @Nonnull Provider<P> provider) {
+        nonNull(view, "view");
+        nonNull(fieldName, "filedName");
+        nonNull(provider, "provider");
+
+        ActivityPresenterManager apm;
+
+        if (view instanceof WeavedMvpActivity) {
+            WeavedMvpActivity mvpActivity = (WeavedMvpActivity) view;
+
+            String activityId = mvpActivity.getWeavedId();
+            apm = getActivityPresenterManagerOrCreate(activityId);
+        } else if (view instanceof WeavedMvpFragment) {
+            WeavedMvpFragment mvpFragment = (WeavedMvpFragment) view;
+
+            String activityId = getActivityIdPart(mvpFragment);
+            apm = getActivityPresenterManagerOrCreate(activityId);
+        } else {
+            throw new IllegalArgumentException("view has unsupported type");
+        }
+
+        P presenter = apm.get(view, fieldName);
+        if (presenter == null) {
+            presenter = provider.get();
+            apm.put(view, fieldName, presenter);
+
+            presenter.onCreate(view.getWeavedState());
+        }
+        presenter.onBind(view);
+
+        return presenter;
+    }
+
+    //endregion provide presenter
+
+    //region save presenter
+
+    public <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+    void save(@Nonnull Bundle outState, @Nonnull String fieldName, @Nullable P presenter) {
+        if (presenter == null) {
+            return;
+        }
+
+        nonNull(fieldName, "fieldName");
+        nonNull(outState, "outState");
+
+        Bundle presenterState = new Bundle();
+        presenter.onSaveState(presenterState);
+        outState.putBundle(String.format(STATE_VIEW_PRESENTER, fieldName), presenterState);
+    }
+
+    //endregion save presenter
+
+    //region unbind/remove presenter
+
+    public <V extends Activity & IView & WeavedMvpView, P extends IPresenter<V>>
+    void onActivityDestroy(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
+        if (presenter == null) {
+            return;
+        }
+
+        nonNull(view, "view");
+        nonNull(fieldName, "fieldName");
+
+        if (presenter.getView() != null) {
+            presenter.onUnbind();
+        }
+
+        // check if presenter should be removed completely
+        if (view.isFinishing()) {
+            removeActivityPresenterManager(view.getWeavedId());
+        }
+    }
+
+    public <V extends Fragment & IView & WeavedMvpFragment, P extends IPresenter<V>>
+    void onFragmentDestroy(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
+        if (presenter == null) {
+            return;
+        }
+
+        nonNull(view, "view");
+        nonNull(fieldName, "fieldName");
+
+        if (presenter.getView() != null) {
+            presenter.onUnbind();
+        }
+
+        boolean remove = false;
+        FragmentActivity activity = view.getActivity();
+        if (activity != null && activity.isFinishing()) {
+            // if activity is finishing the fragment will too
+            remove = true;
+        } else if (view.isRemoving() && !view.wasOnSaveCalled()) {
+            // The fragment can be still in backstack even if isRemoving() is true.
+            // We check waOnSaveCalled() - if this was not called then the fragment is totally removed.
+            remove = true;
+        }
+
+        if (remove) {
+            String activityId = getActivityIdPart(view);
+            ActivityPresenterManager apm = getActivityPresenterManager(activityId);
+            if (apm != null) {
+                apm.remove(view, fieldName);
+            }
+        }
+    }
+
+    public <V extends Fragment & IView & WeavedMvpFragment, P extends IPresenter<V>>
+    void onFragmentDestroyView(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
+        if (presenter == null) {
+            return;
+        }
+
+        nonNull(view, "view");
+        nonNull(fieldName, "fieldName");
+
+        if (presenter.getView() != null) {
+            presenter.onUnbind();
+        }
+
+        // check if presenter should be removed completely
+        if (view.getActivity() != null && view.getActivity().isFinishing()) {
+            // if activity is finishing the fragment will too
+            String activityId = getActivityIdPart(view);
+            ActivityPresenterManager apm = getActivityPresenterManager(activityId);
+            if (apm != null) {
+                apm.remove(view, fieldName);
+            }
+        }
+    }
+
+    //endregion unbind/remove presenter
+
+    //region ActivityPresenterManager management
+
+    @Nullable
+    private ActivityPresenterManager getActivityPresenterManager(@Nonnull String activityId) {
+        return mActivityManagers.get(activityId);
+    }
+
+    @Nonnull
+    private ActivityPresenterManager getActivityPresenterManagerOrCreate(@Nonnull String activityId) {
+        if (mActivityManagers.containsKey(activityId)) {
+            return mActivityManagers.get(activityId);
+        } else {
+            ActivityPresenterManager apm = new ActivityPresenterManager();
+            mActivityManagers.put(activityId, apm);
+            return apm;
+        }
+    }
+
+    private void removeActivityPresenterManager(@Nonnull String activityId) {
+        if (mActivityManagers.containsKey(activityId)) {
+            ActivityPresenterManager apm = mActivityManagers.get(activityId);
             apm.removeAll();
+            mActivityManagers.remove(activityId);
         }
     }
 
-    private static class ActivityPresenterManager {
+    //endregion ActivityPresenterManager management
 
-        private final Map<Class, IPresenter> mActivityPresenters;
-        private final Map<String, Map<Class, IPresenter>> mViewPresenters;
-        private Bundle mState;
+    private static final class ActivityPresenterManager {
 
-        private ActivityPresenterManager() {
-            mActivityPresenters = new HashMap<>();
-            mViewPresenters = new HashMap<>();
-            mState = null;
+        private final Map<String, IPresenter> mPresenters;
+
+        ActivityPresenterManager() {
+            mPresenters = new HashMap<>();
         }
 
-        public <V extends IView, D> void put(View view, D data, IPresenter<V, D> presenter) {
-            assert view != null;
-            assert data != null;
-            assert presenter != null;
-
-            String viewId = buildViewId(view, data);
-            putViewPresenter(viewId, presenter);
-
-            boolean restored = false;
-
-            if (mState != null) {
-                Bundle viewPresentersState = mState.getBundle(viewId);
-                if (viewPresentersState != null) {
-                    String key = presenter.getClass().getCanonicalName();
-                    Bundle presenterState = viewPresentersState.getBundle(key);
-                    if (presenterState != null) {
-                        presenter.restoreState(presenterState);
-                        restored = true;
-                    }
-                }
-            }
-
-            presenter.create(data, restored);
+        <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+        void put(@Nonnull V view, @Nonnull String filedName, @Nonnull P presenter) {
+            String key = prepareKey(view, filedName);
+            mPresenters.put(key, presenter);
         }
 
-        public <V extends IView, D> void put(D data, IPresenter<V, D> presenter) {
-            assert data != null;
-            assert presenter != null;
-
-            putActivityPresenter(presenter);
-
-            boolean restored = false;
-
-            if (mState != null) {
-                String key = presenter.getClass().getCanonicalName();
-                Bundle presenterState = mState.getBundle(key);
-                if (presenterState != null) {
-                    presenter.restoreState(presenterState);
-                    restored = true;
-                }
-            }
-
-            presenter.create(data, restored);
+        @Nullable
+        <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+        P get(@Nonnull V view, @Nonnull String filedName) {
+            String key = prepareKey(view, filedName);
+            //noinspection unchecked
+            return (P) mPresenters.get(key);
         }
 
-        public <D> IPresenter get(View view, D data, Class presenterClass) {
-            assert view != null;
-            assert data != null;
-            assert presenterClass != null;
+        /**
+         * Calls {@link IPresenter#onDestroy()} and forgets reference for presenter in given view.
+         */
+        void remove(@Nonnull WeavedMvpView view, @Nonnull String fieldName) {
+            String key = prepareKey(view, fieldName);
 
-            String viewId = buildViewId(view, data);
-            return getViewPresenter(viewId, presenterClass);
-        }
-
-        public <D> IPresenter get(D data, Class presenterClass) {
-            assert data != null;
-            assert presenterClass != null;
-
-            return getActivityPresenter(presenterClass);
-        }
-
-        public void removeFor(View view) {
-            assert view != null;
-
-            if (view.getTag() == null) {
-                return;
-            }
-
-            String viewId = buildViewId(view, view.getTag());
-            Map<Class, IPresenter> presenters = mViewPresenters.get(viewId);
-            if (presenters == null) {
-                return;
-            }
-
-            for (IPresenter presenter : presenters.values()) {
-                presenter.destroy();
-            }
-            presenters.clear();
-            mViewPresenters.remove(viewId);
-        }
-
-        public void removeAll() {
-            // activity presenters
-            for (IPresenter presenter : mActivityPresenters.values()) {
-                presenter.destroy();
-            }
-            mActivityPresenters.clear();
-
-            // view presenters
-            for (Map<Class, IPresenter> viewPresenters : mViewPresenters.values()) {
-                for (IPresenter presenter : viewPresenters.values()) {
-                    presenter.destroy();
-                }
-                viewPresenters.clear();
-            }
-            mViewPresenters.clear();
-        }
-
-        public void saveInto(Bundle state) {
-            // save activity presenters
-            save(mActivityPresenters, state);
-
-            // save view presenters
-            for (Map.Entry<String, Map<Class, IPresenter>> viewEntry : mViewPresenters.entrySet()) {
-                String viewId = viewEntry.getKey();
-                Map<Class, IPresenter> viewPresenters = viewEntry.getValue();
-                Bundle viewPresentersState = new Bundle();
-
-                save(viewPresenters, viewPresentersState);
-
-                state.putBundle(viewId, viewPresentersState);
-            }
-
-            mState = state;
-        }
-
-        private void save(Map<Class, IPresenter> presenters, Bundle state) {
-            for (Map.Entry<Class, IPresenter> presenterEntry : presenters.entrySet()) {
-                String key = presenterEntry.getKey().getCanonicalName();
-                IPresenter presenter = presenterEntry.getValue();
-                Bundle presenterState = new Bundle();
-
-                presenter.saveState(presenterState);
-
-                state.putBundle(key, presenterState);
+            IPresenter presenter = mPresenters.remove(key);
+            if (presenter != null) {
+                presenter.onDestroy();
             }
         }
 
-        public void restoreFrom(Bundle state) {
-            mState = state;
-        }
-
-        private void putViewPresenter(String viewId, IPresenter presenter) {
-            Map<Class, IPresenter> viewPresenters = mViewPresenters.get(viewId);
-            if (viewPresenters == null) {
-                viewPresenters = new HashMap<>();
-                mViewPresenters.put(viewId, viewPresenters);
+        /**
+         * Calls {@link IPresenter#onDestroy()} and forgets reference for all presenters.
+         */
+        void removeAll() {
+            Collection<IPresenter> presenters = mPresenters.values();
+            for (IPresenter presenter : presenters) {
+                presenter.onDestroy();
             }
-
-            viewPresenters.put(presenter.getClass(), presenter);
+            mPresenters.clear();
         }
 
-        private IPresenter getViewPresenter(String viewId, Class presenterClass) {
-            Map<Class, IPresenter> viewPresenters = mViewPresenters.get(viewId);
-            if (viewPresenters == null) {
-                return null;
-            }
-
-            return viewPresenters.get(presenterClass);
+        @Nonnull
+        private String prepareKey(@Nonnull WeavedMvpView view, @Nonnull String filedName) {
+            return view.getWeavedId() + ID_SEPARATOR + filedName;
         }
-
-        private void putActivityPresenter(IPresenter presenter) {
-            mActivityPresenters.put(presenter.getClass(), presenter);
-        }
-
-        private IPresenter getActivityPresenter(Class presenterClass) {
-            return mActivityPresenters.get(presenterClass);
-        }
-
-        private String buildViewId(View view, Object tagObject) {
-            return String.format("%s:%s", view.getClass().getCanonicalName(), tagObject.toString());
-        }
-
     }
 
+    //region util methods
+
+    private void nonNull(Object o, String name) {
+        if (o == null) {
+            throw new IllegalArgumentException(String.format("'%s' cannot be null", name));
+        }
+    }
+
+    //endregion util methods
 }

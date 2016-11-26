@@ -1,4 +1,4 @@
-package eu.f3rog.blade.sample.mvp.view;
+package eu.f3rog.blade.sample.mvp.ui.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -9,20 +9,21 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import blade.Presenter;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
 
+
 /**
  * Class {@link DataView}
  *
  * @author FrantisekGazo
- * @version 2016-02-15
  */
-public class DataView extends LinearLayout implements IDataView {
+public final class DataView
+        extends LinearLayout
+        implements IDataView {
 
     @Bind(R.id.value_layout)
     View mValueLayout;
@@ -31,7 +32,7 @@ public class DataView extends LinearLayout implements IDataView {
     @Bind(R.id.progress)
     ProgressBar mProgressBar;
 
-    @Presenter
+    // FIXME @Inject
     DataPresenter mPresenter;
 
     public DataView(Context context) {
@@ -60,7 +61,7 @@ public class DataView extends LinearLayout implements IDataView {
         mProgressBar.setVisibility(GONE);
 
         // random data (normally they would be send via constructor from activity)
-        Data data = new Data(123, 5, "Loaded Text");
+        Data data = new Data(123, 5, 1, "Loaded Text");
 
         setTag(data);
     }

@@ -61,42 +61,10 @@ public final class WeaveBuilder {
         }
     }
 
-    public static final class Into {
-
-        private final MethodWeaveType mMethodWeaveType;
-        private final WeavePriority mPriority;
-        private final String mMethodName;
-
-        public Into(MethodWeaveType methodWeaveType, WeavePriority priority, String methodName) {
-            mPriority = priority;
-            mMethodWeaveType = methodWeaveType;
-            mMethodName = methodName;
-        }
-
-        public MethodWeaveType getMethodWeaveType() {
-            return mMethodWeaveType;
-        }
-
-        public WeavePriority getPriority() {
-            return mPriority;
-        }
-
-        public String getMethodName() {
-            return mMethodName;
-        }
-    }
-
-    public static Into parseInto(final String into) {
-        int number = Integer.valueOf(into.substring(0, 1));
-        WeavePriority priority = WeavePriority.from(number);
-        String type = into.substring(1, 2);
-        MethodWeaveType weaveType = MethodWeaveType.from(type);
-        String actualName = into.substring(2);
-        return new Into(weaveType, priority, actualName);
-    }
+    //region @Weave / @Weaves
 
     public static IWeaveInto weave() {
-        return new Implementation();
+        return new WeaveBuilderImpl();
     }
 
     public interface IWeaveInto extends IWeaveBuild {
@@ -131,7 +99,7 @@ public final class WeaveBuilder {
 
     }
 
-    private static final class Implementation
+    private static final class WeaveBuilderImpl
             implements IWeaveInto, IMethodWeaveStatement {
 
         private AnnotationSpec.Builder mContainerAnnotationBuilder;
@@ -252,4 +220,5 @@ public final class WeaveBuilder {
         return format.toString();
     }
 
+    //endregion @Weave / @Weaves
 }

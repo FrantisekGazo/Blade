@@ -19,7 +19,8 @@
     <string name="value_double">double:</string>
 
     <string name="rotation_message">Now you can rotate your device, the loading is running in presenter, which will update the view when done.</string>
-    <string name="activity_value_is">Activity Value is:</string>
+    <string name="activity_value_is">Activity value is:</string>
+    <string name="frag_value_is">Fragment value is:</string>
     <string name="value_is">Value is:</string>
 
     <string name="run_test">Run test</string>

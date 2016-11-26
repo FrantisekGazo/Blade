@@ -12,7 +12,7 @@ import javassist.bytecode.AnnotationsAttribute;
  * @author FrantisekGazo
  * @version 2015-11-09
  */
-public class WeavingUtil {
+public final class WeavingUtil {
 
     public static boolean isSubclassOf(CtClass clazz, String superClassName) throws NotFoundException {
         CtClass superClass = clazz;

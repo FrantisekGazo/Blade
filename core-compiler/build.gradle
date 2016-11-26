@@ -19,6 +19,8 @@ dependencies {
     testCompile project(':module:extra-compiler')
     testCompile project(':module:state-compiler')
     testCompile project(':module:mvp-compiler')
+    testCompile deps.dagger2
+    testCompile deps.dagger2_compiler
     testCompile project(':module:parcel-compiler')
 
     testCompile deps.guava

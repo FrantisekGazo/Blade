@@ -1,22 +1,32 @@
-package eu.f3rog.blade.sample.mvp;
+package eu.f3rog.blade.sample.mvp.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import blade.Blade;
-import blade.Presenter;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
+import eu.f3rog.blade.sample.mvp.di.component.Component;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
-import eu.f3rog.blade.sample.mvp.view.IDataView;
+import eu.f3rog.blade.sample.mvp.ui.view.IDataView;
 
+
+/**
+ * Class {@link TestMvpActivity}
+ *
+ * @author FrantisekGazo
+ */
 @Blade
-public class TestMvpActivity extends AppCompatActivity implements IDataView {
+public final class TestMvpActivity
+        extends AppCompatActivity
+        implements IDataView {
 
-    @Presenter
+    @Inject
     DataPresenter mPresenter;
 
     @Bind(R.id.txt_activity_value)
@@ -28,11 +38,9 @@ public class TestMvpActivity extends AppCompatActivity implements IDataView {
         setContentView(R.layout.activity_test_mvp);
         ButterKnife.bind(this);
 
-        setTag(new Data(123, 1, "Hello World!"));
-    }
+        Component.forApp().inject(this);
 
-    @Override
-    public void setTag(Object o) {
+        mPresenter.onViewCreated(new Data(123, 10, 1, "Hello"));
     }
 
     @Override

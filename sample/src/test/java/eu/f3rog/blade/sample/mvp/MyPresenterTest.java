@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
-import eu.f3rog.blade.sample.mvp.view.IDataView;
+import eu.f3rog.blade.sample.mvp.ui.view.IDataView;
 import rx.Observable;
 
 /**

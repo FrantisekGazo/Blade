@@ -1,44 +1,43 @@
 package blade.mvp;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Class {@link BasePresenter}
  *
  * @author FrantisekGazo
- * @version 2016-02-14
  */
-public abstract class BasePresenter<V extends IView, D>
-        implements IPresenter<V, D> {
+public abstract class BasePresenter<V extends IView>
+        implements IPresenter<V> {
 
     private V mView;
 
+    @Override
+    @Nullable
     public V getView() {
         return mView;
     }
 
     @Override
-    public void create(D data, boolean wasRestored) {
+    public void onCreate(@Nullable Object state) {
     }
 
     @Override
-    public void destroy() {
+    public void onDestroy() {
     }
 
     @Override
-    public void bind(V view) {
+    public void onBind(@Nonnull V view) {
         mView = view;
     }
 
     @Override
-    public void unbind() {
+    public void onUnbind() {
         mView = null;
     }
 
     @Override
-    public void saveState(Object state) {
+    public void onSaveState(@Nonnull Object state) {
     }
-
-    @Override
-    public void restoreState(Object state) {
-    }
-
 }

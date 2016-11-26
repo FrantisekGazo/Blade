@@ -1,51 +1,46 @@
 package blade.mvp;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Interface {@link IPresenter}.
  * Class that implements this interface has to have default constructor.
  *
  * @param <V> View type
- * @param <D> Data type
  */
-public interface IPresenter<V extends IView, D> {
+public interface IPresenter<V extends IView> {
 
     /**
-     * Called after this presenter has been created via default constructor.
-     *
-     * @param data        Data for initialization
-     * @param wasRestored Flag signalling whether this Presenter was newly created, or restored from state.
+     * Called only when presenter is firstly created with null state and also when presenter needs to be restored from state.
      */
-    void create(D data, boolean wasRestored);
-
-    /**
-     * Called before destroying this Presenter.
-     */
-    void destroy();
-
-    /**
-     * Called every time this Presenter is connecting to a view.
-     *
-     * @param view View
-     */
-    void bind(V view);
-
-    /**
-     * Called every time this Presenter is disconnecting from a view.
-     */
-    void unbind();
+    void onCreate(@Nullable Object state);
 
     /**
      * Saves state to given state object.
      * <p/>
      * Normally this would be an instance of android's Bundle class, but in order to allow unit testing there is just Object as parameter type.
      */
-    void saveState(Object state);
+    void onSaveState(@Nonnull Object state);
 
     /**
-     * Restores state from given state object.
-     * <p/>
-     * Normally this would be an instance of android's Bundle class, but in order to allow unit testing there is just Object as parameter type.
+     * Called before destroying this presenter.
      */
-    void restoreState(Object state);
+    void onDestroy();
+
+    /**
+     * Called every time this Presenter is connecting to a view.
+     *
+     * @param view View
+     */
+    void onBind(@Nonnull V view);
+
+    @Nullable
+    V getView();
+
+    /**
+     * Called every time this Presenter is disconnecting from a view.
+     */
+    void onUnbind();
 
 }

@@ -6,7 +6,9 @@ targetCompatibility = JavaVersion.VERSION_1_7
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
+    compileOnly deps.dagger2
+    compileOnly deps.dagger2_compiler
+    compileOnly deps.google_android
+    compileOnly deps.google_support_v4
     compile project(':core')
-
-    compile deps.google_android
 }

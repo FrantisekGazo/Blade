@@ -5,11 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
-import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
+import eu.f3rog.blade.compiler.builder.annotation.WeaveParser;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
+import eu.f3rog.blade.weaving.interfaces.Interfaces;
 import eu.f3rog.blade.weaving.util.AWeaver;
+import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -26,6 +27,23 @@ import static eu.f3rog.blade.weaving.util.WeavingUtil.getAnnotations;
 
 public final class BladeWeaver
         extends AWeaver {
+
+    @Override
+    public void weave(ClassPool classPool, List<CtClass> classes) {
+        for (CtClass cls : classes) {
+            String className = cls.getName();
+            if (className.endsWith("_Helper")) {
+                CtClass intoClass;
+                try {
+                    intoClass = classPool.get(className.replace("_Helper", ""));
+                } catch (NotFoundException e) {
+                    continue;
+                }
+
+                weave(cls, intoClass);
+            }
+        }
+    }
 
     private static class Metadata {
         String into;
@@ -58,9 +76,8 @@ public final class BladeWeaver
         super(debug);
     }
 
-    @Override
     public void weave(CtClass helperClass, CtClass intoClass) {
-        lognl("Weaving starts (%s)", intoClass.getSimpleName());
+        lognl("|~ Weaving start '%s'", intoClass.getName());
         try {
             ClassPool classPool = intoClass.getClassPool();
 
@@ -88,14 +105,13 @@ public final class BladeWeaver
             // weave interfaces
             for (CtClass interfaceClass : helperClass.getInterfaces()) {
                 lognl("interface '%s'", interfaceClass.getName());
-
                 Interfaces.weaveInterface(interfaceClass, intoClass, getJavassistHelper());
             }
 
-            lognl("Weaving done (%s)", intoClass.getSimpleName());
+            lognl("~| Weaving done '%s'", intoClass.getName());
         } catch (Exception e) {
             lognl("");
-            lognl("Weaving failed! (%s)", intoClass.getSimpleName());
+            lognl("~| Weaving failed '%s'", intoClass.getName());
             lognl("");
             e.printStackTrace();
             throw new IllegalStateException(e);
@@ -138,7 +154,7 @@ public final class BladeWeaver
                 lognl(" ~~~ %s", body);
             } else {
                 // weave into method
-                WeaveBuilder.Into into = WeaveBuilder.parseInto(metadata.into);
+                WeaveParser.Into into = WeaveParser.parseInto(metadata.into);
                 log(" ~> method '%s' %s with %s priority", into.getMethodName(), into.getMethodWeaveType(), into.getPriority());
                 switch (into.getMethodWeaveType()) {
                     case BEFORE_BODY:

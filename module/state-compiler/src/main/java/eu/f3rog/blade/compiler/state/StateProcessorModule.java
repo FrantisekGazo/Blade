@@ -16,9 +16,8 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * Class {@link StateProcessorModule}
  *
  * @author FrantisekGazo
- * @version 2015-12-19
  */
-public class StateProcessorModule
+public final class StateProcessorModule
         implements ProcessorModule {
 
     @Override

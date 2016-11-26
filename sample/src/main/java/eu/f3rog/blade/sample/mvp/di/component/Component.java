@@ -1,5 +1,6 @@
 package eu.f3rog.blade.sample.mvp.di.component;
 
+import eu.f3rog.blade.sample.mvp.di.module.PresenterModule;
 import eu.f3rog.blade.sample.mvp.di.module.RxModule;
 
 /**
@@ -17,6 +18,7 @@ public class Component {
             sAppComponent = DaggerAppComponent
                     .builder()
                     .rxModule(new RxModule())
+                    .presenterModule(new PresenterModule())
                     .build();
         }
         return sAppComponent;

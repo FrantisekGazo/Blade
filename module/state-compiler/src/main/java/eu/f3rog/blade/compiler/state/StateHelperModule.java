@@ -36,9 +36,8 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
  * Class {@link StateHelperModule}
  *
  * @author FrantisekGazo
- * @version 2015-12-19
  */
-public class StateHelperModule
+public final class StateHelperModule
         extends BaseHelperModule {
 
     private static final ClassName PRESENTER_CLASS_NAME = ClassName.get("blade.mvp", "IPresenter");
@@ -53,8 +52,7 @@ public class StateHelperModule
     private static final String WEAVE_onSaveInstanceState = "onSaveInstanceState";
     private static final String WEAVE_onRestoreInstanceState = "onRestoreInstanceState";
     private static final String WEAVE_onCreate = "onCreate";
-    private static final String WEAVE_saveState = "saveState";
-    private static final String WEAVE_restoreState = "restoreState";
+    private static final String WEAVE_onSaveState = "onSaveState";
 
     private static final String STATEFUL_ID_FORMAT = "<Stateful-%s>";
 
@@ -163,12 +161,13 @@ public class StateHelperModule
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
                 return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState, Bundle.class)
-                        .placed(WeaveBuilder.MethodWeaveType.AFTER_SUPER)
+                        .placed(WeaveBuilder.MethodWeaveType.AFTER_BODY)
                         .withStatement("%s.%s(this, $1);", helperName, METHOD_NAME_SAVE_SATE)
                         .build();
 
             case PRESENTER:
-                return WeaveBuilder.weave().method(WEAVE_saveState, Object.class)
+                return WeaveBuilder.weave().method(WEAVE_onSaveState, Object.class)
+                        .placed(WeaveBuilder.MethodWeaveType.AFTER_BODY)
                         .withStatement("%s.%s(this, (%s) $1);", helperName, METHOD_NAME_SAVE_SATE, Bundle.class.getCanonicalName())
                         .build();
             case VIEW:
@@ -192,7 +191,7 @@ public class StateHelperModule
                         .build();
 
             case PRESENTER:
-                return WeaveBuilder.weave().method(WEAVE_restoreState, Object.class)
+                return WeaveBuilder.weave().method(WEAVE_onCreate, Object.class)
                         .withStatement("%s.%s(this, (%s) $1);", helperName, METHOD_NAME_RESTORE_SATE, Bundle.class.getCanonicalName())
                         .build();
             case VIEW:
