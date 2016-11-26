@@ -1,6 +1,8 @@
 package eu.f3rog.blade.compiler.mvp;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.mvp.WeavedMvpActivity;
 import eu.f3rog.blade.mvp.WeavedMvpFragment;
 
+import static eu.f3rog.blade.compiler.util.ProcessorUtils.getSuperType;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.getTypeElement;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.isFragmentSubClass;
@@ -55,14 +58,22 @@ public final class PresenterHelperModule
 
     @Override
     public void add(VariableElement e) throws ProcessorError {
-        if (isSubClassOf(getTypeElement(ClassName.get(e.asType())), IPresenter.class)) {
+        TypeName presenterType = getSuperType(getTypeElement(ClassName.get(e.asType())), IPresenter.class);
+        if (presenterType != null) {
             mPresenterFieldNames.add(e.getSimpleName().toString());
 
             if (mViewType == null) {
                 throw new ProcessorError(e, MvpErrorMsg.Invalid_class_with_injected_Presenter);
             }
 
-            // FIXME : add check for view type vs presenter arg type
+            // check if view type is the same as the one presenter needs
+            TypeElement typeElement = (TypeElement) e.getEnclosingElement();
+            ParameterizedTypeName paramPresenterType = (ParameterizedTypeName) presenterType;
+            List<TypeName> typeArguments = paramPresenterType.typeArguments;
+            TypeName presenterViewType = typeArguments.get(0);
+            if (!isSubClassOf(typeElement, presenterViewType)) {
+                throw new ProcessorError(e, String.format(MvpErrorMsg.Invalid_view_class, presenterViewType, e.getSimpleName()));
+            }
         }
     }
 

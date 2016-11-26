@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.tools.JavaFileObject;
 
 import blade.Blade;
+import blade.mvp.BasePresenter;
 import blade.mvp.IPresenter;
 import blade.mvp.IView;
 import eu.f3rog.blade.compiler.BaseTest;
@@ -126,6 +127,55 @@ public final class PresenterTest
                 .with(BladeProcessor.Module.MVP)
                 .failsToCompile()
                 .withErrorContaining(MvpErrorMsg.Invalid_class_with_injected_Presenter);
+    }
+
+    @Test
+    public void incorrectTypes() {
+        JavaFileObject viewInterface1 = file("com.example", "IMyView1")
+                .imports(
+                        IView.class, "V"
+                )
+                .body(
+                        "public interface $T extends $V {",
+                        "}"
+                );
+        JavaFileObject viewInterface2 = file("com.example", "IMyView2")
+                .imports(
+                        IView.class, "V"
+                )
+                .body(
+                        "public interface $T extends $V {",
+                        "}"
+                );
+        JavaFileObject presenter = file("com.example", "MyPresenter")
+                .imports(
+                        BasePresenter.class, "P",
+                        viewInterface2, "MV2"
+                )
+                .body(
+                        "public class $T extends $P<$MV2> {",
+                        "",
+                        "}"
+                );
+        JavaFileObject activity = file("com.example", "MyActivity")
+                .imports(
+                        Activity.class,
+                        viewInterface1, "MV1",
+                        presenter, "P",
+                        Inject.class, "I"
+                )
+                .body(
+                        "public class $T extends Activity implements $MV1 {",
+                        "",
+                        "   @$I $P mPresenter;",
+                        "",
+                        "}"
+                );
+
+        assertFiles(viewInterface1, viewInterface2, presenter, activity)
+                .with(BladeProcessor.Module.MVP)
+                .failsToCompile()
+                .withErrorContaining(String.format(MvpErrorMsg.Invalid_view_class, "com.example.IMyView2", "mPresenter"));
     }
 
     @Test
