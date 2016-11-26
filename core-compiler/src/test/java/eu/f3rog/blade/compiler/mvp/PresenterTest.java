@@ -11,6 +11,7 @@ import org.junit.Test;
 import javax.inject.Inject;
 import javax.tools.JavaFileObject;
 
+import blade.Blade;
 import blade.mvp.IPresenter;
 import blade.mvp.IView;
 import eu.f3rog.blade.compiler.BaseTest;
@@ -26,7 +27,8 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  *
  * @author FrantisekGazo
  */
-public final class PresenterTest extends BaseTest {
+public final class PresenterTest
+        extends BaseTest {
 
     static String getPresenterImplementation(String viewType) {
         return String.format(PRESENTER_METHODS, viewType, viewType);
@@ -152,6 +154,46 @@ public final class PresenterTest extends BaseTest {
                 .compilesWithoutError();
 
         assertFileNotGenerated("com.example", "MyActivity_Helper", viewInterface, activity);
+    }
+
+    @Test
+    public void activityWithoutPresenterWithBlade() {
+        JavaFileObject viewInterface = file("com.example", "IMyView")
+                .imports(
+                        IView.class, "V"
+                )
+                .body(
+                        "public interface $T extends $V {",
+                        "}"
+                );
+        JavaFileObject activity = file("com.example", "MyActivity")
+                .imports(
+                        Activity.class,
+                        viewInterface, "MV",
+                        Blade.class, "B",
+                        Inject.class, "I"
+                )
+                .body(
+                        "@$B",
+                        "public class $T extends Activity implements $MV {",
+                        "}"
+                );
+
+
+        JavaFileObject expected = generatedFile("com.example", "MyActivity_Helper")
+                .imports(
+                        WeavedMvpActivity.class, "M"
+                )
+                .body(
+                        "abstract class $T implements $M {",
+                        "}"
+                );
+
+        assertFiles(viewInterface, activity)
+                .with(BladeProcessor.Module.MVP)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
     }
 
     @Test
@@ -291,6 +333,36 @@ public final class PresenterTest extends BaseTest {
                         Inject.class, "I"
                 )
                 .body(
+                        "public class $T extends Fragment implements $MV {",
+                        "}"
+                );
+
+        assertFiles(viewInterface, fragment)
+                .with(BladeProcessor.Module.MVP)
+                .compilesWithoutError();
+
+        assertFileNotGenerated("com.example", "MyFragment_Helper", viewInterface, fragment);
+    }
+
+    @Test
+    public void fragmentWithoutPresenterWithBlade() {
+        JavaFileObject viewInterface = file("com.example", "IMyView")
+                .imports(
+                        IView.class, "V"
+                )
+                .body(
+                        "public interface $T extends $V {",
+                        "}"
+                );
+        JavaFileObject fragment = file("com.example", "MyFragment")
+                .imports(
+                        Fragment.class,
+                        viewInterface, "MV",
+                        Blade.class, "B",
+                        Inject.class, "I"
+                )
+                .body(
+                        "@$B",
                         "public class $T extends Fragment implements $MV {",
                         "}"
                 );

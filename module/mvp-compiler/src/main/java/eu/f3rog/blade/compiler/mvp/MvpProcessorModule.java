@@ -22,9 +22,9 @@ public final class MvpProcessorModule
 
     @Override
     public void process(TypeElement bladeElement) throws ProcessorError {
-        /*ClassManager.getInstance()
+        ClassManager.getInstance()
                 .getHelper(bladeElement)
-                .tryGetModule(PresenterScopeHelperModule.class);*/
+                .tryGetModule(PresenterHelperModule.class);
     }
 
     @Override
@@ -39,10 +39,6 @@ public final class MvpProcessorModule
             if (module != null) {
                 module.add((VariableElement) e);
             }
-/*
-            ClassManager.getInstance()
-                    .getHelper(typeElement)
-                    .tryGetModule(PresenterScopeHelperModule.class);*/
         }
     }
 

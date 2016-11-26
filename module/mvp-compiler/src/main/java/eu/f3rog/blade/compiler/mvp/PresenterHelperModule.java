@@ -46,6 +46,7 @@ public final class PresenterHelperModule
             } else if (isFragmentSubClass(e)) {
                 viewType = ViewType.FRAGMENT;
             }
+
             // TODO : look at View subclass support
         }
 
@@ -60,6 +61,8 @@ public final class PresenterHelperModule
             if (mViewType == null) {
                 throw new ProcessorError(e, MvpErrorMsg.Invalid_class_with_injected_Presenter);
             }
+
+            // FIXME : add check for view type vs presenter arg type
         }
     }
 
@@ -69,7 +72,7 @@ public final class PresenterHelperModule
             return false; // if class is NOT a IView and does NOT inject any IPresenter
         }
 
-        if (mPresenterFieldNames.isEmpty()) {
+        if (mViewType != ViewType.ACTIVITY && mPresenterFieldNames.isEmpty()) {
             return false; // if class is a IView but does NOT inject any IPresenter
         }
 

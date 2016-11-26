@@ -1,10 +1,12 @@
 package eu.f3rog.blade.compiler.mvp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
 import org.junit.Test;
 
+import javax.inject.Inject;
 import javax.tools.JavaFileObject;
 
 import blade.mvp.IPresenter;
@@ -13,6 +15,7 @@ import blade.mvp.PresenterManager;
 import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.core.Weave;
+import eu.f3rog.blade.mvp.WeavedMvpActivity;
 
 import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
@@ -21,9 +24,9 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  * Class {@link InnerClassTest}
  *
  * @author FrantisekGazo
- * @version 2015-11-27
  */
-public final class InnerClassTest extends BaseTest {/*
+public final class InnerClassTest
+        extends BaseTest {
 
     @Test
     public void inner() {
@@ -33,83 +36,35 @@ public final class InnerClassTest extends BaseTest {/*
                         "com.example.Wrapper", "V"
                 )
                 .body(
-                        "public class $T implements $P<$V.MyView, String> {",
+                        "public class $T implements $P<$V.MyView> {",
                         "",
-                        PresenterTest.getPresenterImplementation("$V.MyView", "String"),
+                        PresenterTest.getPresenterImplementation("$V.MyView"),
                         "}"
                 );
         JavaFileObject view = file("com.example", "Wrapper")
                 .imports(
                         presenter, "MP",
-                        View.class,
-                        Context.class,
-                        Presenter.class, "P",
+                        Activity.class,
+                        Inject.class, "I",
                         IView.class, "V"
                 )
                 .body(
                         "public class $T {",
                         "",
-                        "   public static class MyView extends View implements $V {",
+                        "   public static class MyView extends Activity implements $V {",
                         "",
-                        "       @$P $MP mPresenter;",
+                        "       @$I $MP mPresenter;",
                         "",
-                        "       public MyView(Context c) {super(c);}",
                         "   }",
                         "}"
                 );
 
         JavaFileObject expected = generatedFile("com.example", "Wrapper_MyView_Helper")
                 .imports(
-                        PresenterManager.class, "PM",
-                        presenter, "P",
-                        view, "V",
-                        Object.class,
-                        String.class,
-                        Weave.class,
-                        IllegalStateException.class, "E"
+                        WeavedMvpActivity.class, "I"
                 )
                 .body(
-                        "abstract class $T {",
-                        "",
-                        "   @Weave(into = \"<FIELD>\", statement = \"\")",
-                        "   private boolean mIsAttached;",
-                        "",
-                        "   @Weave(into = \"0^setTag\", args = {\"java.lang.Object\"}, statement = \"String tag = com.example.$T.setPresenters(this, $1); super.setTag(tag); if (this.mIsAttached) { com.example.$T.bindPresenters(this); } return;\")",
-                        "   public static String setPresenters($V.MyView target, Object tagObject) {",
-                        "       if (tagObject == null) {",
-                        "           if (target.mPresenter != null) {",
-                        "               target.mPresenter.unbind();",
-                        "           }",
-                        "           target.mPresenter = null;",
-                        "           return null;",
-                        "       } else {",
-                        "           if (!(tagObject instanceof String)) {",
-                        "               throw new $E(\"Incorrect type of tag object.\");",
-                        "           }",
-                        "           String param = (String) tagObject;",
-                        "           target.mPresenter = ($P) $PM.get(target, param, $P.class);",
-                        "           if (target.mPresenter == null) {",
-                        "               target.mPresenter = new $P();",
-                        "               $PM.put(target, param, target.mPresenter);",
-                        "           }",
-                        "           return tagObject.toString();",
-                        "       }",
-                        "   }",
-                        "",
-                        "   @Weave(into = \"0^onAttachedToWindow\", statement = \"com.example.$T.bindPresenters(this); this.mIsAttached = true;\")",
-                        "   public static void bindPresenters($V.MyView target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.bind(target);",
-                        "       }",
-                        "   }",
-                        "",
-                        "   @Weave(into = \"0^onDetachedFromWindow\", statement = \"com.example.$T.unbindPresenters(this); this.mIsAttached = false;\")",
-                        "   public static void unbindPresenters($V.MyView target) {",
-                        "       if (target.mPresenter != null) {",
-                        "           target.mPresenter.unbind();",
-                        "       }",
-                        "   }",
-                        "",
+                        "abstract class $T implements $I {",
                         "}"
                 );
 
@@ -118,5 +73,5 @@ public final class InnerClassTest extends BaseTest {/*
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected);
-    }*/
+    }
 }

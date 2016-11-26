@@ -13,9 +13,5 @@ import eu.f3rog.blade.compiler.ErrorMsg;
 public interface MvpErrorMsg extends ErrorMsg {
 
     String Invalid_class_with_injected_Presenter = "Only Activity or Fragment subclass that implements " + IView.class.getCanonicalName() + " can inject class that implements " + IPresenter.class.getSimpleName() + ".";
-//    String Invalid_Presenter_class = "@" + Presenter.class.getSimpleName() + " has to be non-abstract class that implements " + IPresenter.class.getCanonicalName();
-//    String Inconsistent_Presenter_parameter_classes = "All @" + Presenter.class.getSimpleName() + "s has to implement " + IPresenter.class.getCanonicalName() + " with the same parameter type.";
-//    String Presenter_class_cannot_be_parametrized = "@" + Presenter.class.getSimpleName() + " class cannot e parametrized.";
-//    String Presenter_class_missing_default_constructor = "Presenter class has to contain default constructor.";
 
 }
