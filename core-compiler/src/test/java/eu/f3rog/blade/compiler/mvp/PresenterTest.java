@@ -28,17 +28,17 @@ import static eu.f3rog.blade.compiler.util.File.generatedFile;
  */
 public final class PresenterTest extends BaseTest {
 
-    static String getPresenterImplementation(String viewType, String dataType) {
-        return String.format(PRESENTER_METHODS, viewType, dataType);
+    static String getPresenterImplementation(String viewType) {
+        return String.format(PRESENTER_METHODS, viewType, viewType);
     }
 
     private static final String PRESENTER_METHODS =
-            " public void bind(%s view) {} " +
-                    " public void unbind() {} " +
-                    " public void create(%s o, boolean wasRestored) {} " +
-                    " public void destroy() {} " +
-                    " public void saveState(Object o) {} " +
-                    " public void restoreState(Object o) {} ";
+            " public void onBind(%s view) {} " +
+                    " public %s getView() {return null;} " +
+                    " public void onUnbind() {} " +
+                    " public void onCreate(Object state) {} " +
+                    " public void onDestroy() {} " +
+                    " public void onSaveState(Object state) {} ";
 
     @Test
     public void ignoredInjections() {
@@ -170,9 +170,9 @@ public final class PresenterTest extends BaseTest {
                         viewInterface, "MV"
                 )
                 .body(
-                        "public class $T implements $P<$MV, String> {",
+                        "public class $T implements $P<$MV> {",
                         "",
-                        getPresenterImplementation("$MV", "String"),
+                        getPresenterImplementation("$MV"),
                         "",
                         "}"
                 );
@@ -223,9 +223,9 @@ public final class PresenterTest extends BaseTest {
                         viewInterface, "MV"
                 )
                 .body(
-                        "public class $T implements $P<$MV, String> {",
+                        "public class $T implements $P<$MV> {",
                         "",
-                        getPresenterImplementation("$MV", "String"),
+                        getPresenterImplementation("$MV"),
                         "",
                         "}"
                 );
@@ -235,9 +235,9 @@ public final class PresenterTest extends BaseTest {
                         viewInterface, "MV"
                 )
                 .body(
-                        "public class $T implements $P<$MV, String> {",
+                        "public class $T implements $P<$MV> {",
                         "",
-                        getPresenterImplementation("$MV", "String"),
+                        getPresenterImplementation("$MV"),
                         "",
                         "}"
                 );
@@ -318,9 +318,9 @@ public final class PresenterTest extends BaseTest {
                         viewInterface, "MV"
                 )
                 .body(
-                        "public class $T implements $P<$MV, String> {",
+                        "public class $T implements $P<$MV> {",
                         "",
-                        getPresenterImplementation("$MV", "String"),
+                        getPresenterImplementation("$MV"),
                         "",
                         "}"
                 );
@@ -371,9 +371,9 @@ public final class PresenterTest extends BaseTest {
                         viewInterface, "MV"
                 )
                 .body(
-                        "public class $T implements $P<$MV, String> {",
+                        "public class $T implements $P<$MV> {",
                         "",
-                        getPresenterImplementation("$MV", "String"),
+                        getPresenterImplementation("$MV"),
                         "",
                         "}"
                 );
@@ -383,9 +383,9 @@ public final class PresenterTest extends BaseTest {
                         viewInterface, "MV"
                 )
                 .body(
-                        "public class $T implements $P<$MV, String> {",
+                        "public class $T implements $P<$MV> {",
                         "",
-                        getPresenterImplementation("$MV", "String"),
+                        getPresenterImplementation("$MV"),
                         "",
                         "}"
                 );
