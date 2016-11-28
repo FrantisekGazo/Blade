@@ -3,6 +3,7 @@ package eu.f3rog.blade.sample.mvp;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +11,7 @@ import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
 import eu.f3rog.blade.sample.mvp.ui.view.IDataView;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 /**
  * Class {@link MyPresenterTest}
@@ -40,16 +42,16 @@ public class MyPresenterTest {
     public void setup() {
     }
 
-    //@Test
+    @Test
     public void test() throws InterruptedException {
-        DataPresenter presenter = new DataPresenter();
+        DataPresenter presenter = new DataPresenter(Schedulers.immediate(), Schedulers.immediate());
         MockDataView view = new MockDataView();
 
-        presenter.create(new Data(123, 2, "Hello World!"), false);
-        presenter.bind(view);
+        presenter.onViewCreated(new Data(123, 2, 1, "Hello World!"));
+        presenter.onBind(view);
 
         Observable
-                .timer(13, TimeUnit.SECONDS)
+                .timer(5, TimeUnit.SECONDS)
                 .toBlocking()
                 .last();    // Wait for observable to complete. Last item discarded.
 

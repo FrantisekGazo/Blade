@@ -4,8 +4,4 @@ import blade.mvp.IView;
 
 class MockView implements IView {
 
-    @Override
-    public void setTag(Object o) {
-    }
-
 }
