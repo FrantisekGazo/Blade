@@ -1,127 +1,68 @@
 package eu.f3rog.blade.weaving.interfaces;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import eu.f3rog.javassist.JavassistHelper;
 import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.Modifier;
 import javassist.NotFoundException;
 
 
 /**
- * Base class for weaving a MVP interface
+ * Weaves MVP interface to View
  *
  * @author FrantisekGazo
  */
-abstract class WeavedMvpViewIW
-        extends InterfaceWeaver {
-
-    protected static final String PM = "blade.mvp.PresenterManager.getInstance()";
+final class WeavedMvpViewIW
+        extends WeavedMvpUiIW {
 
     @Override
-    public void weave(CtClass interfaceClass, CtClass targetClass, JavassistHelper javassistHelper)
+    protected void weave(CtClass targetClass, JavassistHelper javassistHelper, List<String> presenterFieldNames)
             throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException {
 
         ClassPool classPool = targetClass.getClassPool();
 
-        boolean implementedBySuperclass = willBeImplementedBySuperclass(targetClass, interfaceClass);
+        // TODO : show I cause crash if user did not set ID to View ?!
 
-        if (!implementedBySuperclass) {
-            // add interface
-            targetClass.addInterface(interfaceClass);
+        // ~> onRestoreInstanceState
+        StringBuilder body = new StringBuilder();
+        body.append("{");
+        // FIXME : $1 is a Parcelable NOT a Bundle !!!
+        body.append("this.setWeavedState($1);"); // initialize view STATE
+        body.append("this.setWeavedId(").append(PM).append(".getId(this, this.getContext()));"); // initialize view ID
+        body.append("}");
+        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onRestoreInstanceState", classPool.get("android.os.Parcelable"));
 
-            // add ID field
-            CtField field = new CtField(classPool.get("java.lang.String"), "mWeavedId", targetClass);
-            field.setModifiers(Modifier.PRIVATE);
-            targetClass.addField(field);
-            // getter
-            CtMethod getterMethod = new CtMethod(
-                    classPool.get("java.lang.String"),
-                    "getWeavedId",
-                    null,
-                    targetClass
-            );
-            getterMethod.setBody("{ return this.mWeavedId; }");
-            targetClass.addMethod(getterMethod);
-            // setter
-            CtMethod setterMethod = new CtMethod(
-                    classPool.get("void"),
-                    "setWeavedId",
-                    new CtClass[]{classPool.get("java.lang.String")},
-                    targetClass
-            );
-            setterMethod.setBody("{ this.mWeavedId = $1; }");
-            targetClass.addMethod(setterMethod);
+        // ~> onAttachedToWindow
+        body.setLength(0);
+        body.append("{");
+        body.append("if (this.getWeavedId() == null) {")
+                .append("this.setWeavedId(").append(PM).append(".getId(this, this.getContext()));") // initialize view ID
+                .append("}");
+        body.append("}");
+        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onAttachedToWindow");
 
-            // add STATE field
-            field = new CtField(classPool.get("android.os.Bundle"), "mWeavedState", targetClass);
-            field.setModifiers(Modifier.PRIVATE);
-            targetClass.addField(field);
-            // getter
-            getterMethod = new CtMethod(
-                    classPool.get("android.os.Bundle"),
-                    "getWeavedState",
-                    null,
-                    targetClass
-            );
-            getterMethod.setBody("{ return this.mWeavedState; }");
-            targetClass.addMethod(getterMethod);
-            // setter
-            setterMethod = new CtMethod(
-                    classPool.get("void"),
-                    "setWeavedState",
-                    new CtClass[]{classPool.get("android.os.Bundle")},
-                    targetClass
-            );
-            setterMethod.setBody("{ this.mWeavedState = $1; }");
-            targetClass.addMethod(setterMethod);
-
-            // add SAVE CALL field
-            field = new CtField(classPool.get("boolean"), "mWasOnSaveCalled", targetClass);
-            field.setModifiers(Modifier.PRIVATE);
-            targetClass.addField(field);
-            // getter
-            getterMethod = new CtMethod(
-                    classPool.get("boolean"),
-                    "wasOnSaveCalled",
-                    null,
-                    targetClass
-            );
-            getterMethod.setBody("{ return this.mWasOnSaveCalled; }");
-            targetClass.addMethod(getterMethod);
-            // setter
-            setterMethod = new CtMethod(
-                    classPool.get("void"),
-                    "setOnSaveCalled",
-                    null,
-                    targetClass
-            );
-            setterMethod.setBody("{ this.mWasOnSaveCalled = true; }");
-            targetClass.addMethod(setterMethod);
+        // ~> onSaveInstanceState
+        body.setLength(0);
+        body.append("{");
+        body.append("this.setOnSaveCalled();");
+        // FIXME : state is not a parameter !
+        body.append(PM).append(".saveViewId($1, this.getWeavedId());"); // save view ID
+        for (String presenterFieldName : presenterFieldNames) { // save each declared presenter
+            body.append(PM).append(".save($1, \"").append(presenterFieldName).append("\", ").append(presenterFieldName).append(");");
         }
-    }
+        body.append("}");
+        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onSaveInstanceState", classPool.get("android.os.Bundle"));
 
-    protected List<String> getPresenterFieldNames(CtClass targetClass) throws NotFoundException {
-        List<String> presenterFieldNames = new ArrayList<>();
-
-        ClassPool classPool = targetClass.getClassPool();
-        CtField[] declaredFields = targetClass.getDeclaredFields();
-        CtClass presenterInterface = classPool.get("blade.mvp.IPresenter");
-
-        for (CtField declaredField : declaredFields) {
-            if (declaredField.hasAnnotation(Inject.class) && declaredField.getType().subtypeOf(presenterInterface)) {
-                presenterFieldNames.add(declaredField.getName());
-            }
+        // ~> onDetachedFromWindow
+        body.setLength(0);
+        body.append("{");
+        for (String presenterFieldName : presenterFieldNames) { // unbind/remove each declared presenter
+            body.append(PM).append(".onViewDestroy(this, \"").append(presenterFieldName).append("\", ").append(presenterFieldName).append(");");
         }
-
-        return presenterFieldNames;
+        body.append("}");
+        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onDetachedFromWindow");
     }
 }

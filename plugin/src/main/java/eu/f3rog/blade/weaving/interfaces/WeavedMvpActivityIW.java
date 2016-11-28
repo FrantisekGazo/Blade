@@ -16,26 +16,19 @@ import javassist.NotFoundException;
  * @author FrantisekGazo
  */
 final class WeavedMvpActivityIW
-        extends WeavedMvpViewIW {
+        extends WeavedMvpUiIW {
 
     @Override
-    public void weave(CtClass interfaceClass, CtClass targetClass, JavassistHelper javassistHelper)
+    protected void weave(CtClass targetClass, JavassistHelper javassistHelper, List<String> presenterFieldNames)
             throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException {
 
-        super.weave(interfaceClass, targetClass, javassistHelper);
         ClassPool classPool = targetClass.getClassPool();
-
-        List<String> presenterFieldNames = getPresenterFieldNames(targetClass);
-
-        // ~> _MembersInjector
-        DaggerMiddleMan daggerMiddleMan = new DaggerMiddleMan();
-        daggerMiddleMan.weaveFor(targetClass, presenterFieldNames, PM + ".get", javassistHelper);
 
         // ~> onCreate
         StringBuilder body = new StringBuilder();
         body.append("{")
                 .append("this.setWeavedState($1);") // initialize view STATE
-                .append("this.setWeavedId(").append(PM).append(".getActivityId(this));") // initialize view ID
+                .append("this.setWeavedId(").append(PM).append(".getId(this));") // initialize view ID
                 .append("}");
         javassistHelper.insertBeforeBody(body.toString(), targetClass, "onCreate", classPool.get("android.os.Bundle"));
 

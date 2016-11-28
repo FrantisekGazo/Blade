@@ -81,7 +81,7 @@ public final class BladeWeaver
         try {
             ClassPool classPool = intoClass.getClassPool();
 
-            // weave field metadata
+            // get field metadata
             for (CtField field : helperClass.getDeclaredFields()) {
                 lognl("field '%s'", field.getName());
 
@@ -89,14 +89,14 @@ public final class BladeWeaver
                 weave(metadata, intoClass, field);
             }
 
-            // weave method metadata
+            // get method metadata
             List<Metadata> allMethodMetadata = new ArrayList<>();
             for (CtMethod method : helperClass.getDeclaredMethods()) {
                 lognl("method '%s'", method.getName());
                 List<Metadata> metadata = loadWeaveMetadata(classPool, method);
                 allMethodMetadata.addAll(metadata);
             }
-            // sort them based on priority
+            // sort metadata based on priority and weave them
             Collections.sort(allMethodMetadata, new MetadataComparator());
             for (Metadata metadata : allMethodMetadata) {
                 weave(metadata, intoClass, null);

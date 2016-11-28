@@ -2,6 +2,9 @@ package eu.f3rog.blade.sample.mvp.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -15,6 +18,7 @@ import eu.f3rog.blade.sample.R;
 import eu.f3rog.blade.sample.mvp.di.component.Component;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
+import eu.f3rog.blade.sample.mvp.ui.view.DataView;
 import eu.f3rog.blade.sample.mvp.ui.view.IDataView;
 
 
@@ -31,6 +35,8 @@ public final class TestMvpActivity
     @Inject
     DataPresenter mPresenter;
 
+    @Bind(R.id.container)
+    ViewGroup mContainer;
     @Bind(R.id.txt_activity_value)
     TextView mTextView;
 
@@ -48,6 +54,10 @@ public final class TestMvpActivity
         Component.forApp().inject(this);
 
         mPresenter.onViewCreated(new Data(123, 10, 1, "Hello"));
+
+        DataView child = new DataView(this);
+        child.setId(12345678);
+        mContainer.addView(child);
     }
 
     @Override

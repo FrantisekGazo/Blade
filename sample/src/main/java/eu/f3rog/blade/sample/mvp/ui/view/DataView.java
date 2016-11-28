@@ -3,6 +3,9 @@ package eu.f3rog.blade.sample.mvp.ui.view;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -25,10 +28,13 @@ public final class DataView
         extends LinearLayout
         implements IDataView {
 
+    @Nullable
     @Bind(R.id.value_layout)
     View mValueLayout;
+    @Nullable
     @Bind(R.id.txt_value)
     TextView mTxtValue;
+    @Nullable
     @Bind(R.id.progress)
     ProgressBar mProgressBar;
 
@@ -57,13 +63,11 @@ public final class DataView
         super.onFinishInflate();
         ButterKnife.bind(this);
 
-        mValueLayout.setVisibility(GONE);
-        mProgressBar.setVisibility(GONE);
+//        mValueLayout.setVisibility(GONE);
+//        mProgressBar.setVisibility(GONE);
 
         // random data (normally they would be send via constructor from activity)
-        Data data = new Data(123, 5, 1, "Loaded Text");
-
-        setTag(data);
+        // FIXME : set to presenter Data data = new Data(123, 5, 1, "Loaded Text");
     }
 
     @Override
@@ -78,5 +82,26 @@ public final class DataView
 
         mValueLayout.setVisibility(VISIBLE);
         mProgressBar.setVisibility(GONE);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable parcelable = super.onSaveInstanceState();
+        return parcelable;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        super.onRestoreInstanceState(state);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
     }
 }

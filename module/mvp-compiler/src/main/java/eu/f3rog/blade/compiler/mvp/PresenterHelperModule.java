@@ -33,7 +33,7 @@ public final class PresenterHelperModule
         extends BaseHelperModule {
 
     private enum ViewType {
-        ACTIVITY, FRAGMENT
+        ACTIVITY, FRAGMENT, VIEW
     }
 
     private ViewType mViewType;

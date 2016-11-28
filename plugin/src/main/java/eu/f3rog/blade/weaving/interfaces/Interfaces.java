@@ -45,5 +45,6 @@ public final class Interfaces {
 
         sSupportedInterfaces.put("eu.f3rog.blade.mvp.WeavedMvpActivity", new WeavedMvpActivityIW());
         sSupportedInterfaces.put("eu.f3rog.blade.mvp.WeavedMvpFragment", new WeavedMvpFragmentIW());
+        sSupportedInterfaces.put("eu.f3rog.blade.mvp.WeavedMvpView", new WeavedMvpViewIW());
     }
 }

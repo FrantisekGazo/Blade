@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.view.View;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,6 +17,7 @@ import javax.inject.Provider;
 
 import eu.f3rog.blade.mvp.WeavedMvpActivity;
 import eu.f3rog.blade.mvp.WeavedMvpFragment;
+import eu.f3rog.blade.mvp.WeavedMvpUi;
 import eu.f3rog.blade.mvp.WeavedMvpView;
 
 /**
@@ -43,8 +44,16 @@ public class PresenterManager {
 
     //region ID management
 
+    /**
+     * Returns ID for given view.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     *
+     * @param view Activity instance
+     * @return ID
+     */
     @Nonnull
-    public String getActivityId(@Nonnull WeavedMvpView view) {
+    public final String getId(@Nonnull WeavedMvpActivity view) {
         nonNull(view, "view");
 
         String id = null;
@@ -61,8 +70,17 @@ public class PresenterManager {
         return id;
     }
 
+    /**
+     * Returns ID for given view.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     *
+     * @param view            View or Fragment instance
+     * @param activityContext Activity context
+     * @return ID
+     */
     @Nonnull
-    public String getFragmentId(@Nonnull WeavedMvpView view, @Nonnull Context activityContext) {
+    public final String getId(@Nonnull WeavedMvpUi view, @Nonnull Context activityContext) {
         nonNull(view, "view");
         nonNull(view, "activityContext");
 
@@ -89,12 +107,20 @@ public class PresenterManager {
         }
     }
 
-    public void saveViewId(@Nonnull Bundle state, @Nonnull String id) {
+    /**
+     * Saves given ID into given state
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     *
+     * @param state MVP view state
+     * @param id    MVP view ID
+     */
+    public final void saveViewId(@Nonnull Bundle state, @Nonnull String id) {
         state.putString(STATE_VIEW_ID, id);
     }
 
     @Nonnull
-    private String getActivityIdPart(@Nonnull WeavedMvpFragment view) {
+    private String getActivityIdPart(@Nonnull WeavedMvpUi view) {
         String fragmentId = view.getWeavedId();
         String[] ids = fragmentId.split(ID_SEPARATOR);
         return ids[0];
@@ -104,8 +130,13 @@ public class PresenterManager {
 
     //region provide/create/bind presenter
 
+    /**
+     * Provides presenter.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
     @Nonnull
-    public <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+    public final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
     P get(@Nonnull V view, @Nonnull String fieldName, @Nonnull Provider<P> provider) {
         nonNull(view, "view");
         nonNull(fieldName, "filedName");
@@ -143,7 +174,12 @@ public class PresenterManager {
 
     //region save presenter
 
-    public <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+    /**
+     * Saves given presenter.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    public final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
     void save(@Nonnull Bundle outState, @Nonnull String fieldName, @Nullable P presenter) {
         if (presenter == null) {
             return;
@@ -161,7 +197,12 @@ public class PresenterManager {
 
     //region unbind/remove presenter
 
-    public <V extends Activity & IView & WeavedMvpView, P extends IPresenter<V>>
+    /**
+     * Performs some actions when activity is being destroyed.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    public final <V extends Activity & IView & WeavedMvpUi, P extends IPresenter<V>>
     void onActivityDestroy(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
         if (presenter == null) {
             return;
@@ -180,7 +221,12 @@ public class PresenterManager {
         }
     }
 
-    public <V extends Fragment & IView & WeavedMvpFragment, P extends IPresenter<V>>
+    /**
+     * Performs some actions when fragment is being destroyed.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    public final <V extends Fragment & IView & WeavedMvpFragment, P extends IPresenter<V>>
     void onFragmentDestroy(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
         if (presenter == null) {
             return;
@@ -194,7 +240,7 @@ public class PresenterManager {
         }
 
         boolean remove = false;
-        FragmentActivity activity = view.getActivity();
+        Activity activity = view.getActivity();
         if (activity != null && activity.isFinishing()) {
             // if activity is finishing the fragment will too
             remove = true;
@@ -213,7 +259,12 @@ public class PresenterManager {
         }
     }
 
-    public <V extends Fragment & IView & WeavedMvpFragment, P extends IPresenter<V>>
+    /**
+     * Performs some actions when fragment's view is being destroyed.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    public final <V extends Fragment & IView & WeavedMvpFragment, P extends IPresenter<V>>
     void onFragmentDestroyView(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
         if (presenter == null) {
             return;
@@ -229,6 +280,43 @@ public class PresenterManager {
         // check if presenter should be removed completely
         if (view.getActivity() != null && view.getActivity().isFinishing()) {
             // if activity is finishing the fragment will too
+            String activityId = getActivityIdPart(view);
+            ActivityPresenterManager apm = getActivityPresenterManager(activityId);
+            if (apm != null) {
+                apm.remove(view, fieldName);
+            }
+        }
+    }
+
+    /**
+     * Performs some actions when view is being destroyed.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    public final <V extends View & IView & WeavedMvpView, P extends IPresenter<V>>
+    void onViewDestroy(@Nonnull V view, @Nonnull String fieldName, @Nullable P presenter) {
+        if (presenter == null) {
+            return;
+        }
+
+        nonNull(view, "view");
+        nonNull(fieldName, "fieldName");
+
+        if (presenter.getView() != null) {
+            presenter.onUnbind();
+        }
+
+        boolean remove = false;
+        Activity activity = (Activity) view.getContext();
+        if (activity != null && activity.isFinishing()) {
+            // if activity is finishing the fragment will too
+            remove = true;
+        } else if (!view.wasOnSaveCalled()) {
+            // We check waOnSaveCalled() - if this was not called then the view will be removed.
+            remove = true;
+        }
+
+        if (remove) {
             String activityId = getActivityIdPart(view);
             ActivityPresenterManager apm = getActivityPresenterManager(activityId);
             if (apm != null) {
@@ -275,14 +363,14 @@ public class PresenterManager {
             mPresenters = new HashMap<>();
         }
 
-        <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+        final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
         void put(@Nonnull V view, @Nonnull String filedName, @Nonnull P presenter) {
             String key = prepareKey(view, filedName);
             mPresenters.put(key, presenter);
         }
 
         @Nullable
-        <V extends IView & WeavedMvpView, P extends IPresenter<V>>
+        final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
         P get(@Nonnull V view, @Nonnull String filedName) {
             String key = prepareKey(view, filedName);
             //noinspection unchecked
@@ -292,7 +380,7 @@ public class PresenterManager {
         /**
          * Calls {@link IPresenter#onDestroy()} and forgets reference for presenter in given view.
          */
-        void remove(@Nonnull WeavedMvpView view, @Nonnull String fieldName) {
+        final void remove(@Nonnull WeavedMvpUi view, @Nonnull String fieldName) {
             String key = prepareKey(view, fieldName);
 
             IPresenter presenter = mPresenters.remove(key);
@@ -304,7 +392,7 @@ public class PresenterManager {
         /**
          * Calls {@link IPresenter#onDestroy()} and forgets reference for all presenters.
          */
-        void removeAll() {
+        final void removeAll() {
             Collection<IPresenter> presenters = mPresenters.values();
             for (IPresenter presenter : presenters) {
                 presenter.onDestroy();
@@ -313,7 +401,7 @@ public class PresenterManager {
         }
 
         @Nonnull
-        private String prepareKey(@Nonnull WeavedMvpView view, @Nonnull String filedName) {
+        private String prepareKey(@Nonnull WeavedMvpUi view, @Nonnull String filedName) {
             return view.getWeavedId() + ID_SEPARATOR + filedName;
         }
     }

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:id="@+id/container"
     android:padding="16dp">
 
     <LinearLayout
@@ -36,7 +37,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Show dialog"/>
-
-    <include layout="@layout/view_data"/>
 
 </LinearLayout>
