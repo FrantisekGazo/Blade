@@ -38,4 +38,6 @@
         android:layout_height="wrap_content"
         android:text="Show dialog"/>
 
+    <include layout="@layout/view_data" />
+
 </LinearLayout>

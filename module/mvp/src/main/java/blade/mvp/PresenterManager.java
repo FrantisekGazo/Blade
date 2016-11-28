@@ -84,6 +84,13 @@ public class PresenterManager {
         nonNull(view, "view");
         nonNull(view, "activityContext");
 
+        if (view instanceof View) {
+            View v = (View) view;
+            if (v.getId() == View.NO_ID) {
+                throw new IllegalStateException("View does not have an ID. Without it the state of the view won't be managed.");
+            }
+        }
+
         if (activityContext instanceof WeavedMvpActivity) {
             String id = null;
 
@@ -153,6 +160,11 @@ public class PresenterManager {
             WeavedMvpFragment mvpFragment = (WeavedMvpFragment) view;
 
             String activityId = getActivityIdPart(mvpFragment);
+            apm = getActivityPresenterManagerOrCreate(activityId);
+        } else if (view instanceof WeavedMvpView) {
+            WeavedMvpView mvpView = (WeavedMvpView) view;
+
+            String activityId = getActivityIdPart(mvpView);
             apm = getActivityPresenterManagerOrCreate(activityId);
         } else {
             throw new IllegalArgumentException("view has unsupported type");

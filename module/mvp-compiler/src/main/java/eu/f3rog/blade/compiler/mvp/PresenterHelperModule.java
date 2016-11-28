@@ -1,5 +1,7 @@
 package eu.f3rog.blade.compiler.mvp;
 
+import android.view.View;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -17,6 +19,7 @@ import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.mvp.WeavedMvpActivity;
 import eu.f3rog.blade.mvp.WeavedMvpFragment;
+import eu.f3rog.blade.mvp.WeavedMvpView;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.getSuperType;
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.getTypeElement;
@@ -48,9 +51,9 @@ public final class PresenterHelperModule
                 viewType = ViewType.ACTIVITY;
             } else if (isFragmentSubClass(e)) {
                 viewType = ViewType.FRAGMENT;
+            } else if (isSubClassOf(e, View.class)) {
+                viewType = ViewType.VIEW;
             }
-
-            // TODO : look at View subclass support
         }
 
         mViewType = viewType;
@@ -95,6 +98,9 @@ public final class PresenterHelperModule
                 return true;
             case FRAGMENT:
                 builder.getBuilder().addSuperinterface(ClassName.get(WeavedMvpFragment.class));
+                return true;
+            case VIEW:
+                builder.getBuilder().addSuperinterface(ClassName.get(WeavedMvpView.class));
                 return true;
             default:
                 return false;

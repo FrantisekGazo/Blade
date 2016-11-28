@@ -24,14 +24,33 @@ final class WeavedMvpViewIW
 
         ClassPool classPool = targetClass.getClassPool();
 
-        // TODO : show I cause crash if user did not set ID to View ?!
+        boolean hasOnRestore, hasOnSave;
+        try {
+            targetClass.getDeclaredMethod("onRestoreInstanceState", new CtClass[]{classPool.get("android.os.Parcelable")});
+            hasOnRestore = true;
+        } catch (NotFoundException e) {
+            hasOnRestore = false;
+        }
+        try {
+            targetClass.getDeclaredMethod("onSaveInstanceState", new CtClass[0]);
+            hasOnSave = true;
+        } catch (NotFoundException e) {
+            hasOnSave = false;
+        }
 
         // ~> onRestoreInstanceState
         StringBuilder body = new StringBuilder();
         body.append("{");
-        // FIXME : $1 is a Parcelable NOT a Bundle !!!
-        body.append("this.setWeavedState($1);"); // initialize view STATE
+        body.append("android.os.Bundle b = (android.os.Bundle) $1;"); // initialize view STATE
+        body.append("this.setWeavedState(b);"); // initialize view STATE
         body.append("this.setWeavedId(").append(PM).append(".getId(this, this.getContext()));"); // initialize view ID
+        if (hasOnRestore) {
+            javassistHelper.renameMethod(targetClass, "onRestoreInstanceState", "onRestoreInstanceState_BladeMvp", classPool.get("android.os.Parcelable"));
+            body.append("this.onRestoreInstanceState_BladeMvp(b.getParcelable(\"USER_STATE\"));");
+        } else {
+            body.append("super.onRestoreInstanceState(b.getParcelable(\"PARENT_STATE\"));");
+        }
+        body.append("return;");
         body.append("}");
         javassistHelper.insertBeforeBody(body.toString(), targetClass, "onRestoreInstanceState", classPool.get("android.os.Parcelable"));
 
@@ -48,13 +67,20 @@ final class WeavedMvpViewIW
         body.setLength(0);
         body.append("{");
         body.append("this.setOnSaveCalled();");
-        // FIXME : state is not a parameter !
-        body.append(PM).append(".saveViewId($1, this.getWeavedId());"); // save view ID
+        body.append("android.os.Bundle b = new android.os.Bundle();");
+        body.append(PM).append(".saveViewId(b, this.getWeavedId());"); // save view ID
         for (String presenterFieldName : presenterFieldNames) { // save each declared presenter
-            body.append(PM).append(".save($1, \"").append(presenterFieldName).append("\", ").append(presenterFieldName).append(");");
+            body.append(PM).append(".save(b, \"").append(presenterFieldName).append("\", ").append(presenterFieldName).append(");");
         }
+        if (hasOnSave) {
+            javassistHelper.renameMethod(targetClass, "onSaveInstanceState", "onSaveInstanceState_BladeMvp");
+            body.append("b.putParcelable(\"USER_STATE\", this.onSaveInstanceState_BladeMvp());");
+        } else {
+            body.append("b.putParcelable(\"PARENT_STATE\", super.onSaveInstanceState());");
+        }
+        body.append("return b;");
         body.append("}");
-        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onSaveInstanceState", classPool.get("android.os.Bundle"));
+        javassistHelper.insertBeforeBody(body.toString(), targetClass, "onSaveInstanceState");
 
         // ~> onDetachedFromWindow
         body.setLength(0);

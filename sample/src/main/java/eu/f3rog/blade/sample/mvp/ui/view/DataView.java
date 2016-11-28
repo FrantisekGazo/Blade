@@ -3,18 +3,19 @@ package eu.f3rog.blade.sample.mvp.ui.view;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
+import eu.f3rog.blade.sample.mvp.di.component.Component;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
 
@@ -28,17 +29,14 @@ public final class DataView
         extends LinearLayout
         implements IDataView {
 
-    @Nullable
     @Bind(R.id.value_layout)
     View mValueLayout;
-    @Nullable
     @Bind(R.id.txt_value)
     TextView mTxtValue;
-    @Nullable
     @Bind(R.id.progress)
     ProgressBar mProgressBar;
 
-    // FIXME @Inject
+    @Inject
     DataPresenter mPresenter;
 
     public DataView(Context context) {
@@ -63,11 +61,8 @@ public final class DataView
         super.onFinishInflate();
         ButterKnife.bind(this);
 
-//        mValueLayout.setVisibility(GONE);
-//        mProgressBar.setVisibility(GONE);
-
-        // random data (normally they would be send via constructor from activity)
-        // FIXME : set to presenter Data data = new Data(123, 5, 1, "Loaded Text");
+        mValueLayout.setVisibility(GONE);
+        mProgressBar.setVisibility(GONE);
     }
 
     @Override
@@ -98,6 +93,9 @@ public final class DataView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        Component.forApp().inject(this);
+
+        mPresenter.onViewCreated(new Data(123, 5, 1, "Loaded Text"));
     }
 
     @Override

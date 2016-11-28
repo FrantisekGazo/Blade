@@ -55,9 +55,9 @@ public final class TestMvpActivity
 
         mPresenter.onViewCreated(new Data(123, 10, 1, "Hello"));
 
-        DataView child = new DataView(this);
-        child.setId(12345678);
-        mContainer.addView(child);
+//        DataView child = new DataView(this);
+//        child.setId(12345678);
+//        mContainer.addView(child);
     }
 
     @Override

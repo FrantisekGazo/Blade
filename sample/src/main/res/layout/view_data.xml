@@ -8,11 +8,6 @@
     android:id="@+id/view_mvp"
     android:padding="15dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rotation_message"/>
-
     <LinearLayout
         android:id="@+id/value_layout"
         android:layout_width="match_parent"
@@ -22,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="10dp"
-            android:text="@string/value_is"/>
+            android:text="@string/view_value_is"/>
 
         <TextView
             android:id="@+id/txt_value"
