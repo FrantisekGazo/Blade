@@ -102,7 +102,7 @@ ext.deps = [
         dagger2_compiler   : 'com.google.dagger:dagger-compiler:2.7',
 
         // Plugin
-        javassist_helper   : 'eu.f3rog.javassist:helper:0.1.8',
+        javassist_helper   : 'eu.f3rog.javassist:helper:0.1.10',
         gradle_plugin      : 'com.android.tools.build:gradle:2.2.2',
         apt_plugin         : 'com.neenbedankt.gradle.plugins:android-apt:1.8',
 

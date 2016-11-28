@@ -93,6 +93,7 @@ public final class BladeWeaver
             List<Metadata> allMethodMetadata = new ArrayList<>();
             for (CtMethod method : helperClass.getDeclaredMethods()) {
                 lognl("method '%s'", method.getName());
+
                 List<Metadata> metadata = loadWeaveMetadata(classPool, method);
                 allMethodMetadata.addAll(metadata);
             }
@@ -155,7 +156,15 @@ public final class BladeWeaver
             } else {
                 // weave into method
                 WeaveParser.Into into = WeaveParser.parseInto(metadata.into);
+
+                if (into.shouldRename()) {
+                    lognl(" ~> rename '%s' to '%s'", into.getMethodName(), into.getRename());
+                    getJavassistHelper().renameMethod(intoClass, into.getMethodName(), into.getRename(), metadata.args);
+                }
+
                 log(" ~> method '%s' %s with %s priority", into.getMethodName(), into.getMethodWeaveType(), into.getPriority());
+                lognl(" ~~~ %s", body);
+
                 switch (into.getMethodWeaveType()) {
                     case BEFORE_BODY:
                         getJavassistHelper().insertBeforeBody(body, intoClass, into.getMethodName(), metadata.args);
@@ -180,7 +189,6 @@ public final class BladeWeaver
                     default:
                         throw new IllegalStateException();
                 }
-                lognl(" ~~~ %s", body);
             }
         }
     }

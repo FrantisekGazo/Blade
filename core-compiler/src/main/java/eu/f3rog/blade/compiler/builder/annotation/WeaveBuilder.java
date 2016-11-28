@@ -13,6 +13,8 @@ import eu.f3rog.blade.core.Weaves;
  */
 public final class WeaveBuilder {
 
+    public static final String RENAME_SEPARATOR = "/";
+
     public enum MethodWeaveType {
 
         BEFORE_BODY("^"), AFTER_BODY("_"), BEFORE_SUPER("<"), AFTER_SUPER(">");
@@ -79,6 +81,8 @@ public final class WeaveBuilder {
 
     public interface IMethodWeaveStatement extends IWeaveStatement {
 
+        IMethodWeaveStatement renameExistingTo(String newName);
+
         IMethodWeaveStatement placed(MethodWeaveType type);
 
         IMethodWeaveStatement withPriority(WeavePriority priority);
@@ -104,6 +108,7 @@ public final class WeaveBuilder {
 
         private AnnotationSpec.Builder mContainerAnnotationBuilder;
         private String mInto;
+        private String mRename;
         private Object[] mIntoArgs;
         private StringBuilder mStatement = new StringBuilder();
         private MethodWeaveType mMethodWeaveType = null;
@@ -111,10 +116,17 @@ public final class WeaveBuilder {
 
         @Override
         public IMethodWeaveStatement method(String methodName, Class... args) {
+            mRename = null;
             mInto = methodName;
             mIntoArgs = toString(args);
             mMethodWeaveType = MethodWeaveType.BEFORE_BODY;
             mWeavePriority = WeavePriority.NORMAL;
+            return this;
+        }
+
+        @Override
+        public IMethodWeaveStatement renameExistingTo(String newName) {
+            mRename = newName;
             return this;
         }
 
@@ -186,6 +198,9 @@ public final class WeaveBuilder {
                 }
                 if (mWeavePriority != null) {
                     into = mWeavePriority.getNum() + into;
+                }
+                if (mRename != null) {
+                    into += RENAME_SEPARATOR + mRename;
                 }
                 AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class)
                         .addMember("into", "$S", into);
