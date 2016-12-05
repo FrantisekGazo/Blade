@@ -24,7 +24,7 @@ public final class BladePlugin
     public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'."
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.4.0-beta3"
+    public static String LIB_VERSION = "2.4.0-beta4"
     public static String LIB_CONFIG_FILE_NAME = "blade.json"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 

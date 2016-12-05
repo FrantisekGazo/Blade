@@ -1,7 +1,8 @@
 package blade.mvp;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Interface {@link IPresenter}.
@@ -21,7 +22,7 @@ public interface IPresenter<V extends IView> {
      * <p/>
      * Normally this would be an instance of android's Bundle class, but in order to allow unit testing there is just Object as parameter type.
      */
-    void onSaveState(@Nonnull Object state);
+    void onSaveState(@NonNull Object state);
 
     /**
      * Called before destroying this presenter.
@@ -33,7 +34,7 @@ public interface IPresenter<V extends IView> {
      *
      * @param view View
      */
-    void onBind(@Nonnull V view);
+    void onBind(@NonNull V view);
 
     @Nullable
     V getView();

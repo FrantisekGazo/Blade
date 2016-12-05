@@ -1,7 +1,8 @@
 package blade.mvp;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 
 /**
  * Class {@link BasePresenter}
@@ -28,7 +29,7 @@ public abstract class BasePresenter<V extends IView>
     }
 
     @Override
-    public void onBind(@Nonnull V view) {
+    public void onBind(@NonNull V view) {
         mView = view;
     }
 
@@ -38,6 +39,6 @@ public abstract class BasePresenter<V extends IView>
     }
 
     @Override
-    public void onSaveState(@Nonnull Object state) {
+    public void onSaveState(@NonNull Object state) {
     }
 }
