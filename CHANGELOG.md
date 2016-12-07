@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.4.0 *(2016-12-07)*
+----------------------------
+
+ * Change: Refactor **mvp** module to use Dagger2 and support Fragments
+ * Fix: `@State` inside android View subclasses
+
 Version 2.3.0 *(2016-10-28)*
 ----------------------------
 
