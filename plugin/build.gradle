@@ -10,16 +10,12 @@ dependencies {
     compile localGroovy()
 
     /* Gradle plugin */
-    compile 'com.android.tools.build:gradle:1.5.0'
-    /* Javassist */
-    compile 'org.javassist:javassist:3.20.0-GA'
-    /* Logging */
-    compile 'org.projectlombok:lombok:1.14.2'
+    compileOnly deps.gradle_plugin
+    compile deps.apt_plugin
+    compile deps.javassist_helper
 
     /* Android */
     compile deps.google_android
-    /* APT plugin */
-    compile 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 
     compile project(':core')
     compile project(':core-compiler')

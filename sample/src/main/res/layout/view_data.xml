@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eu.f3rog.blade.sample.mvp.view.DataView
+<eu.f3rog.blade.sample.mvp.ui.view.DataView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:id="@+id/view_mvp"
     android:padding="15dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rotation_message"/>
 
     <LinearLayout
         android:id="@+id/value_layout"
@@ -21,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="10dp"
-            android:text="@string/value_is"/>
+            android:text="@string/view_value_is"/>
 
         <TextView
             android:id="@+id/txt_value"
@@ -36,4 +32,4 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-</eu.f3rog.blade.sample.mvp.view.DataView>
+</eu.f3rog.blade.sample.mvp.ui.view.DataView>

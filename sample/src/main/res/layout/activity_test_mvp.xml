@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="5dp">
+    android:id="@+id/container"
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,6 +26,18 @@
 
     </LinearLayout>
 
-    <include layout="@layout/view_data"/>
+    <fragment
+        android:id="@+id/frag_mvp"
+        android:name="eu.f3rog.blade.sample.mvp.ui.fragment.TestMvpFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btn_show_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show dialog"/>
+
+    <include layout="@layout/view_data" />
 
 </LinearLayout>

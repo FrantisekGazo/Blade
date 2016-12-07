@@ -97,6 +97,15 @@ ext.deps = [
         // Square
         javapoet           : 'com.squareup:javapoet:1.4.0',
 
+        // Dagger2
+        dagger2            : 'com.google.dagger:dagger:2.7',
+        dagger2_compiler   : 'com.google.dagger:dagger-compiler:2.7',
+
+        // Plugin
+        javassist_helper   : 'eu.f3rog.javassist:helper:0.1.10',
+        gradle_plugin      : 'com.android.tools.build:gradle:2.2.2',
+        apt_plugin         : 'com.neenbedankt.gradle.plugins:android-apt:1.8',
+
         // Test dependencies
         junit              : 'junit:junit:4.12',
         guava              : 'com.google.guava:guava:18.0',

@@ -9,10 +9,12 @@ dependencies {
 
     compile project(':core')
 
-    compile deps.google_android
     compile deps.javapoet
     compile deps.autoservice
     compile deps.autocommon
+
+    compile deps.google_android
+    compile deps.google_support_v4
 
     // test
     testCompile project(':module:arg-compiler')
@@ -20,6 +22,8 @@ dependencies {
     testCompile project(':module:state-compiler')
     testCompile project(':module:mvp-compiler')
     testCompile project(':module:parcel-compiler')
+
+    testCompile deps.dagger2
 
     testCompile deps.guava
     testCompile deps.truth
