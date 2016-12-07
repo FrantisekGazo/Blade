@@ -8,8 +8,8 @@ buildscript {
             mavenLocal()
         }
 
-        classpath 'com.android.tools.build:gradle:1.5.0'
-        classpath 'eu.f3rog.blade:plugin:2.2.1-beta6'
+        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'eu.f3rog.blade:plugin:2.4.0-beta4'
     }
 }
 

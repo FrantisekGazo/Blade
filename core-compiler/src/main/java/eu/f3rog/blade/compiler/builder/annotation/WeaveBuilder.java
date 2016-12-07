@@ -13,6 +13,8 @@ import eu.f3rog.blade.core.Weaves;
  */
 public final class WeaveBuilder {
 
+    public static final String RENAME_SEPARATOR = "/";
+
     public enum MethodWeaveType {
 
         BEFORE_BODY("^"), AFTER_BODY("_"), BEFORE_SUPER("<"), AFTER_SUPER(">");
@@ -61,42 +63,10 @@ public final class WeaveBuilder {
         }
     }
 
-    public static final class Into {
-
-        private final MethodWeaveType mMethodWeaveType;
-        private final WeavePriority mPriority;
-        private final String mMethodName;
-
-        public Into(MethodWeaveType methodWeaveType, WeavePriority priority, String methodName) {
-            mPriority = priority;
-            mMethodWeaveType = methodWeaveType;
-            mMethodName = methodName;
-        }
-
-        public MethodWeaveType getMethodWeaveType() {
-            return mMethodWeaveType;
-        }
-
-        public WeavePriority getPriority() {
-            return mPriority;
-        }
-
-        public String getMethodName() {
-            return mMethodName;
-        }
-    }
-
-    public static Into parseInto(final String into) {
-        int number = Integer.valueOf(into.substring(0, 1));
-        WeavePriority priority = WeavePriority.from(number);
-        String type = into.substring(1, 2);
-        MethodWeaveType weaveType = MethodWeaveType.from(type);
-        String actualName = into.substring(2);
-        return new Into(weaveType, priority, actualName);
-    }
+    //region @Weave / @Weaves
 
     public static IWeaveInto weave() {
-        return new Implementation();
+        return new WeaveBuilderImpl();
     }
 
     public interface IWeaveInto extends IWeaveBuild {
@@ -110,6 +80,8 @@ public final class WeaveBuilder {
     }
 
     public interface IMethodWeaveStatement extends IWeaveStatement {
+
+        IMethodWeaveStatement renameExistingTo(String newName);
 
         IMethodWeaveStatement placed(MethodWeaveType type);
 
@@ -131,11 +103,12 @@ public final class WeaveBuilder {
 
     }
 
-    private static final class Implementation
+    private static final class WeaveBuilderImpl
             implements IWeaveInto, IMethodWeaveStatement {
 
         private AnnotationSpec.Builder mContainerAnnotationBuilder;
         private String mInto;
+        private String mRename;
         private Object[] mIntoArgs;
         private StringBuilder mStatement = new StringBuilder();
         private MethodWeaveType mMethodWeaveType = null;
@@ -143,10 +116,17 @@ public final class WeaveBuilder {
 
         @Override
         public IMethodWeaveStatement method(String methodName, Class... args) {
+            mRename = null;
             mInto = methodName;
             mIntoArgs = toString(args);
             mMethodWeaveType = MethodWeaveType.BEFORE_BODY;
             mWeavePriority = WeavePriority.NORMAL;
+            return this;
+        }
+
+        @Override
+        public IMethodWeaveStatement renameExistingTo(String newName) {
+            mRename = newName;
             return this;
         }
 
@@ -219,6 +199,9 @@ public final class WeaveBuilder {
                 if (mWeavePriority != null) {
                     into = mWeavePriority.getNum() + into;
                 }
+                if (mRename != null) {
+                    into += RENAME_SEPARATOR + mRename;
+                }
                 AnnotationSpec.Builder a = AnnotationSpec.builder(Weave.class)
                         .addMember("into", "$S", into);
 
@@ -252,4 +235,5 @@ public final class WeaveBuilder {
         return format.toString();
     }
 
+    //endregion @Weave / @Weaves
 }

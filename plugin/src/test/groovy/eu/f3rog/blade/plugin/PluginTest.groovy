@@ -42,7 +42,7 @@ class PluginTest extends Specification {
         e.getMessage().contains(BladePlugin.ERROR_ANDROID_PLUGIN_REQUIRED)
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0']
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
     }
 
     @Unroll
@@ -68,9 +68,9 @@ class PluginTest extends Specification {
         e.getMessage().contains(String.format(BladePlugin.ERROR_MODULE_DOES_NOT_EXIST, "fake"))
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0']
-        gradleVersion << ['2.9', '2.10']
-        bladeModules << [Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake")]
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
+        bladeModules << [Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake")]
     }
 
     @Unroll
@@ -100,9 +100,9 @@ class PluginTest extends Specification {
         result.output.contains("eu.f3rog.blade.plugin.BladePlugin")
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0']
-        gradleVersion << ['2.9', '2.10']
-        bladeModules << [Arrays.asList("Extra", "Mvp", "State"), Arrays.asList("arg")] // also test case insensitivity
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
+        bladeModules << [Arrays.asList("Extra", "Mvp", "State"), Arrays.asList("arg"), Arrays.asList("arg")] // also test case insensitivity
     }
 
     @Unroll
@@ -120,12 +120,39 @@ class PluginTest extends Specification {
 
         then:
         result.task(":build").outcome == SUCCESS
-        result.task(":transformClassesWithBladeTransformerForDebug").outcome == SUCCESS
-        result.task(":transformClassesWithBladeTransformerForRelease").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0']
-        gradleVersion << ['2.9', '2.10']
-        bladeModules << [Arrays.asList("extra"), Arrays.asList("extra", "arg")]
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
+        bladeModules << [Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg")]
+    }
+
+    @Unroll
+    def "build successfully mvp module - for android gradle tools #gradleToolsVersion"() {
+        given:
+        testProjectDir.addBladeFile(bladeModules)
+        def deps = [
+                "compile 'com.google.dagger:dagger:2.0.2'"
+        ]
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true, deps)
+
+        when:
+        BuildResult result = GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir.root)
+                .withArguments(':build')
+                .build()
+
+        then:
+        result.task(":build").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
+
+        where:
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleVersion << ['2.9', '2.10', '2.14.1']
+        bladeModules << [Arrays.asList("mvp"), Arrays.asList("mvp"), Arrays.asList("mvp")]
     }
 }

@@ -6,6 +6,6 @@ targetCompatibility = JavaVersion.VERSION_1_7
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile project(':core-compiler')
     compile project(':module:parcel')
+    compile project(':core-compiler')
 }

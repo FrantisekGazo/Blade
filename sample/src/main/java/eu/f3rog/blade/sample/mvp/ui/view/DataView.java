@@ -1,28 +1,33 @@
-package eu.f3rog.blade.sample.mvp.view;
+package eu.f3rog.blade.sample.mvp.ui.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import blade.Presenter;
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
+import eu.f3rog.blade.sample.mvp.di.component.Component;
 import eu.f3rog.blade.sample.mvp.model.Data;
 import eu.f3rog.blade.sample.mvp.presenter.DataPresenter;
+
 
 /**
  * Class {@link DataView}
  *
  * @author FrantisekGazo
- * @version 2016-02-15
  */
-public class DataView extends LinearLayout implements IDataView {
+public final class DataView
+        extends LinearLayout
+        implements IDataView {
 
     @Bind(R.id.value_layout)
     View mValueLayout;
@@ -31,7 +36,7 @@ public class DataView extends LinearLayout implements IDataView {
     @Bind(R.id.progress)
     ProgressBar mProgressBar;
 
-    @Presenter
+    @Inject
     DataPresenter mPresenter;
 
     public DataView(Context context) {
@@ -58,11 +63,6 @@ public class DataView extends LinearLayout implements IDataView {
 
         mValueLayout.setVisibility(GONE);
         mProgressBar.setVisibility(GONE);
-
-        // random data (normally they would be send via constructor from activity)
-        Data data = new Data(123, 5, "Loaded Text");
-
-        setTag(data);
     }
 
     @Override
@@ -77,5 +77,29 @@ public class DataView extends LinearLayout implements IDataView {
 
         mValueLayout.setVisibility(VISIBLE);
         mProgressBar.setVisibility(GONE);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable parcelable = super.onSaveInstanceState();
+        return parcelable;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        super.onRestoreInstanceState(state);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Component.forApp().inject(this);
+
+        mPresenter.onViewCreated(new Data(123, 5, 1, "Loaded Text"));
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
     }
 }

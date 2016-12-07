@@ -15,7 +15,6 @@ import javax.tools.JavaFileObject;
  * Class {@link BaseTest}
  *
  * @author FrantisekGazo
- * @version 2015-11-19
  */
 public abstract class BaseTest {
 
@@ -36,9 +35,9 @@ public abstract class BaseTest {
 
     private static class TruthWrapper implements ITruthWrapper {
 
-        private Iterable<JavaFileObject> mFiles;
+        private final List<JavaFileObject> mFiles;
 
-        public TruthWrapper(Iterable<JavaFileObject> files) {
+        public TruthWrapper(List<JavaFileObject> files) {
             mFiles = files;
         }
 
