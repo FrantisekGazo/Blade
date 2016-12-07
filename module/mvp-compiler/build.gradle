@@ -7,8 +7,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compileOnly deps.dagger2
-    compileOnly deps.dagger2_compiler
-
-    compile project(':core-compiler')
     compile project(':module:mvp')
+    compile project(':core-compiler')
 }
