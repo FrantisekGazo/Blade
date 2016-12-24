@@ -9,7 +9,7 @@ buildscript {
         }
 
         classpath 'com.android.tools.build:gradle:2.2.2'
-        classpath 'eu.f3rog.blade:plugin:2.4.0-beta4'
+        classpath 'eu.f3rog.blade:plugin:2.5.0-beta1'
     }
 }
 
@@ -65,5 +65,5 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.0'
 
     compile 'com.google.dagger:dagger:2.0.2'
-    apt 'com.google.dagger:dagger-compiler:2.0.2'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.0.2'
 }

@@ -104,7 +104,6 @@ ext.deps = [
         // Plugin
         javassist_helper   : 'eu.f3rog.javassist:helper:0.1.10',
         gradle_plugin      : 'com.android.tools.build:gradle:2.2.2',
-        apt_plugin         : 'com.neenbedankt.gradle.plugins:android-apt:1.8',
 
         // Test dependencies
         junit              : 'junit:junit:4.12',

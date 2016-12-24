@@ -2,7 +2,6 @@ package eu.f3rog.blade.plugin
 
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
-import com.neenbedankt.gradle.androidapt.AndroidAptPlugin
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -24,7 +23,7 @@ public final class BladePlugin
     public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'."
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.4.0"
+    public static String LIB_VERSION = "2.5.0-beta1"
     public static String LIB_CONFIG_FILE_NAME = "blade.json"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
@@ -46,34 +45,38 @@ public final class BladePlugin
 
         prepareConfig(project)
 
-        boolean isKotlinProject = project.plugins.find {
-            it.getClass().name == "org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper"
-        }
-
-        if (!isKotlinProject) {
-            project.plugins.apply(AndroidAptPlugin)
-
-            project.android {
-                packagingOptions {
-                    exclude 'META-INF/services/javax.annotation.processing.Processor'
-                }
-            }
-        }
-
         project.repositories.add(project.getRepositories().jcenter())
-
-        // add dependencies
-        String apt = isKotlinProject ? "kapt" : "apt"
+        def apList = determineAnnotationProcessorPlugin(project)
         // core
         project.dependencies.add("compile", "$LIB_GROUP_ID:core:$LIB_VERSION")
         // modules
-        for (String moduleName : mConfig.modules) {
+        for (final String moduleName : mConfig.modules) {
             project.dependencies.add("compile", "$LIB_GROUP_ID:$moduleName:$LIB_VERSION")
-            project.dependencies.add(apt, "$LIB_GROUP_ID:$moduleName-compiler:$LIB_VERSION")
+            for (final String ap : apList) {
+                project.dependencies.add(ap, "$LIB_GROUP_ID:$moduleName-compiler:$LIB_VERSION")
+            }
         }
 
         // apply bytecode weaving via Transform API
         project.android.registerTransform(new BladeTransformer(mConfig.debug))
+    }
+
+    private String[] determineAnnotationProcessorPlugin(Project project) {
+        def usesAptPlugin = project.plugins.findPlugin('com.neenbedankt.android-apt') != null
+        def isKotlinProject = project.plugins.findPlugin('kotlin-android') != null
+        def hasAnnotationProcessorConfiguration = project.getConfigurations().findByName('annotationProcessor') != null
+        // TODO : add a parameter in config if this should be specified by users ?!
+        def preferAptOnKotlinProject = false
+
+        if (usesAptPlugin) {
+            return ['apt', 'androidTestApt']
+        } else if (isKotlinProject && !preferAptOnKotlinProject) {
+            return ['kapt']
+        } else if (hasAnnotationProcessorConfiguration) {
+            return ['annotationProcessor', 'androidTestAnnotationProcessor']
+        } else {
+            throw new IllegalStateException("Apply apt plugin or update gradle plugin to >=2.2")
+        }
     }
 
     private static boolean isTransformAvailable() {
