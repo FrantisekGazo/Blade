@@ -17,7 +17,7 @@ class PluginTest extends Specification {
     private String bladeGroupId
 
     def setup() {
-        bladeVersion = BladePlugin.LIB_VERSION
+        bladeVersion = "2.5.0-beta1"
         bladeGroupId = BladePlugin.LIB_GROUP_ID
     }
 
@@ -42,7 +42,7 @@ class PluginTest extends Specification {
         e.getMessage().contains(BladePlugin.ERROR_ANDROID_PLUGIN_REQUIRED)
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
     }
 
     @Unroll
@@ -68,7 +68,7 @@ class PluginTest extends Specification {
         e.getMessage().contains(String.format(BladePlugin.ERROR_MODULE_DOES_NOT_EXIST, "fake"))
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
         gradleVersion << ['2.9', '2.10', '2.14.1']
         bladeModules << [Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake"), Arrays.asList("arg", "fake")]
     }
@@ -77,7 +77,7 @@ class PluginTest extends Specification {
     def "add correct dependencies - gradleToolsVersion #gradleToolsVersion, gradleVersion #gradleVersion"() {
         given:
         testProjectDir.addBladeFile(bladeModules)
-        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true)
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true, gradleToolsVersion < '2.2.0')
 
         when:
         BuildResult result = GradleRunner.create()
@@ -95,12 +95,11 @@ class PluginTest extends Specification {
             result.output.contains("$bladeGroupId:${module}:${bladeVersion}") == bladeModules.contains(module)
             result.output.contains("$bladeGroupId:${module}-compiler:${bladeVersion}") == bladeModules.contains(module)
         }
-        // check plugins
-        result.output.contains("com.neenbedankt.gradle.androidapt.AndroidAptPlugin")
+        // check plugin
         result.output.contains("eu.f3rog.blade.plugin.BladePlugin")
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
         gradleVersion << ['2.9', '2.10', '2.14.1']
         bladeModules << [Arrays.asList("Extra", "Mvp", "State"), Arrays.asList("arg"), Arrays.asList("arg")] // also test case insensitivity
     }
@@ -109,7 +108,7 @@ class PluginTest extends Specification {
     def "build successfully - for android gradle tools #gradleToolsVersion"() {
         given:
         testProjectDir.addBladeFile(bladeModules)
-        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true)
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true, gradleToolsVersion < '2.2.0')
 
         when:
         BuildResult result = GradleRunner.create()
@@ -124,7 +123,7 @@ class PluginTest extends Specification {
         result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
         gradleVersion << ['2.9', '2.10', '2.14.1']
         bladeModules << [Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg"), Arrays.asList("extra", "arg")]
     }
@@ -136,7 +135,7 @@ class PluginTest extends Specification {
         def deps = [
                 "compile 'com.google.dagger:dagger:2.0.2'"
         ]
-        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true, deps)
+        testProjectDir.addGradleBuildFile(gradleToolsVersion, bladeVersion, true, gradleToolsVersion < '2.2.0', deps)
 
         when:
         BuildResult result = GradleRunner.create()
@@ -151,7 +150,7 @@ class PluginTest extends Specification {
         result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.2']
+        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
         gradleVersion << ['2.9', '2.10', '2.14.1']
         bladeModules << [Arrays.asList("mvp"), Arrays.asList("mvp"), Arrays.asList("mvp")]
     }

@@ -18,7 +18,9 @@ public class ProjectFolder extends TemporaryFolder {
         return file
     }
 
-    public File addGradleBuildFile(String gradleToolsVersion, String bladeVersion, boolean android, deps = []) {
+    public File addGradleBuildFile(String gradleToolsVersion, String bladeVersion, boolean android, boolean useApt = false, deps = []) {
+        def pluginClasspath = useApt ? "classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'" : ""
+
         File file = this.newFile('build.gradle')
         file << """
             buildscript {
@@ -31,6 +33,8 @@ public class ProjectFolder extends TemporaryFolder {
                         mavenLocal()
                     }
 
+                    ${pluginClasspath}
+
                     classpath 'com.android.tools.build:gradle:${gradleToolsVersion}'
                     classpath 'eu.f3rog.blade:plugin:${bladeVersion}'
                 }
@@ -41,6 +45,11 @@ public class ProjectFolder extends TemporaryFolder {
         if (android) {
             file << """
                 apply plugin: 'com.android.application'
+            """
+        }
+        if (useApt) {
+            file << """
+                apply plugin: 'com.neenbedankt.android-apt'
             """
         }
         // apply Blade plugin
