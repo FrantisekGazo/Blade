@@ -18,9 +18,10 @@ public final class BladePlugin
         String[] modules = LIB_MODULES
     }
 
-    public static String ERROR_GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later."
-    public static String ERROR_ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required."
-    public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'."
+    public static String ERROR_GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later!"
+    public static String ERROR_ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required!"
+    public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'!"
+    public static String ERROR_APT_MISSING = "Apply apt plugin or update gradle plugin to >=2.2.0!"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
     public static String LIB_VERSION = "2.5.0-beta2"
@@ -75,7 +76,7 @@ public final class BladePlugin
         } else if (hasAnnotationProcessorConfiguration) {
             return ['annotationProcessor', 'androidTestAnnotationProcessor']
         } else {
-            throw new IllegalStateException("Apply apt plugin or update gradle plugin to >=2.2")
+            throw new IllegalStateException(ERROR_APT_MISSING)
         }
     }
 
