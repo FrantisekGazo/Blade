@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.5.0 *(2016-12-26)*
+----------------------------
+
+ * Change: Add support for android gradle plugin 2.2+ `annotationProcessor`. (android-apt is no longer added automatically)
+ * New: Add support for **YAML** format of configuration file `blade.yaml`
+
 Version 2.4.0 *(2016-12-07)*
 ----------------------------
 
