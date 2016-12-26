@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2.5.1 *(2016-12-26)*
+----------------------------
+
+ * Change: Configuration file is now required
+
 Version 2.5.0 *(2016-12-26)*
 ----------------------------
 

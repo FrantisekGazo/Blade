@@ -16,7 +16,7 @@ public final class BladePlugin
         // non-debug by default
         public boolean debug = false
         // include all modules by default
-        public String[] modules = LIB_MODULES
+        public String[] modules = []
 
         @Override
         public String toString() {
@@ -28,10 +28,11 @@ public final class BladePlugin
     public static String ERROR_GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later!"
     public static String ERROR_ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required!"
     public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'!"
-    public static String ERROR_APT_MISSING = "Apply apt plugin or update gradle plugin to >=2.2.0!"
+    public static String ERROR_APT_IS_MISSING = "Apply apt plugin or update gradle plugin to >=2.2.0!"
+    public static String ERROR_CONFIG_FILE_IS_MISSING = "Blade configuration file is missing! (more info here: https://github.com/FrantisekGazo/Blade/wiki#1-create-configuration-file)"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.5.0"
+    public static String LIB_VERSION = "2.5.1"
     public static String LIB_CONFIG_FILE_NAME = "blade"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
@@ -83,7 +84,7 @@ public final class BladePlugin
         } else if (hasAnnotationProcessorConfiguration) {
             return ['annotationProcessor', 'androidTestAnnotationProcessor']
         } else {
-            throw new IllegalStateException(ERROR_APT_MISSING)
+            throw new IllegalStateException(ERROR_APT_IS_MISSING)
         }
     }
 
@@ -122,6 +123,8 @@ public final class BladePlugin
         } else if (yamlConfigFile.exists()) {
             Yaml yaml = new Yaml()
             mConfig = yaml.loadAs(new FileInputStream(yamlConfigFile), BladeConfig.class)
+        } else {
+            throw new IllegalStateException(ERROR_CONFIG_FILE_IS_MISSING)
         }
 
         // check module names
