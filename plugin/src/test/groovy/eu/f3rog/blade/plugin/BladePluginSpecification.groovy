@@ -12,7 +12,7 @@ import spock.lang.Unroll
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 
-final class PluginTest
+final class BladePluginSpecification
         extends Specification {
 
     private static final String APT_CLASSPATH = "com.neenbedankt.gradle.plugins:android-apt:1.8"
@@ -21,6 +21,16 @@ final class PluginTest
     private static String buildGradleClasspath(final String version) {
         return "com.android.tools.build:gradle:${version}"
     }
+
+    private final static def WHERE_DATA = [
+            // #gradleToolsVersion, #gradleVersion, #aptClasspath, #apt, #bladeFileType
+            ['1.5.0', '2.9', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.JSON],
+            ['2.0.0', '2.10', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.JSON],
+            ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.JSON],
+            ['1.5.0', '2.9', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.YAML],
+            ['2.0.0', '2.10', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.YAML],
+            ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.YAML]
+    ]
 
     @Rule
     final TempProjectFolder projectFolder = new TempProjectFolder()
@@ -31,12 +41,12 @@ final class PluginTest
 
     def setup() {
         bladeGroupId = BladePlugin.LIB_GROUP_ID
-        bladeVersion = "2.5.0-beta2"
+        bladeVersion = "2.5.0-beta3"
         bladeClasspath = "${bladeGroupId}:plugin:${bladeVersion}"
     }
 
     @Unroll
-    def "fail without android plugin - for android gradle tools #gradleToolsVersion"() {
+    def "fail without android plugin - for #gradleToolsVersion"() {
         given:
         projectFolder.addGradleFile(new GradleConfig()
                 .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
@@ -59,13 +69,13 @@ final class PluginTest
         e.getMessage().contains(BladePlugin.ERROR_ANDROID_PLUGIN_REQUIRED)
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
+        [gradleToolsVersion, _, _, _, _] << WHERE_DATA[0..2]
     }
 
     @Unroll
-    def "fail if non-existing module name used - gradleToolsVersion #gradleToolsVersion, gradleVersion #gradleVersion"() {
+    def "fail if non-existing module name used - for #gradleToolsVersion, #bladeFileType"() {
         given:
-        projectFolder.addBladeFile(BladeTempFileBuilder.FileType.JSON, bladeModules)
+        projectFolder.addBladeFile(bladeFileType, ["arg", "fake"])
         projectFolder.addGradleFile(new GradleConfig()
                 .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
                 .plugins(["com.android.application", "blade"])
@@ -88,15 +98,13 @@ final class PluginTest
         e.getMessage().contains(String.format(BladePlugin.ERROR_MODULE_DOES_NOT_EXIST, "fake"))
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
-        gradleVersion << ['2.9', '2.10', '2.14.1']
-        bladeModules << [["arg", "fake"], ["arg", "fake"], ["arg", "fake"]]
+        [gradleToolsVersion, gradleVersion, _, _, bladeFileType] << WHERE_DATA
     }
 
     @Unroll
-    def "fail if apt is not applied in gradle <2.2.0 - gradleToolsVersion #gradleToolsVersion, gradleVersion #gradleVersion"() {
+    def "fail if apt is not applied in gradle <2.2.0 - for #gradleToolsVersion, #bladeFileType"() {
         given:
-        projectFolder.addBladeFile(BladeTempFileBuilder.FileType.JSON, bladeModules)
+        projectFolder.addBladeFile(bladeFileType, ["arg"])
         projectFolder.addGradleFile(new GradleConfig()
                 .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
                 .plugins(["com.android.application", "blade"])
@@ -119,15 +127,14 @@ final class PluginTest
         e.getMessage().contains(BladePlugin.ERROR_APT_MISSING)
 
         where:
-        gradleToolsVersion << ['1.5.0']
-        gradleVersion << ['2.9']
-        bladeModules << [["arg"]]
+        [gradleToolsVersion, gradleVersion, _, _, bladeFileType] << WHERE_DATA[0..1] + WHERE_DATA[3..4]
     }
 
     @Unroll
-    def "add correct dependencies - gradleToolsVersion #gradleToolsVersion, gradleVersion #gradleVersion"() {
+    def "add correct dependencies - for #gradleToolsVersion, #bladeFileType"() {
         given:
-        projectFolder.addBladeFile(BladeTempFileBuilder.FileType.JSON, bladeModules)
+        def bladeModules = ["arg"]
+        projectFolder.addBladeFile(bladeFileType, bladeModules)
         projectFolder.addGradleFile(new GradleConfig()
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
                 .plugins(["com.android.application"] + apt + ["blade"])
@@ -153,44 +160,11 @@ final class PluginTest
         result.output.contains("eu.f3rog.blade.plugin.BladePlugin")
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
-        gradleVersion << ['2.9', '2.10', '2.14.1']
-        bladeModules << [["arg"], ["arg"], ["arg"]]
-        aptClasspath << [[APT_CLASSPATH], [APT_CLASSPATH], []]
-        apt << [[APT_PLUGIN], [APT_PLUGIN], []]
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA
     }
 
     @Unroll
-    def "build successfully - for android gradle tools #gradleToolsVersion"() {
-        given:
-        projectFolder.addBladeFile(BladeTempFileBuilder.FileType.JSON, bladeModules)
-        projectFolder.addGradleFile(new GradleConfig()
-                .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
-                .plugins(["com.android.application"] + apt + ["blade"])
-        )
-
-        when:
-        BuildResult result = GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(projectFolder.root)
-                .withArguments(':build')
-                .build()
-
-        then:
-        result.task(":build").outcome == SUCCESS
-        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
-        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
-
-        where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
-        gradleVersion << ['2.9', '2.10', '2.14.1']
-        bladeModules << [["EXTRA", "arg"], ["EXTRA", "arg"], ["EXTRA", "arg"]] // also test it's case insensitive
-        aptClasspath << [[APT_CLASSPATH], [APT_CLASSPATH], []]
-        apt << [[APT_PLUGIN], [APT_PLUGIN], []]
-    }
-
-    @Unroll
-    def "build successfully without blade file - for android gradle tools #gradleToolsVersion"() {
+    def "build successfully without blade file - for #gradleToolsVersion"() {
         given:
         projectFolder.addGradleFile(new GradleConfig()
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
@@ -211,16 +185,38 @@ final class PluginTest
         result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
-        gradleVersion << ['2.9', '2.10', '2.14.1']
-        aptClasspath << [[APT_CLASSPATH], [APT_CLASSPATH], []]
-        apt << [[APT_PLUGIN], [APT_PLUGIN], []]
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA[0..2]
     }
 
     @Unroll
-    def "build successfully mvp module - for android gradle tools #gradleToolsVersion"() {
+    def "build successfully [EXTRA, arg] modules - for #gradleToolsVersion, #bladeFileType"() {
         given:
-        projectFolder.addBladeFile(BladeTempFileBuilder.FileType.JSON, bladeModules)
+        projectFolder.addBladeFile(bladeFileType, ["EXTRA", "arg"]) // also test it's case insensitive
+        projectFolder.addGradleFile(new GradleConfig()
+                .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
+                .plugins(["com.android.application"] + apt + ["blade"])
+        )
+
+        when:
+        BuildResult result = GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(projectFolder.root)
+                .withArguments(':build')
+                .build()
+
+        then:
+        result.task(":build").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
+        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
+
+        where:
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA
+    }
+
+    @Unroll
+    def "build successfully [mvp] module - for #gradleToolsVersion, #bladeFileType"() {
+        given:
+        projectFolder.addBladeFile(bladeFileType, ['mvp'])
         projectFolder.addGradleFile(new GradleConfig()
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
                 .plugins(["com.android.application"] + apt + ["blade"])
@@ -240,10 +236,6 @@ final class PluginTest
         result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
 
         where:
-        gradleToolsVersion << ['1.5.0', '2.0.0', '2.2.0']
-        gradleVersion << ['2.9', '2.10', '2.14.1']
-        bladeModules << [["mvp"], ["mvp"], ["mvp"]]
-        aptClasspath << [[APT_CLASSPATH], [APT_CLASSPATH], []]
-        apt << [[APT_PLUGIN], [APT_PLUGIN], []]
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA
     }
 }

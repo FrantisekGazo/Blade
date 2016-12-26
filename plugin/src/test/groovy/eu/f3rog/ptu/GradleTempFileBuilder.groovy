@@ -43,11 +43,9 @@ package eu.f3rog.ptu
         return """buildscript {
     dependencies {
         repositories {
+            mavenLocal()
             mavenCentral()
             jcenter()
-
-            // NOTE: This is only needed when developing the plugin!
-            mavenLocal()
         }
 
         ${mConfig.getClasspaths().collect({ "classpath '$it'" }).join("\n")}

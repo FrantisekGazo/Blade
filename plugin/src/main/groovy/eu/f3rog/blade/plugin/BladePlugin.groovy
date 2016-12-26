@@ -6,16 +6,23 @@ import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.yaml.snakeyaml.Yaml
 
 public final class BladePlugin
         implements Plugin<Project> {
 
-    private static class BladeConfig {
+    public static final class BladeConfig {
 
         // non-debug by default
-        boolean debug = false
+        public boolean debug = false
         // include all modules by default
-        String[] modules = LIB_MODULES
+        public String[] modules = LIB_MODULES
+
+        @Override
+        public String toString() {
+            return String.format("%s[debug: %b, modules: %s]",
+                    BladeConfig.class.getSimpleName(), this.debug, Arrays.toString(this.modules))
+        }
     }
 
     public static String ERROR_GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later!"
@@ -24,8 +31,8 @@ public final class BladePlugin
     public static String ERROR_APT_MISSING = "Apply apt plugin or update gradle plugin to >=2.2.0!"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.5.0-beta2"
-    public static String LIB_CONFIG_FILE_NAME = "blade.json"
+    public static String LIB_VERSION = "2.5.0-beta3"
+    public static String LIB_CONFIG_FILE_NAME = "blade"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
     private BladeConfig mConfig;
@@ -92,41 +99,44 @@ public final class BladePlugin
     private void prepareConfig(Project project) {
         mConfig = new BladeConfig()
 
-        File configFile = new File(project.projectDir.getAbsolutePath() + File.separator + LIB_CONFIG_FILE_NAME)
+        // load configuration file (if exists)
+        final String filePath = project.projectDir.getAbsolutePath() + File.separator + LIB_CONFIG_FILE_NAME
+        final File jsonConfigFile = new File(filePath + ".json")
+        final File yamlConfigFile = new File(filePath + ".yaml")
 
-        if (!configFile.exists()) {
-            return
-        }
+        if (jsonConfigFile.exists()) {
+            Map json = new JsonSlurper().parseText(jsonConfigFile.text)
 
-        Map json = new JsonSlurper().parseText(configFile.text)
-
-        json.each { key, value ->
-            switch (key) {
-                case "debug":
-                    mConfig.debug = value
-                    break
-                case "modules":
-                    mConfig.modules = value.collect {
-                        String moduleName = it.toLowerCase() // ignore case
-                        if (!LIB_MODULES.contains(moduleName)) { // check if module exists
-                            throw new IllegalStateException(String.format(ERROR_MODULE_DOES_NOT_EXIST, it))
-                        }
-                        return moduleName
-                    }
-                    break
-                default:
-                    throw new IllegalStateException("'$key' is not supported in $LIB_CONFIG_FILE_NAME.")
+            json.each { key, value ->
+                switch (key) {
+                    case "debug":
+                        mConfig.debug = value
+                        break
+                    case "modules":
+                        mConfig.modules = value
+                        break
+                    default:
+                        throw new IllegalStateException("'$key' is not supported in ${LIB_CONFIG_FILE_NAME}.json!")
+                }
             }
+        } else if (yamlConfigFile.exists()) {
+            Yaml yaml = new Yaml()
+            mConfig = yaml.loadAs(new FileInputStream(yamlConfigFile), BladeConfig.class)
         }
 
+        // check module names
+        mConfig.modules = checkModuleNames(mConfig.modules)
+
+        System.out.println("used Blade config: " + mConfig)
     }
 
-    private static ConfigObject parseLibConfig() {
-        FileInputStream fis = new FileInputStream("../gradle.properties")
-        Properties prop = new Properties()
-        prop.load(fis)
-        ConfigObject config = new ConfigSlurper().parse(prop)
-        fis.close()
-        return config
+    private String[] checkModuleNames(final String[] values) {
+        return values.collect {
+            final String moduleName = it.toLowerCase() // ignore case
+            if (!LIB_MODULES.contains(moduleName)) { // check if module exists
+                throw new IllegalStateException(String.format(ERROR_MODULE_DOES_NOT_EXIST, it))
+            }
+            return moduleName
+        }
     }
 }

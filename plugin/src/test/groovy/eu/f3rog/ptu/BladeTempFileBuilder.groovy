@@ -39,17 +39,15 @@ public final class BladeTempFileBuilder
     ]
 }
                 """
-                break
+
             case FileType.YAML:
-                String body = """debug: false
-modules:
-                """
+                String body = "debug: false"
+                body += "\nmodules:"
                 for (final String module : mModules) {
-                    body << """
-    - ${module}
-                    """
+                    body += "\n  - ${module}"
                 }
-                break
+                return body
+
             default:
                 throw new AssertionError("Unsupported file type!")
         }
