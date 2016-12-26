@@ -124,10 +124,38 @@ final class BladePluginSpecification
 
         then:
         e != null
-        e.getMessage().contains(BladePlugin.ERROR_APT_MISSING)
+        e.getMessage().contains(BladePlugin.ERROR_APT_IS_MISSING)
 
         where:
         [gradleToolsVersion, gradleVersion, _, _, bladeFileType] << WHERE_DATA[0..1] + WHERE_DATA[3..4]
+    }
+
+    @Unroll
+    def "fail without blade file - for #gradleToolsVersion"() {
+        given:
+        projectFolder.addGradleFile(new GradleConfig()
+                .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
+                .plugins(["com.android.application"] + apt + ["blade"])
+        )
+
+        when:
+        Exception e = null
+        try {
+            GradleRunner.create()
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(projectFolder.root)
+                    .withArguments(':build')
+                    .build()
+        } catch (Exception ex) {
+            e = ex
+        }
+
+        then:
+        e != null
+        e.getMessage().contains(BladePlugin.ERROR_CONFIG_FILE_IS_MISSING)
+
+        where:
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA[0..2]
     }
 
     @Unroll
@@ -161,31 +189,6 @@ final class BladePluginSpecification
 
         where:
         [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA
-    }
-
-    @Unroll
-    def "build successfully without blade file - for #gradleToolsVersion"() {
-        given:
-        projectFolder.addGradleFile(new GradleConfig()
-                .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
-                .plugins(["com.android.application"] + apt + ["blade"])
-                .dependencies(["compile 'com.google.dagger:dagger:2.0.2'"]) // required for 'mvp' module
-        )
-
-        when:
-        BuildResult result = GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(projectFolder.root)
-                .withArguments(':build')
-                .build()
-
-        then:
-        result.task(":build").outcome == SUCCESS
-        result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
-        result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
-
-        where:
-        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA[0..2]
     }
 
     @Unroll
