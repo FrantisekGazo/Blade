@@ -41,7 +41,7 @@ final class BladePluginSpecification
 
     def setup() {
         bladeGroupId = BladePlugin.LIB_GROUP_ID
-        bladeVersion = "2.5.0-beta3"
+        bladeVersion = BladePlugin.LIB_VERSION
         bladeClasspath = "${bladeGroupId}:plugin:${bladeVersion}"
     }
 

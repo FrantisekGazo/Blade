@@ -31,7 +31,7 @@ public final class BladePlugin
     public static String ERROR_APT_MISSING = "Apply apt plugin or update gradle plugin to >=2.2.0!"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.5.0-beta3"
+    public static String LIB_VERSION = "2.5.0"
     public static String LIB_CONFIG_FILE_NAME = "blade"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
