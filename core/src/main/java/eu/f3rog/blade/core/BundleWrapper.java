@@ -10,7 +10,6 @@ import java.io.Serializable;
  * Class {@link BundleWrapper}
  *
  * @author FrantisekGazo
- * @version 2015-12-01
  */
 public class BundleWrapper {
 
@@ -170,6 +169,10 @@ public class BundleWrapper {
     }
 
     // Bundle
+    public Bundle getBundle(String key) {
+        return mBundle.getBundle(key);
+    }
+
     public Bundle get(String key, Bundle object) {
         return mBundle.getBundle(key);
     }

@@ -20,6 +20,7 @@ import javax.lang.model.element.VariableElement;
 import blade.Extra;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.annotation.GeneratedForBuilder;
+import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.name.NameUtils;
@@ -33,9 +34,9 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isSubClassOf;
  * Class {@link IntentBuilderBuilder}
  *
  * @author FrantisekGazo
- * @version 2015-10-21
  */
-public class IntentBuilderBuilder extends BaseClassBuilder {
+public final class IntentBuilderBuilder
+        extends BaseClassBuilder {
 
     private static final String METHOD_NAME_FOR = "for%s";
     private static final String METHOD_NAME_START = "start%s";
@@ -50,7 +51,7 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.PUBLIC);
     }
 
-    public void addMethodsFor(TypeElement typeElement) throws ProcessorError {
+    public void addMethodsFor(final TypeElement typeElement) throws ProcessorError {
         if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
             return;
         }
@@ -67,47 +68,64 @@ public class IntentBuilderBuilder extends BaseClassBuilder {
         integrate(ClassName.get(typeElement), extras, isSubClassOf(typeElement, Service.class));
     }
 
-    private void integrate(ClassName activityClassName, List<VariableElement> allExtras, boolean isService) throws ProcessorError {
-        String forName = getMethodName(METHOD_NAME_FOR, activityClassName);
-        String context = "context";
-        String intent = "intent";
-        String extras = "extras";
+    private void integrate(final ClassName activityClassName,
+                           final List<VariableElement> fields,
+                           final boolean isService) throws ProcessorError {
+        final String forName = getMethodName(METHOD_NAME_FOR, activityClassName);
+        final String context = "context";
+        final String intent = "intent";
+        final String extras = "extras";
         // build FOR method
-        MethodSpec.Builder forMethod = MethodSpec.methodBuilder(forName)
+        final MethodSpec.Builder forMethod = MethodSpec.methodBuilder(forName)
                 .addAnnotation(GeneratedForBuilder.buildFor(activityClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context.class, context)
                 .returns(Intent.class);
         // build START method
-        MethodSpec.Builder startMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START, activityClassName))
+        final MethodSpec.Builder startMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START, activityClassName))
                 .addAnnotation(GeneratedForBuilder.buildFor(activityClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context.class, context);
 
-        forMethod.addStatement("$T $N = new $T($N, $T.class)", Intent.class, intent, Intent.class, context, activityClassName)
-                .addStatement("$T $N = new $T()", BundleWrapper.class, extras, BundleWrapper.class);
-        startMethod.addCode("$N.$N($N($N", context,
-                (isService) ? "startService" : "startActivity",
-                forName, context);
-        for (VariableElement extra : allExtras) {
-            Type type = ProcessorUtils.getBoundedType(extra);
-            TypeName typeName = ClassName.get(type);
-            String name = extra.getSimpleName().toString();
+        forMethod.addStatement("$T $N = new $T($N, $T.class)",
+                Intent.class, intent, Intent.class, context, activityClassName);
+        forMethod.addStatement("$T $N = new $T()",
+                        BundleWrapper.class, extras, BundleWrapper.class);
+        startMethod.addCode("$N.$N($N($N",
+                context, (isService) ? "startService" : "startActivity", forName, context);
+
+
+        final ProcessorUtils.IGetter<Extra, Class<?>> classGetter = new ProcessorUtils.IGetter<Extra, Class<?>>() {
+            @Override
+            public Class<?> get(final Extra a) {
+                return a.value();
+            }
+        };
+
+        for (int i = 0, c = fields.size(); i < c; i++) {
+            final VariableElement field = fields.get(i);
+            final Type type = ProcessorUtils.getBoundedType(field);
+            final TypeName typeName = ClassName.get(type);
+            final String name = field.getSimpleName().toString();
+
             forMethod.addParameter(typeName, name);
-            forMethod.addStatement("$N.put($S, $N)", extras, ExtraHelperModule.getExtraId(name), name);
+            final BundleUtils.BundledField bundledField = BundleUtils.getBundledField(field, Extra.class, classGetter);
+            BundleUtils.putToBundle(forMethod, null, bundledField, ExtraHelperModule.EXTRA_ID_FORMAT, extras);
 
             startMethod.addParameter(typeName, name);
             startMethod.addCode(", $N", name);
         }
+
         forMethod.addStatement("$N.putExtras($N.getBundle())", intent, extras)
                 .addStatement("return $N", intent);
         startMethod.addCode("));\n");
+
         // add methods
         getBuilder().addMethod(forMethod.build());
         getBuilder().addMethod(startMethod.build());
     }
 
-    private String getMethodName(String format, ClassName activityName) {
+    private String getMethodName(final String format, final ClassName activityName) {
         return String.format(format, NameUtils.getNestedName(activityName, ""));
     }
 }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import org.junit.Test;
@@ -17,21 +18,22 @@ import eu.f3rog.blade.compiler.BaseTest;
 import eu.f3rog.blade.compiler.BladeProcessor;
 import eu.f3rog.blade.compiler.ErrorMsg;
 import eu.f3rog.blade.core.BundleWrapper;
+import eu.f3rog.blade.core.Bundler;
 import eu.f3rog.blade.core.Weave;
 
 import static eu.f3rog.blade.compiler.util.File.file;
 import static eu.f3rog.blade.compiler.util.File.generatedFile;
 
+
 /**
  * Class {@link ExtraTest}
  *
  * @author FrantisekGazo
- * @version 2015-11-27
  */
 public final class ExtraTest extends BaseTest {
 
     @Test
-    public void invalidCLass() {
+    public void invalidClass() {
         JavaFileObject input = file("com.example", "MainActivity")
                 .imports(
                         Extra.class, "E"
@@ -127,7 +129,7 @@ public final class ExtraTest extends BaseTest {
     }
 
     @Test
-    public void activityOne() {
+    public void activityTwoDefault() {
         JavaFileObject input = file("com.example", "MainActivity")
                 .imports(
                         Extra.class, "E",
@@ -174,7 +176,75 @@ public final class ExtraTest extends BaseTest {
     }
 
     @Test
-    public void serviceOne() {
+    public void activityOneCustomOneDefault() {
+        final JavaFileObject customBundler = file("com.example", "StringBundler")
+                .imports(
+                        Bundler.class,
+                        Bundle.class
+                )
+                .body(
+                        "public class $T implements Bundler<String> {",
+                        "",
+                        "   public void save(String value, Bundle state) {",
+                        "   }",
+                        "",
+                        "   public String restore(Bundle state) {",
+                        "       return null;",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        final JavaFileObject input = file("com.example", "MainActivity")
+                .imports(
+                        Extra.class, "E",
+                        customBundler, "CB",
+                        Activity.class
+                )
+                .body(
+                        "public class $T extends Activity {",
+                        "",
+                        "   @$E($CB.class) String mExtraString;",
+                        "   @$E int mA;",
+                        "",
+                        "}"
+                );
+
+        final JavaFileObject expected = generatedFile("com.example", "MainActivity_Helper")
+                .imports(
+                        input, "I",
+                        customBundler, "CB",
+                        BundleWrapper.class,
+                        Weave.class,
+                        Intent.class
+                )
+                .body(
+                        "abstract class $T {",
+                        "",
+                        "   @Weave(into = \"0^onCreate\", args = {\"android.os.Bundle\"}, statement = \"com.example.$T.inject(this);\")",
+                        "   public static void inject($I target) {",
+                        "       Intent intent = target.getIntent();",
+                        "       if (intent == null || intent.getExtras() == null) {",
+                        "           return;",
+                        "       }",
+                        "       BundleWrapper extras = BundleWrapper.from(intent.getExtras());",
+                        "       $CB mExtraStringBundler = new $CB();",
+                        "       target.mExtraString = mExtraStringBundler.restore(extras.getBundle(\"<Extra-mExtraString>\"));",
+                        "       target.mA = extras.get(\"<Extra-mA>\", target.mA);",
+                        "   }",
+                        "",
+                        "}"
+                );
+
+        assertFiles(customBundler, input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void serviceTwoDefault() {
         JavaFileObject input = file("com.example", "SomeService")
                 .imports(
                         Extra.class, "E",
@@ -226,7 +296,7 @@ public final class ExtraTest extends BaseTest {
     }
 
     @Test
-    public void intentServiceOne() {
+    public void intentServiceTwoDefault() {
         JavaFileObject input = file("com.example", "SomeService")
                 .imports(
                         Extra.class, "E",

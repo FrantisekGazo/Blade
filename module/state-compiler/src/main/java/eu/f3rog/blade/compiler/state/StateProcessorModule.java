@@ -21,14 +21,14 @@ public final class StateProcessorModule
         implements ProcessorModule {
 
     @Override
-    public void process(TypeElement bladeElement) throws ProcessorError {
+    public void process(final TypeElement bladeElement) throws ProcessorError {
         // do nothing
     }
 
     @Override
-    public void process(RoundEnvironment roundEnv) throws ProcessorError {
+    public void process(final RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(State.class);
-        for (Element e : elements) {
+        for (final Element e : elements) {
             ClassManager.getInstance()
                     .getHelper((TypeElement) e.getEnclosingElement())
                     .getModule(StateHelperModule.class)
