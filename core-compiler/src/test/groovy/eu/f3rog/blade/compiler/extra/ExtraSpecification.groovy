@@ -73,7 +73,7 @@ public final class ExtraSpecification
         'final'     | _
     }
 
-    def "generate only blade.I class if no @ is in an Activity"() {
+    def "do NOT generate _Helper if an Activity has only @Blade"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -87,11 +87,15 @@ public final class ExtraSpecification
         )
 
         expect:
-        assertFiles(input)
-                .with(BladeProcessor.Module.EXTRA)
-                .compilesWithoutError()
-                .and()
-                .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "blade", "I.class");
+        try {
+            assertFiles(input)
+                    .with(BladeProcessor.Module.EXTRA)
+                    .compilesWithoutError()
+                    .and()
+                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "com.example", "MyActivity_Helper.class")
+        } catch (AssertionError e) {
+            assert e.getMessage().contains("Did not find a generated file corresponding to MyActivity_Helper.class in package com.example")
+        }
     }
 
     def "generate _Helper if 2 @ are in an Activity"() {
@@ -166,7 +170,7 @@ public final class ExtraSpecification
                 """
                 public class #T extends Activity {
 
-                    @#E(#CB.class) String mExtraString;
+                    @#E(#CB.class) String mText;
                     @#E int mA;
                 }
                 """,
@@ -193,8 +197,8 @@ public final class ExtraSpecification
                             return;
                         }
                         BundleWrapper extras = BundleWrapper.from(intent.getExtras());
-                        #CB mExtraStringBundler = new #CB();
-                        target.mExtraString = mExtraStringBundler.restore(extras.getBundle("<Extra-mExtraString>"));
+                        #CB mTextBundler = new #CB();
+                        target.mText = mTextBundler.restore(extras.getBundle("<Extra-mText>"));
                         target.mA = extras.get("<Extra-mA>", target.mA);
                     }
                 }
