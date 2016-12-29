@@ -16,6 +16,8 @@ public class TestStateActivity extends AppCompatActivity {
 
     @State
     int mCounts;
+    @State(StringCustomBundler.class)
+    String mText;
 
     @Bind(R.id.txt)
     TextView mTextView;
@@ -26,7 +28,7 @@ public class TestStateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_test_state);
         ButterKnife.bind(this);
 
-        mTextView.setText(String.format("Rotation count: %d", mCounts));
+        mTextView.setText(String.format("Rotation count: %d \n%s", mCounts, mText));
         mCounts++;
     }
 
