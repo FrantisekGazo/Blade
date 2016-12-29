@@ -15,7 +15,7 @@ import eu.f3rog.blade.core.GeneratedFor
 
 import javax.tools.JavaFileObject
 
-public final class Blade_I_Specification
+public final class IntentBuilderSpecification
         extends BaseSpecification {
 
     def "generate for an Activity with only @Blade"() {

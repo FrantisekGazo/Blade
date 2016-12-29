@@ -20,7 +20,7 @@ import spock.lang.Unroll
 import javax.tools.JavaFileObject
 import javax.tools.StandardLocation
 
-public final class ExtraSpecification
+public final class ExtraHelperSpecification
         extends BaseSpecification {
 
     def "fail if @ is in invalid class"() {
@@ -29,7 +29,7 @@ public final class ExtraSpecification
                 """
                 public class #T {
 
-                    @#E String mExtraString;
+                    @#E String mText;
                 }
                 """,
                 [
@@ -51,7 +51,7 @@ public final class ExtraSpecification
                 """
                 public class #T extends Activity {
 
-                    @#E $accessor String mExtraString;
+                    @#E $accessor String mText;
                 }
                 """,
                 [
