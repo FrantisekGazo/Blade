@@ -42,3 +42,8 @@ script:
     - ./gradlew :core-compiler:test
     # Run plugin tests
     - ./gradlew :plugin:test
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

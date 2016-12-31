@@ -9,4 +9,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Target(FIELD)
 @Retention(SOURCE)
 public @interface Arg {
+
+    Class<? extends Bundler> value() default Bundler.class;
 }

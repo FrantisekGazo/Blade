@@ -35,9 +35,9 @@ import static eu.f3rog.blade.compiler.util.ProcessorUtils.isActivitySubClass;
  * Class {@link ExtraHelperModule}
  *
  * @author FrantisekGazo
- * @version 2015-12-15
  */
-public class ExtraHelperModule extends BaseHelperModule {
+public final class ExtraHelperModule
+        extends BaseHelperModule {
 
     private enum Injected {
         ACTIVITY, SERVICE, INTENT_SERVICE
@@ -45,17 +45,13 @@ public class ExtraHelperModule extends BaseHelperModule {
 
     private static final String METHOD_NAME_INJECT = "inject";
 
-    private static final String EXTRA_ID_FORMAT = "<Extra-%s>";
+    public static final String EXTRA_ID_FORMAT = "<Extra-%s>";
 
-    public static String getExtraId(String extra) {
-        return String.format(EXTRA_ID_FORMAT, extra);
-    }
-
-    private List<String> mExtras = new ArrayList<>();
+    private List<BundleUtils.BundledField> mExtras = new ArrayList<>();
     private Injected mInjected;
 
     @Override
-    public void checkClass(TypeElement e) throws ProcessorError {
+    public void checkClass(final TypeElement e) throws ProcessorError {
         if (isActivitySubClass(e)) {
             mInjected = Injected.ACTIVITY;
         } else if (ProcessorUtils.isSubClassOf(e, IntentService.class)) {
@@ -68,16 +64,21 @@ public class ExtraHelperModule extends BaseHelperModule {
     }
 
     @Override
-    public void add(VariableElement e) throws ProcessorError {
+    public void add(final VariableElement e) throws ProcessorError {
         if (cannotHaveAnnotation(e)) {
             throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, Extra.class.getSimpleName());
         }
 
-        mExtras.add(e.getSimpleName().toString());
+        BundleUtils.addBundledField(mExtras, e, Extra.class, new ProcessorUtils.IGetter<Extra, Class<?>>() {
+            @Override
+            public Class<?> get(Extra a) {
+                return a.value();
+            }
+        });
     }
 
     @Override
-    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(final HelperClassBuilder builder) throws ProcessorError {
         addMethodToIntentManager(builder);
         if (!mExtras.isEmpty()) {
             // add inject() only if there is something
@@ -87,10 +88,10 @@ public class ExtraHelperModule extends BaseHelperModule {
         return false;
     }
 
-    private void addInjectMethod(HelperClassBuilder builder) {
-        String target = "target";
-        String intent = "intent";
-        MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
+    private void addInjectMethod(final HelperClassBuilder builder) {
+        final String target = "target";
+        final String intent = "intent";
+        final MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
                 .addAnnotation(weaveAnnotation(builder))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
@@ -106,7 +107,7 @@ public class ExtraHelperModule extends BaseHelperModule {
                 .addStatement("return")
                 .endControlFlow();
 
-        String extras = "extras";
+        final String extras = "extras";
         method.addStatement("$T $N = $T.from($N.getExtras())", BundleWrapper.class, extras, BundleWrapper.class, intent);
 
         BundleUtils.getFromBundle(method, target, mExtras, EXTRA_ID_FORMAT, extras);
@@ -114,7 +115,7 @@ public class ExtraHelperModule extends BaseHelperModule {
         builder.getBuilder().addMethod(method.build());
     }
 
-    private AnnotationSpec weaveAnnotation(HelperClassBuilder builder) {
+    private AnnotationSpec weaveAnnotation(final HelperClassBuilder builder) {
         switch (mInjected) {
             case ACTIVITY:
                 return WeaveBuilder.weave().method("onCreate", Bundle.class)
@@ -133,10 +134,9 @@ public class ExtraHelperModule extends BaseHelperModule {
         }
     }
 
-    private void addMethodToIntentManager(HelperClassBuilder builder) throws ProcessorError {
+    private void addMethodToIntentManager(final HelperClassBuilder builder) throws ProcessorError {
         ClassManager.getInstance()
                 .getSpecialClass(IntentBuilderBuilder.class)
                 .addMethodsFor(builder.getTypeElement());
     }
-
 }

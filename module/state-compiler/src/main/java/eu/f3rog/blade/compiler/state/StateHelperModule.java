@@ -24,6 +24,7 @@ import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
+import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
 
 import static eu.f3rog.blade.compiler.util.ProcessorUtils.addClassAsParameter;
@@ -56,13 +57,13 @@ public final class StateHelperModule
 
     private static final String STATEFUL_ID_FORMAT = "<Stateful-%s>";
 
-    private final List<String> mStatefulFields = new ArrayList<>();
+    private final List<BundleUtils.BundledField> mStatefulFields = new ArrayList<>();
     private HelpedClassType mHelpedClassType;
     private boolean mHasSaveStateMethod;
     private boolean mHasRestoreStateMethod;
 
     @Override
-    public void checkClass(TypeElement e) throws ProcessorError {
+    public void checkClass(final TypeElement e) throws ProcessorError {
         // support any class
         if (isActivitySubClass(e) || isFragmentSubClass(e)) {
             mHelpedClassType = HelpedClassType.ACTIVITY_OR_FRAGMENT;
@@ -77,11 +78,11 @@ public final class StateHelperModule
         }
     }
 
-    private boolean hasViewImplementedStateMethod(TypeElement viewType, String methodName) {
-        List<? extends Element> elements = viewType.getEnclosedElements();
-        for (Element e : elements) {
+    private boolean hasViewImplementedStateMethod(final TypeElement viewType, final String methodName) {
+        final List<? extends Element> elements = viewType.getEnclosedElements();
+        for (final Element e : elements) {
             if (e.getKind() == ElementKind.METHOD) {
-                String name = e.getSimpleName().toString();
+                final String name = e.getSimpleName().toString();
                 if (name.equals(methodName)) {
                     return true;
                 }
@@ -91,16 +92,21 @@ public final class StateHelperModule
     }
 
     @Override
-    public void add(VariableElement e) throws ProcessorError {
+    public void add(final VariableElement e) throws ProcessorError {
         if (cannotHaveAnnotation(e)) {
             throw new ProcessorError(e, ErrorMsg.Invalid_field_with_annotation, State.class.getSimpleName());
         }
 
-        mStatefulFields.add(e.getSimpleName().toString());
+        BundleUtils.addBundledField(mStatefulFields, e, State.class, new ProcessorUtils.IGetter<State, Class<?>>() {
+            @Override
+            public Class<?> get(State a) {
+                return a.value();
+            }
+        });
     }
 
     @Override
-    public boolean implement(HelperClassBuilder builder) throws ProcessorError {
+    public boolean implement(final HelperClassBuilder builder) throws ProcessorError {
         if (!mStatefulFields.isEmpty()) {
             // add methods only if there is something stateful
             addSaveStateMethod(builder);
@@ -110,10 +116,10 @@ public final class StateHelperModule
         return false;
     }
 
-    private void addSaveStateMethod(HelperClassBuilder builder) {
-        String target = "target";
-        String state = "state";
-        MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
+    private void addSaveStateMethod(final HelperClassBuilder builder) {
+        final String target = "target";
+        final String state = "state";
+        final MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_SAVE_SATE)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         addClassAsParameter(method, builder.getArgClassName(), target);
@@ -123,7 +129,7 @@ public final class StateHelperModule
             method.addAnnotation(weaveSave(builder.getClassName()));
         }
 
-        String bundleWrapper = "bundleWrapper";
+        final String bundleWrapper = "bundleWrapper";
         method.beginControlFlow("if ($N == null)", state)
                 .addStatement("throw new $T($S)", IllegalArgumentException.class, "State cannot be null!")
                 .endControlFlow()
@@ -134,10 +140,10 @@ public final class StateHelperModule
         builder.getBuilder().addMethod(method.build());
     }
 
-    private void addRestoreStateMethod(HelperClassBuilder builder) {
-        String target = "target";
-        String state = "state";
-        MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
+    private void addRestoreStateMethod(final HelperClassBuilder builder) {
+        final String target = "target";
+        final String state = "state";
+        final MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_RESTORE_SATE)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         addClassAsParameter(method, builder.getArgClassName(), target);
@@ -147,7 +153,7 @@ public final class StateHelperModule
             method.addAnnotation(weaveRestore(builder.getClassName()));
         }
 
-        String bundleWrapper = "bundleWrapper";
+        final String bundleWrapper = "bundleWrapper";
         method.beginControlFlow("if ($N == null)", state)
                 .addStatement("return")
                 .endControlFlow()
@@ -158,7 +164,7 @@ public final class StateHelperModule
         builder.getBuilder().addMethod(method.build());
     }
 
-    private AnnotationSpec weaveSave(ClassName helperName) {
+    private AnnotationSpec weaveSave(final ClassName helperName) {
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
                 return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState, Bundle.class)
@@ -193,7 +199,7 @@ public final class StateHelperModule
         }
     }
 
-    private AnnotationSpec weaveRestore(ClassName helperName) {
+    private AnnotationSpec weaveRestore(final ClassName helperName) {
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
                 return WeaveBuilder.weave().method(WEAVE_onCreate, Bundle.class)
