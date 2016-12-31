@@ -12,7 +12,7 @@ import java.util.List;
 import javax.lang.model.element.VariableElement;
 
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
-import eu.f3rog.blade.core.Bundler;
+import blade.Bundler;
 
 /**
  * Class {@link BundleUtils}

@@ -10,7 +10,7 @@ import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
-import eu.f3rog.blade.core.Bundler
+import blade.Bundler
 import eu.f3rog.blade.core.GeneratedFor
 
 import javax.tools.JavaFileObject
