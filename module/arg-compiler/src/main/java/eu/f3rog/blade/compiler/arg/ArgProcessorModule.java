@@ -16,21 +16,21 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * Class {@link ArgProcessorModule}
  *
  * @author FrantisekGazo
- * @version 2015-12-19
  */
-public class ArgProcessorModule implements ProcessorModule {
+public final class ArgProcessorModule
+        implements ProcessorModule {
 
     @Override
-    public void process(TypeElement bladeElement) throws ProcessorError {
+    public void process(final TypeElement bladeElement) throws ProcessorError {
         ClassManager.getInstance()
                 .getHelper(bladeElement)
                 .tryGetModule(ArgHelperModule.class);
     }
 
     @Override
-    public void process(RoundEnvironment roundEnv) throws ProcessorError {
+    public void process(final RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Arg.class);
-        for (Element e : elements) {
+        for (final Element e : elements) {
             ClassManager.getInstance()
                     .getHelper((TypeElement) e.getEnclosingElement())
                     .getModule(ArgHelperModule.class)

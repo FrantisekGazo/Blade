@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -28,4 +29,7 @@ dependencies {
     testCompile deps.guava
     testCompile deps.truth
     testCompile deps.compiletesting
+
+    testCompile deps.groovy_all
+    testCompile deps.spock
 }

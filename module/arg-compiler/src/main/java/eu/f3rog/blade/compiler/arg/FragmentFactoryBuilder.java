@@ -15,6 +15,7 @@ import javax.lang.model.element.VariableElement;
 
 import blade.Arg;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
+import eu.f3rog.blade.compiler.module.BundleUtils;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.name.NameUtils;
@@ -26,9 +27,9 @@ import eu.f3rog.blade.core.BundleWrapper;
  * Class {@link FragmentFactoryBuilder}
  *
  * @author FrantisekGazo
- * @version 2015-12-19
  */
-public class FragmentFactoryBuilder extends BaseClassBuilder {
+public final class FragmentFactoryBuilder
+        extends BaseClassBuilder {
 
     private static final String METHOD_NAME_NEW = "new%s";
 
@@ -42,7 +43,7 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
         getBuilder().addModifiers(Modifier.PUBLIC);
     }
 
-    public void addMethodFor(TypeElement typeElement) throws ProcessorError {
+    public void addMethodFor(final TypeElement typeElement) throws ProcessorError {
         if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
             return;
         }
@@ -59,32 +60,48 @@ public class FragmentFactoryBuilder extends BaseClassBuilder {
         integrate(ClassName.get(typeElement), args);
     }
 
-    private void integrate(ClassName fragmentClassName, List<VariableElement> allArgs) throws ProcessorError {
-        MethodSpec.Builder forMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_NEW, fragmentClassName))
+    private void integrate(final ClassName fragmentClassName,
+                           final List<VariableElement> fields) throws ProcessorError {
+        final MethodSpec.Builder forMethodBuilder = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_NEW, fragmentClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(fragmentClassName);
 
-        String fragment = "fragment";
-        String args = "args";
-        forMethod.addStatement("$T $N = new $T()", fragmentClassName, fragment, fragmentClassName)
-                .addStatement("$T $N = new $T()", BundleWrapper.class, args, BundleWrapper.class);
+        final String fragment = "fragment";
+        final String args = "args";
 
-        for (int i = 0; i < allArgs.size(); i++) {
-            VariableElement arg = allArgs.get(i);
-            Type type = ProcessorUtils.getBoundedType(arg);
-            TypeName typeName = ClassName.get(type);
-            String name = arg.getSimpleName().toString();
-            forMethod.addParameter(typeName, name);
-            forMethod.addStatement("$N.put($S, $N)", args, ArgHelperModule.getArgId(name), name);
+        forMethodBuilder.addStatement("$T $N = new $T()",
+                fragmentClassName, fragment, fragmentClassName);
+        forMethodBuilder.addStatement("$T $N = new $T()",
+                BundleWrapper.class, args, BundleWrapper.class);
+
+        final ProcessorUtils.IGetter<Arg, Class<?>> classGetter = new ProcessorUtils.IGetter<Arg, Class<?>>() {
+            @Override
+            public Class<?> get(final Arg a) {
+                return a.value();
+            }
+        };
+
+        for (int i = 0, c = fields.size(); i < c; i++) {
+            final VariableElement field = fields.get(i);
+            final Type type = ProcessorUtils.getBoundedType(field);
+            final TypeName typeName = ClassName.get(type);
+            final String name = field.getSimpleName().toString();
+
+            forMethodBuilder.addParameter(typeName, name);
+
+            final BundleUtils.BundledField bundledField = BundleUtils.getBundledField(field, Arg.class, classGetter);
+            BundleUtils.putToBundle(forMethodBuilder, null, bundledField, ArgHelperModule.ARG_ID_FORMAT, args);
         }
 
-        forMethod.addStatement("$N.setArguments($N.getBundle())", fragment, args)
-                .addStatement("return $N", fragment);
+        forMethodBuilder.addStatement("$N.setArguments($N.getBundle())",
+                fragment, args);
+        forMethodBuilder.addStatement("return $N",
+                fragment);
 
-        getBuilder().addMethod(forMethod.build());
+        getBuilder().addMethod(forMethodBuilder.build());
     }
 
-    private String getMethodName(String format, ClassName fragmentClassName) {
+    private String getMethodName(final String format, final ClassName fragmentClassName) {
         return String.format(format, NameUtils.getNestedName(fragmentClassName, ""));
     }
 }
