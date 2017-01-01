@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2.6.0 *(2017-01-01)*
+----------------------------
+
+ * New: Add support for custom `Bundler` for `@Arg`, `@Extra` and `@State`
+
 Version 2.5.1 *(2016-12-26)*
 ----------------------------
 
