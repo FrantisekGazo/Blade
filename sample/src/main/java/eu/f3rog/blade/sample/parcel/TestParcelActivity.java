@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import blade.Blade;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import eu.f3rog.blade.sample.R;
@@ -19,7 +19,7 @@ import eu.f3rog.blade.sample.R;
 @Blade
 public class TestParcelActivity extends AppCompatActivity {
 
-    @Bind(R.id.txt_output)
+    @BindView(R.id.txt_output)
     TextView mOutput;
 
     @Override

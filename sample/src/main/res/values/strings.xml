@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Bl@de</string>
 
-    <string name="goto_extra">\@Extra</string>
-    <string name="goto_arg">\@Arg</string>
-    <string name="goto_state">\@State</string>
-    <string name="goto_mvp">\@Presenter</string>
-    <string name="goto_parcel">\@Parcel</string>
+    <string name="goto_extra">extra</string>
+    <string name="goto_arg">arg</string>
+    <string name="goto_state">state</string>
+    <string name="goto_mvp">mvp</string>
+    <string name="goto_parcel">parcel</string>
 
     <string name="show_text">Show text</string>
     <string name="show_dialog">Show dialog</string>

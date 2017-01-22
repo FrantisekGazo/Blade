@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import blade.Arg;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
 
@@ -23,11 +23,11 @@ public class DataFragment extends BaseFragment {
     @Arg
     Data data;
 
-    @Bind(R.id.txt_value_int)
+    @BindView(R.id.txt_value_int)
     TextView mTxtInteger;
-    @Bind(R.id.txt_value_string)
+    @BindView(R.id.txt_value_string)
     TextView mTxtString;
-    @Bind(R.id.txt_value_double)
+    @BindView(R.id.txt_value_double)
     TextView mTxtDouble;
 
     @Nullable

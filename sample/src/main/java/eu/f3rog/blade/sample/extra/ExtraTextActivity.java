@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import blade.Extra;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
 
@@ -14,7 +14,7 @@ public class ExtraTextActivity extends AppCompatActivity {
     @Extra
     String mShowText;
 
-    @Bind(R.id.txt)
+    @BindView(R.id.txt)
     TextView mTextView;
 
     @Override

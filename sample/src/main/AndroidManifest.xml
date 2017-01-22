@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="eu.f3rog.blade.sample"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="eu.f3rog.blade.sample">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
+        android:name=".mvp.ui.App"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -19,8 +22,11 @@
         <activity android:name=".extra.TestExtraActivity"/>
         <activity android:name=".extra.ExtraTextActivity"/>
         <activity android:name=".state.TestStateActivity"/>
-        <activity android:name=".mvp.ui.activity.TestMvpActivity"/>
         <activity android:name=".parcel.TestParcelActivity"/>
+        <activity android:name=".mvp.ui.activity.MvpMainActivity"/>
+        <activity android:name=".mvp.ui.activity.ActorsActivity"/>
+        <activity android:name=".mvp.ui.activity.ActorViewActivity"/>
+        <activity android:name=".mvp.ui.activity.ActorFragmentActivity"/>
     </application>
 
 </manifest>
