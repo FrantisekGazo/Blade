@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import eu.f3rog.blade.core.Bundler;
+import blade.Bundler;
 
 public final class StringCustomBundler implements Bundler<String> {
 

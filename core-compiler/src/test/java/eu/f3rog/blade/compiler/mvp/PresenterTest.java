@@ -207,7 +207,7 @@ public final class PresenterTest
     }
 
     @Test
-    public void activityWithoutPresenterWithBlade() {
+    public void activityWithoutPresenterWithBladeImplementingIView() {
         JavaFileObject viewInterface = file("com.example", "IMyView")
                 .imports(
                         IView.class, "V"
@@ -240,6 +240,36 @@ public final class PresenterTest
                 );
 
         assertFiles(viewInterface, activity)
+                .with(BladeProcessor.Module.MVP)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected);
+    }
+
+    @Test
+    public void activityWithoutPresenterWithBlade() {
+        JavaFileObject activity = file("com.example", "MyActivity")
+                .imports(
+                        Activity.class,
+                        Blade.class, "B"
+                )
+                .body(
+                        "@$B",
+                        "public class $T extends Activity {",
+                        "}"
+                );
+
+
+        JavaFileObject expected = generatedFile("com.example", "MyActivity_Helper")
+                .imports(
+                        WeavedMvpActivity.class, "M"
+                )
+                .body(
+                        "abstract class $T implements $M {",
+                        "}"
+                );
+
+        assertFiles(activity)
                 .with(BladeProcessor.Module.MVP)
                 .compilesWithoutError()
                 .and()
