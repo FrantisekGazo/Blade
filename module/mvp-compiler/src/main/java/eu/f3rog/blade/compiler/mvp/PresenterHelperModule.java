@@ -54,6 +54,8 @@ public final class PresenterHelperModule
             } else if (isSubClassOf(e, View.class)) {
                 viewType = ViewType.VIEW;
             }
+        } else if (isActivitySubClass(e)) {
+            viewType = ViewType.ACTIVITY;
         }
 
         mViewType = viewType;
