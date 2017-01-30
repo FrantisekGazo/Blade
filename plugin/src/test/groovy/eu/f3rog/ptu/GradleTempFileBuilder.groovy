@@ -17,13 +17,13 @@ package eu.f3rog.ptu
         final String androidConfig
         if (hasAndroidPlugin()) {
             androidConfig = """android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
 
     defaultConfig {
         applicationId "com.example"
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
     }
@@ -32,6 +32,9 @@ package eu.f3rog.ptu
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    lintOptions {
+        abortOnError false
     }
 }
             """

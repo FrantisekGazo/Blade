@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_go_mvp)
     public void gotoMvp() {
-        I.startTestMvpActivity(this);
+        I.startMvpMainActivity(this);
     }
 
     @OnClick(R.id.btn_go_parcel)
