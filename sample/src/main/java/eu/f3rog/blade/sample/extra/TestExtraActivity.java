@@ -6,7 +6,7 @@ import android.widget.EditText;
 
 import blade.Blade;
 import blade.I;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import eu.f3rog.blade.sample.R;
@@ -14,7 +14,7 @@ import eu.f3rog.blade.sample.R;
 @Blade
 public class TestExtraActivity extends AppCompatActivity {
 
-    @Bind(R.id.edt)
+    @BindView(R.id.edt)
     EditText mEditText;
 
     @OnClick(R.id.btn_show_text)

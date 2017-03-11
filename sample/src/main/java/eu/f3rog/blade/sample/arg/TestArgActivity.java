@@ -8,7 +8,7 @@ import java.util.Random;
 
 import blade.Blade;
 import blade.F;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import eu.f3rog.blade.sample.R;
@@ -16,9 +16,9 @@ import eu.f3rog.blade.sample.R;
 @Blade
 public class TestArgActivity extends AppCompatActivity {
 
-    @Bind(R.id.edt_num)
+    @BindView(R.id.edt_num)
     EditText mEditNumber;
-    @Bind(R.id.edt_text)
+    @BindView(R.id.edt_text)
     EditText mEditText;
 
     @OnClick(R.id.btn_show_fragment)

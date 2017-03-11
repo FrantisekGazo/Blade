@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import blade.Blade;
 import blade.State;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.f3rog.blade.sample.R;
 
@@ -19,7 +19,7 @@ public class TestStateActivity extends AppCompatActivity {
     @State(StringCustomBundler.class)
     String mText;
 
-    @Bind(R.id.txt)
+    @BindView(R.id.txt)
     TextView mTextView;
 
     @Override

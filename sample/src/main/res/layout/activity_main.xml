@@ -9,16 +9,22 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/btn_go_arg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/goto_arg"/>
+
+    <Button
         android:id="@+id/btn_go_extra"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/goto_extra"/>
 
     <Button
-        android:id="@+id/btn_go_arg"
+        android:id="@+id/btn_go_parcel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/goto_arg"/>
+        android:text="@string/goto_parcel"/>
 
     <Button
         android:id="@+id/btn_go_state"
@@ -31,11 +37,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/goto_mvp"/>
-
-    <Button
-        android:id="@+id/btn_go_parcel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/goto_parcel"/>
 
 </LinearLayout>

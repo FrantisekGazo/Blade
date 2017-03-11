@@ -21,6 +21,13 @@ allprojects {
         mavenLocal()
     }
 
+    // this is needed for running plugin tests
+    configurations.all {
+        resolutionStrategy {
+            force 'org.codehaus.groovy:groovy-all:2.4.4'
+        }
+    }
+
     if (!['Blade', 'sample', 'module'].contains(project.name)) {
 
         println " --> $project.name "

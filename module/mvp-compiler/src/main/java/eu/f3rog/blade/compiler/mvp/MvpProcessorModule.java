@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.annotation.processing.RoundEnvironment;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
@@ -30,7 +31,12 @@ public final class MvpProcessorModule
     @Override
     public void process(RoundEnvironment roundEnv) throws ProcessorError {
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Inject.class);
-        for (Element e : elements) {
+        for (final Element e : elements) {
+            // process only field injections
+            if (e.getKind() != ElementKind.FIELD) {
+                continue;
+            }
+
             TypeElement typeElement = (TypeElement) e.getEnclosingElement();
 
             PresenterHelperModule module = ClassManager.getInstance()
