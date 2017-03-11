@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2.6.2 *(2017-03-11)*
+----------------------------
+
+ * Fix: Processing of `@Inject` annotations for `mvp` module
+
 Version 2.6.1 *(2017-01-28)*
 ----------------------------
 
