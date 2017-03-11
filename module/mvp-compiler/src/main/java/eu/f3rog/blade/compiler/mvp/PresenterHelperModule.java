@@ -12,6 +12,7 @@ import java.util.List;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
+import blade.Blade;
 import blade.mvp.IPresenter;
 import blade.mvp.IView;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
@@ -54,11 +55,16 @@ public final class PresenterHelperModule
             } else if (isSubClassOf(e, View.class)) {
                 viewType = ViewType.VIEW;
             }
-        } else if (isActivitySubClass(e)) {
+        } else if (isActivitySubClass(e) && hasBladeAnnotation(e)) {
             viewType = ViewType.ACTIVITY;
         }
 
         mViewType = viewType;
+    }
+
+    private boolean hasBladeAnnotation(TypeElement typeElement) {
+        final Blade annotation = typeElement.getAnnotation(Blade.class);
+        return annotation != null;
     }
 
     @Override

@@ -83,15 +83,8 @@ public final class ArgHelperSpecification
         )
 
         expect:
-        try {
-            assertFiles(input)
-                    .with(BladeProcessor.Module.ARG)
-                    .compilesWithoutError()
-                    .and()
-                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "com.example", "MyFragment_Helper.class")
-        } catch (AssertionError e) {
-            assert e.getMessage().contains("Did not find a generated file corresponding to MyFragment_Helper.class in package com.example")
-        }
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyFragment_Helper",
+                BladeProcessor.Module.ARG, input)
     }
 
     def "generate _Helper for a Fragment with 2 @Arg"() {

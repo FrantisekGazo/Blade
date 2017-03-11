@@ -8,6 +8,7 @@ import spock.lang.Specification
 import eu.f3rog.blade.compiler.BladeProcessor
 
 import javax.tools.JavaFileObject
+import javax.tools.StandardLocation
 
 public abstract class BaseSpecification
         extends Specification {
@@ -37,6 +38,22 @@ public abstract class BaseSpecification
                     .about(JavaSourcesSubjectFactory.javaSources())
                     .that(mFiles)
                     .processedWith(new BladeProcessor(processorModules))
+        }
+    }
+
+    protected boolean compilesWithoutErrorAndDoesntGenerate(String pkg,
+                                                            String className,
+                                                            BladeProcessor.Module module,
+                                                            JavaFileObject... inputFiles) {
+        try {
+            assertFiles(inputFiles)
+                    .with(module)
+                    .compilesWithoutError()
+                    .and()
+                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, pkg, className + '.class')
+            return false
+        } catch (AssertionError e) {
+            return e.getMessage().contains("Did not find a generated file corresponding to ${className}.class in package ${pkg}")
         }
     }
 }
