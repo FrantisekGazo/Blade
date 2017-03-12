@@ -7,6 +7,7 @@ import java.util.List;
 
 import eu.f3rog.blade.compiler.builder.annotation.WeaveParser;
 import eu.f3rog.blade.core.Weave;
+import eu.f3rog.blade.core.WeaveInto;
 import eu.f3rog.blade.core.Weaves;
 import eu.f3rog.blade.weaving.interfaces.Interfaces;
 import eu.f3rog.blade.weaving.util.AWeaver;
@@ -36,6 +37,15 @@ public final class BladeWeaver
                 CtClass intoClass;
                 try {
                     intoClass = classPool.get(className.replace("_Helper", ""));
+                } catch (NotFoundException e) {
+                    continue;
+                }
+
+                weave(cls, intoClass);
+            } else if (cls.hasAnnotation(WeaveInto.class)) {
+                CtClass intoClass;
+                try {
+                    intoClass = classPool.get(getWeaveClassTarget(cls));
                 } catch (NotFoundException e) {
                     continue;
                 }
@@ -293,5 +303,15 @@ public final class BladeWeaver
         } else {
             return Collections.emptyList();
         }
+    }
+
+    private String getWeaveClassTarget(CtClass weaveClass) {
+        AnnotationsAttribute annotations = getAnnotations(weaveClass);
+
+        Annotation a = annotations.getAnnotation(WeaveInto.class.getName());
+        if (a != null) {
+            return a.getMemberValue("target").toString().replaceAll("\"", "");
+        }
+        return "";
     }
 }
