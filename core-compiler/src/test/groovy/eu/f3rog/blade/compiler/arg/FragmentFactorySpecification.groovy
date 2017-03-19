@@ -347,4 +347,205 @@ public final class FragmentFactorySpecification
                 .and()
                 .generatesSources(expected)
     }
+
+    def "generate for a generic Fragment with 2 @Arg"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T<T> extends Fragment {
+
+                    @#A String mText;
+                    @#A int mNumber;
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "F",
+                """
+                public class #T {
+
+                   public static #I new#I(String mText, int mNumber) {
+                       #I fragment = new #I();
+                       #BW args = new #BW();
+                       args.put("<Arg-mText>", mText);
+                       args.put("<Arg-mNumber>", mNumber);
+                       fragment.setArguments(args.getBundle());
+                       return fragment;
+                   }
+                }
+                """,
+                [
+                        I : input,
+                        BW: BundleWrapper.class,
+                        _ : [String.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate for a generic Fragment field with 2 @Arg"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T<T extends Serializable> extends Fragment {
+
+                    @#A T mData;
+                    @#A int mNumber;
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class, Serializable.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "F",
+                """
+                public class #T {
+
+                   public static #I new#I(Serializable mData, int mNumber) {
+                       #I fragment = new #I();
+                       #BW args = new #BW();
+                       args.put("<Arg-mData>", mData);
+                       args.put("<Arg-mNumber>", mNumber);
+                       fragment.setArguments(args.getBundle());
+                       return fragment;
+                   }
+                }
+                """,
+                [
+                        I : input,
+                        BW: BundleWrapper.class,
+                        _ : [Serializable.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate for an inner Fragment class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyFragment extends Fragment {
+
+                        @#A String mText;
+                        @#A int mNumber;
+                    }
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "F",
+                """
+                public class #T {
+
+                   public static #I.MyFragment new#IMyFragment(String mText, int mNumber) {
+                       #I.MyFragment fragment = new #I.MyFragment();
+                       #BW args = new #BW();
+                       args.put("<Arg-mText>", mText);
+                       args.put("<Arg-mNumber>", mNumber);
+                       fragment.setArguments(args.getBundle());
+                       return fragment;
+                   }
+                }
+                """,
+                [
+                        I : input,
+                        BW: BundleWrapper.class,
+                        _ : [String.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate for 2 inner Fragment classes"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyFragment1 extends Fragment {
+
+                        @#A String mText;
+                        @#A int mNumber;
+                    }
+
+                    public static class MyFragment2 extends Fragment {
+
+                        @#A String mText;
+                        @#A int mNumber;
+                    }
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "F",
+                """
+                public class #T {
+
+                   public static #I.MyFragment1 new#IMyFragment1(String mText, int mNumber) {
+                       #I.MyFragment1 fragment = new #I.MyFragment1();
+                       #BW args = new #BW();
+                       args.put("<Arg-mText>", mText);
+                       args.put("<Arg-mNumber>", mNumber);
+                       fragment.setArguments(args.getBundle());
+                       return fragment;
+                   }
+
+                   public static #I.MyFragment2 new#IMyFragment2(String mText, int mNumber) {
+                       #I.MyFragment2 fragment = new #I.MyFragment2();
+                       #BW args = new #BW();
+                       args.put("<Arg-mText>", mText);
+                       args.put("<Arg-mNumber>", mNumber);
+                       fragment.setArguments(args.getBundle());
+                       return fragment;
+                   }
+                }
+                """,
+                [
+                        I : input,
+                        BW: BundleWrapper.class,
+                        _ : [String.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
 }
