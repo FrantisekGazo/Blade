@@ -411,4 +411,239 @@ public final class IntentBuilderSpecification
                 .and()
                 .generatesSources(expected)
     }
+
+    def "generate for a generic Activity with 2 @Extra"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T<T> extends Activity {
+
+                    @#E String mText;
+                    @#E int mNumber;
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "I",
+                """
+                public class #T {
+
+                    @#GF(#I.class)
+                    public static Intent for#I(Context context, String mText, int mNumber) {
+                        Intent intent = new Intent(context, #I.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mText>", mText);
+                        extras.put("<Extra-mNumber>", mNumber);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
+
+                    @#GF(#I.class)
+                    public static void start#I(Context context, String mText, int mNumber) {
+                        context.startActivity(for#I(context, mText, mNumber));
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        GF: GeneratedFor.class,
+                        BW: BundleWrapper.class,
+                        _ : [Context.class, Intent.class, String.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for a generic Activity field with 2 @Extra"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T<T extends Serializable> extends Activity {
+
+                    @#E T mData;
+                    @#E int mNumber;
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class, Serializable.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "I",
+                """
+                public class #T {
+
+                    @#GF(#I.class)
+                    public static Intent for#I(Context context, Serializable mData, int mNumber) {
+                        Intent intent = new Intent(context, #I.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mData>", mData);
+                        extras.put("<Extra-mNumber>", mNumber);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
+
+                    @#GF(#I.class)
+                    public static void start#I(Context context, Serializable mData, int mNumber) {
+                        context.startActivity(for#I(context, mData, mNumber));
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        GF: GeneratedFor.class,
+                        BW: BundleWrapper.class,
+                        _ : [Context.class, Intent.class, Serializable.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for an inner Activity class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyActivity extends Activity {
+
+                        @#E String mText;
+                        @#E int mNumber;
+                    }
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "I",
+                """
+                public class #T {
+
+                    @#GF(#I.MyActivity.class)
+                    public static Intent for#IMyActivity(Context context, String mText, int mNumber) {
+                        Intent intent = new Intent(context, #I.MyActivity.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mText>", mText);
+                        extras.put("<Extra-mNumber>", mNumber);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
+
+                    @#GF(#I.MyActivity.class)
+                    public static void start#IMyActivity(Context context, String mText, int mNumber) {
+                        context.startActivity(for#IMyActivity(context, mText, mNumber));
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        GF: GeneratedFor.class,
+                        BW: BundleWrapper.class,
+                        _ : [Context.class, Intent.class, String.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for 2 inner Activity classes"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyActivity1 extends Activity {
+
+                        @#E String mText;
+                        @#E int mNumber;
+                    }
+
+                    public static class MyActivity2 extends Activity {
+
+                        @#E String mText;
+                        @#E int mNumber;
+                    }
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "I",
+                """
+                public class #T {
+
+                    @#GF(#I.MyActivity1.class)
+                    public static Intent for#IMyActivity1(Context context, String mText, int mNumber) {
+                        Intent intent = new Intent(context, #I.MyActivity1.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mText>", mText);
+                        extras.put("<Extra-mNumber>", mNumber);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
+
+                    @#GF(#I.MyActivity1.class)
+                    public static void start#IMyActivity1(Context context, String mText, int mNumber) {
+                        context.startActivity(for#IMyActivity1(context, mText, mNumber));
+                    }
+
+                    @#GF(#I.MyActivity2.class)
+                    public static Intent for#IMyActivity2(Context context, String mText, int mNumber) {
+                        Intent intent = new Intent(context, #I.MyActivity2.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mText>", mText);
+                        extras.put("<Extra-mNumber>", mNumber);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
+
+                    @#GF(#I.MyActivity2.class)
+                    public static void start#IMyActivity2(Context context, String mText, int mNumber) {
+                        context.startActivity(for#IMyActivity2(context, mText, mNumber));
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        GF: GeneratedFor.class,
+                        BW: BundleWrapper.class,
+                        _ : [Context.class, Intent.class, String.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
 }

@@ -326,4 +326,241 @@ public final class ExtraHelperSpecification
                 .and()
                 .generatesSources(expected)
     }
+
+    def "generate _Helper for a generic Activity with 2 @Extra"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T<T> extends Activity {
+
+                    @#E String mText;
+                    @#E int mNumber;
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static <T> void inject(#I<T> target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mText = extras.get("<Extra-mText>", target.mText);
+                        target.mNumber = extras.get("<Extra-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for a generic Activity field with 2 @Extra"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T<T extends Serializable> extends Activity {
+
+                    @#E T mData;
+                    @#E int mNumber;
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class, Serializable.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static <T extends Serializable> void inject(#I<T> target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mData = extras.get("<Extra-mData>", target.mData);
+                        target.mNumber = extras.get("<Extra-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Intent.class, Serializable.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for an inner Activity class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyActivity extends Activity {
+
+                        @#E String mText;
+                        @#E int mNumber;
+                    }
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I.MyActivity target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mText = extras.get("<Extra-mText>", target.mText);
+                        target.mNumber = extras.get("<Extra-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for 2 inner Activity classes"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyActivity1 extends Activity {
+
+                        @#E String mText;
+                        @#E int mNumber;
+                    }
+
+                    public static class MyActivity2 extends Activity {
+
+                        @#E String mText;
+                        @#E int mNumber;
+                    }
+                }
+                """,
+                [
+                        E : Extra.class,
+                        _ : [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected1 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity1_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I.MyActivity1 target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mText = extras.get("<Extra-mText>", target.mText);
+                        target.mNumber = extras.get("<Extra-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                ]
+        )
+        final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity2_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I.MyActivity2 target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mText = extras.get("<Extra-mText>", target.mText);
+                        target.mNumber = extras.get("<Extra-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected1, expected2)
+    }
 }

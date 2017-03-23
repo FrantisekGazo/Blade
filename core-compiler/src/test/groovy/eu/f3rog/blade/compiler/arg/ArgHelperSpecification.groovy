@@ -203,4 +203,236 @@ public final class ArgHelperSpecification
                 .and()
                 .generatesSources(expected)
     }
+
+    def "generate _Helper for a generic Fragment with 2 @Arg"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T<T> extends Fragment {
+
+                    @#A String mText;
+                    @#A int mNumber;
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static <T> void inject(#I<T> target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.mText = args.get("<Arg-mText>", target.mText);
+                       target.mNumber = args.get("<Arg-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for a generic Fragment field with 2 @Arg"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T<T extends Serializable> extends Fragment {
+
+                    @#A T mData;
+                    @#A int mNumber;
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class, Serializable.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static <T extends Serializable> void inject(#I<T> target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.mData = args.get("<Arg-mData>", target.mData);
+                       target.mNumber = args.get("<Arg-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Weave.class, Serializable.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for an inner Fragment class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyFragment extends Fragment {
+
+                        @#A String mText;
+                        @#A int mNumber;
+                    }
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I.MyFragment target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.mText = args.get("<Arg-mText>", target.mText);
+                       target.mNumber = args.get("<Arg-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for 2 inner Fragment classes"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyFragment1 extends Fragment {
+
+                        @#A String mText;
+                        @#A int mNumber;
+                    }
+
+                    public static class MyFragment2 extends Fragment {
+
+                        @#A String mText;
+                        @#A int mNumber;
+                    }
+                }
+                """,
+                [
+                        A : Arg.class,
+                        _ : [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected1 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment1_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I.MyFragment1 target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.mText = args.get("<Arg-mText>", target.mText);
+                       target.mNumber = args.get("<Arg-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Weave.class]
+                ]
+        )
+        final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment2_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I.MyFragment2 target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.mText = args.get("<Arg-mText>", target.mText);
+                       target.mNumber = args.get("<Arg-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        _ : [BundleWrapper.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected1, expected2)
+    }
 }
