@@ -3,7 +3,9 @@ package eu.f3rog.blade.weaving;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import eu.f3rog.blade.compiler.builder.annotation.WeaveParser;
 import eu.f3rog.blade.core.Weave;
@@ -12,6 +14,7 @@ import eu.f3rog.blade.core.Weaves;
 import eu.f3rog.blade.weaving.interfaces.Interfaces;
 import eu.f3rog.blade.weaving.util.AWeaver;
 import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
+import groovy.lang.Tuple2;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -31,6 +34,7 @@ public final class BladeWeaver
 
     @Override
     public void weave(ClassPool classPool, List<CtClass> classes) {
+        final List<Tuple2<CtClass, CtClass>> processingList = new ArrayList<>();
         for (CtClass cls : classes) {
             String className = cls.getName();
             if (className.endsWith("_Helper")) {
@@ -40,8 +44,7 @@ public final class BladeWeaver
                 } catch (NotFoundException e) {
                     continue;
                 }
-
-                weave(cls, intoClass);
+                processingList.add(new Tuple2<>(cls, intoClass));
             } else if (cls.hasAnnotation(WeaveInto.class)) {
                 CtClass intoClass;
                 try {
@@ -49,9 +52,33 @@ public final class BladeWeaver
                 } catch (NotFoundException e) {
                     continue;
                 }
-
-                weave(cls, intoClass);
+                processingList.add(new Tuple2<>(cls, intoClass));
             }
+        }
+
+        final Map<Tuple2<CtClass, CtClass>, Integer> superClassCountMap = new HashMap<>(classes.size());
+        for (Tuple2<CtClass, CtClass> toProcess : processingList) {
+            int superClassCount = 0;
+            try {
+                CtClass checker = toProcess.getSecond();
+                while (checker.getSuperclass() != null) {
+                    superClassCount++;
+                    checker = checker.getSuperclass();
+                }
+            } catch (NotFoundException e) {
+                System.out.println("Why is this throwing a NotFoundException? " + e);
+            }
+            superClassCountMap.put(toProcess, superClassCount);
+        }
+        Collections.sort(processingList, new Comparator<Tuple2<CtClass, CtClass>>() {
+            @Override
+            public int compare(Tuple2<CtClass, CtClass> firstPair, Tuple2<CtClass, CtClass> secondPair) {
+                return Integer.compare(superClassCountMap.get(firstPair), superClassCountMap.get(secondPair));
+            }
+        });
+
+        for (Tuple2<CtClass, CtClass> toProcess : processingList) {
+            weave(toProcess.getFirst(), toProcess.getSecond());
         }
     }
 
