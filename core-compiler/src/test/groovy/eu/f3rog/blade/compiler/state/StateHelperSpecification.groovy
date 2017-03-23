@@ -674,4 +674,331 @@ public final class StateHelperSpecification
                 .and()
                 .generatesSources(expected)
     }
+
+    def "generate _Helper for a generic Activity with 2 @Extra"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
+                """
+                public class #T<T> {
+
+                    @#S String mText;
+                    @#S int mNumber;
+                }
+                """,
+                [
+                        S : State.class,
+                        _ : []
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
+                """
+                abstract class #T {
+
+                    public static <T> void saveState(#I<T> target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mText>", target.mText);
+                        bundleWrapper.put("<Stateful-mNumber>", target.mNumber);
+                    }
+
+                    public static <T> void restoreState(#I<T> target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mText = bundleWrapper.get("<Stateful-mText>", target.mText);
+                        target.mNumber = bundleWrapper.get("<Stateful-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        E : IllegalArgumentException.class,
+                        _ : [Bundle.class, BundleWrapper.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for a generic Activity field with 2 @Extra"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
+                """
+                public class #T<T extends Serializable> {
+
+                    @#S T mData;
+                    @#S int mNumber;
+                }
+                """,
+                [
+                        S : State.class,
+                        _ : [Serializable.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
+                """
+                abstract class #T {
+
+                    public static <T extends Serializable> void saveState(#I<T> target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mData>", target.mData);
+                        bundleWrapper.put("<Stateful-mNumber>", target.mNumber);
+                    }
+
+                    public static <T extends Serializable> void restoreState(#I<T> target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mData = bundleWrapper.get("<Stateful-mData>", target.mData);
+                        target.mNumber = bundleWrapper.get("<Stateful-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        E : IllegalArgumentException.class,
+                        _ : [Bundle.class, BundleWrapper.class, Serializable.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for an inner View class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyView extends View {
+
+                        @#S String mText;
+                        @#S int mNumber;
+
+                        public MyView(Context c) {
+                            super(c);
+                        }
+                    }
+                }
+                """,
+                [
+                        S : State.class,
+                        _ : [Context.class, View.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyView_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into = "0^onSaveInstanceState",
+                        statement = "android.os.Bundle bundle = new android.os.Bundle();bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());com.example.#T.saveState(this, bundle);return bundle;"
+                    )
+                    public static void saveState(#I.MyView target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mText>", target.mText);
+                        bundleWrapper.put("<Stateful-mNumber>", target.mNumber);
+                    }
+
+                    @Weave(
+                        into = "0^onRestoreInstanceState",
+                        args = {"android.os.Parcelable"},
+                        statement = "if (\$1 instanceof android.os.Bundle) {android.os.Bundle bundle = (android.os.Bundle) \$1;com.example.#T.restoreState(this, bundle);super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));} else {super.onRestoreInstanceState(\$1);}return;"
+                    )
+                    public static void restoreState(#I.MyView target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mText = bundleWrapper.get("<Stateful-mText>", target.mText);
+                        target.mNumber = bundleWrapper.get("<Stateful-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        E : IllegalArgumentException.class,
+                        _ : [Bundle.class, BundleWrapper.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for an inner class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyClass {
+
+                        @#S String mText;
+                        @#S int mNumber;
+                    }
+                }
+                """,
+                [
+                        S : State.class,
+                        _ : []
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass_Helper",
+                """
+                abstract class #T {
+
+                    public static void saveState(#I.MyClass target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mText>", target.mText);
+                        bundleWrapper.put("<Stateful-mNumber>", target.mNumber);
+                    }
+
+                    public static void restoreState(#I.MyClass target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mText = bundleWrapper.get("<Stateful-mText>", target.mText);
+                        target.mNumber = bundleWrapper.get("<Stateful-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        E : IllegalArgumentException.class,
+                        _ : [Bundle.class, BundleWrapper.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+    }
+
+    def "generate _Helper for 2 inner classes"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
+                """
+                public class #T {
+
+                    public static class MyClass1 {
+
+                        @#S String mText;
+                        @#S int mNumber;
+                    }
+
+                    public static class MyClass2 {
+
+                        @#S String mText;
+                        @#S int mNumber;
+                    }
+                }
+                """,
+                [
+                        S : State.class,
+                        _ : []
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected1 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass1_Helper",
+                """
+                abstract class #T {
+
+                    public static void saveState(#I.MyClass1 target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mText>", target.mText);
+                        bundleWrapper.put("<Stateful-mNumber>", target.mNumber);
+                    }
+
+                    public static void restoreState(#I.MyClass1 target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mText = bundleWrapper.get("<Stateful-mText>", target.mText);
+                        target.mNumber = bundleWrapper.get("<Stateful-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        E : IllegalArgumentException.class,
+                        _ : [Bundle.class, BundleWrapper.class]
+                ]
+        )
+        final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass2_Helper",
+                """
+                abstract class #T {
+
+                    public static void saveState(#I.MyClass2 target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mText>", target.mText);
+                        bundleWrapper.put("<Stateful-mNumber>", target.mNumber);
+                    }
+
+                    public static void restoreState(#I.MyClass2 target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mText = bundleWrapper.get("<Stateful-mText>", target.mText);
+                        target.mNumber = bundleWrapper.get("<Stateful-mNumber>", target.mNumber);
+                    }
+                }
+                """,
+                [
+                        I : input,
+                        E : IllegalArgumentException.class,
+                        _ : [Bundle.class, BundleWrapper.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected1, expected2)
+    }
 }
