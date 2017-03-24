@@ -26,7 +26,6 @@ dependencies {
 
     testCompile deps.dagger2
 
-    testCompile deps.guava
     testCompile deps.truth
     testCompile deps.compiletesting
 
