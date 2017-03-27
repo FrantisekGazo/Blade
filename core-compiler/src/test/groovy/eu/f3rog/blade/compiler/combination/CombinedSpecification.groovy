@@ -7,13 +7,17 @@ import android.os.Bundle
 import blade.Arg
 import blade.Extra
 import blade.State
+import blade.mvp.BasePresenter
+import blade.mvp.IView
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.mvp.WeavedMvpFragment
 import spock.lang.Unroll
 
+import javax.inject.Inject
 import javax.tools.JavaFileObject
 
 public final class CombinedSpecification
@@ -30,9 +34,9 @@ public final class CombinedSpecification
                 }
                 """,
                 [
-                        A : Arg.class,
-                        S : State.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        S: State.class,
+                        _: [Fragment.class]
                 ]
         )
 
@@ -82,9 +86,9 @@ public final class CombinedSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [
                                 Bundle.class,
                                 BundleWrapper.class,
                                 Weave.class
@@ -115,9 +119,9 @@ public final class CombinedSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        S : State.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        S: State.class,
+                        _: [Activity.class]
                 ]
         )
 
@@ -168,9 +172,9 @@ public final class CombinedSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [
                                 Bundle.class,
                                 BundleWrapper.class,
                                 Intent.class,
@@ -186,8 +190,114 @@ public final class CombinedSpecification
                 .generatesSources(expected)
 
         where:
-        annotations   | _
+        annotations     | _
         '@Extra @State' | _
         '@State @Extra' | _
+    }
+
+    @Unroll
+    def "generate _Helper for a class with #field1 #field2 #field3"() {
+        given:
+        final JavaFileObject presenter = JavaFile.newFile("com.example", "MyPresenter",
+                """
+                public class #T extends #P<#V> {
+                }
+                """,
+                [
+                        P: BasePresenter.class,
+                        V: IView.class,
+                        _: []
+                ]
+        )
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T extends Fragment implements #V {
+
+                    $field1
+                    $field2
+                    $field3
+                }
+                """,
+                [
+                        A: Arg.class,
+                        I: Inject.class,
+                        S: State.class,
+                        P: presenter,
+                        V: IView.class,
+                        _: [Fragment.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
+                """
+                abstract class #T implements WeavedMvpFragment {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I target) {
+                        if (target.getArguments() == null) {
+                            return;
+                        }
+                        BundleWrapper args = BundleWrapper.from(target.getArguments());
+                        target.mTitle = args.get("<Arg-mTitle>", target.mTitle);
+                    }
+
+                    @Weave(
+                        into = "0_onSaveInstanceState",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.saveState(this, \\\$1);"
+                    )
+                    public static void saveState(#I target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mFlag>", target.mFlag);
+                    }
+
+                    @Weave(
+                        into = "1^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.restoreState(this, \\\$1);"
+                    )
+                    public static void restoreState(#I target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mFlag = bundleWrapper.get("<Stateful-mFlag>", target.mFlag);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [
+                                Bundle.class,
+                                BundleWrapper.class,
+                                Weave.class,
+                                WeavedMvpFragment.class
+                        ]
+                ]
+        )
+
+        assertFiles(presenter, input)
+                .with(BladeProcessor.Module.ARG, BladeProcessor.Module.MVP, BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        field1               | field2               | field3               | _
+        '@#A String mTitle;' | '@#I #P mPresenter;' | '@#S boolean mFlag;' | _
+        '@#A String mTitle;' | '@#S boolean mFlag;' | '@#I #P mPresenter;' | _
+        '@#I #P mPresenter;' | '@#S boolean mFlag;' | '@#A String mTitle;' | _
+        '@#I #P mPresenter;' | '@#A String mTitle;' | '@#S boolean mFlag;' | _
+        '@#S boolean mFlag;' | '@#A String mTitle;' | '@#I #P mPresenter;' | _
+        '@#S boolean mFlag;' | '@#I #P mPresenter;' | '@#A String mTitle;' | _
     }
 }
