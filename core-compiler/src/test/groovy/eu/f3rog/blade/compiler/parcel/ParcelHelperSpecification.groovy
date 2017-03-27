@@ -8,6 +8,7 @@ import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.WeaveInto
 
 import javax.tools.JavaFileObject
 
@@ -213,6 +214,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -306,7 +310,8 @@ public final class ParcelHelperSpecification
                                 Parcelable.class,
                                 Object.class,
                                 Override.class,
-                                Weave.class
+                                Weave.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -365,6 +370,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -432,7 +440,8 @@ public final class ParcelHelperSpecification
                                 HashSet.class,
                                 List.class,
                                 Map.class,
-                                Set.class
+                                Set.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -476,6 +485,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -519,7 +531,8 @@ public final class ParcelHelperSpecification
                                 android.os.Parcel.class,
                                 Parcelable.class,
                                 Weave.class,
-                                Override.class
+                                Override.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -653,6 +666,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -698,7 +714,8 @@ public final class ParcelHelperSpecification
                                 android.os.Parcel.class,
                                 Parcelable.class,
                                 Weave.class,
-                                Override.class
+                                Override.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -744,6 +761,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -787,7 +807,8 @@ public final class ParcelHelperSpecification
                                 android.os.Parcel.class,
                                 Parcelable.class,
                                 Weave.class,
-                                Override.class
+                                Override.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -841,6 +862,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -884,7 +908,8 @@ public final class ParcelHelperSpecification
                                 android.os.Parcel.class,
                                 Parcelable.class,
                                 Weave.class,
-                                Override.class
+                                Override.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -939,6 +964,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -989,6 +1017,7 @@ public final class ParcelHelperSpecification
                                 Parcelable.class,
                                 String.class,
                                 Weave.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -1031,6 +1060,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -1075,6 +1107,7 @@ public final class ParcelHelperSpecification
                                 android.os.Parcel.class,
                                 Parcelable.class,
                                 Weave.class,
+                                WeaveInto.class,
                         ]
                 ]
         )
@@ -1117,6 +1150,9 @@ public final class ParcelHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -1161,7 +1197,8 @@ public final class ParcelHelperSpecification
                                 android.os.Parcel.class,
                                 Parcelable.class,
                                 String.class,
-                                Weave.class
+                                Weave.class,
+                                WeaveInto.class,
                         ]
                 ]
         )

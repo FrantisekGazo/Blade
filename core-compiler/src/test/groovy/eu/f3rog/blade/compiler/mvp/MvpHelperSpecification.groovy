@@ -11,6 +11,8 @@ import blade.mvp.IView
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
+import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.WeaveInto
 import eu.f3rog.blade.mvp.WeavedMvpActivity
 import eu.f3rog.blade.mvp.WeavedMvpFragment
 import eu.f3rog.blade.mvp.WeavedMvpView
@@ -338,11 +340,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#A"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpActivity.class
+                        A: activity,
+                        M: WeavedMvpActivity.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -392,11 +399,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#A"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpActivity.class
+                        A: activity,
+                        M: WeavedMvpActivity.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -458,11 +470,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#A"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpActivity.class
+                        A: activity,
+                        M: WeavedMvpActivity.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -539,11 +556,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#F"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpFragment.class
+                        F: fragment,
+                        M: WeavedMvpFragment.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -605,11 +627,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#F"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpFragment.class
+                        F: fragment,
+                        M: WeavedMvpFragment.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -694,11 +721,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#V"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpView.class
+                        V: view,
+                        M: WeavedMvpView.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -764,11 +796,16 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#V"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpView.class
+                        V: view,
+                        M: WeavedMvpView.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -819,11 +856,15 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.Wrapper.MyActivity"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpActivity.class
+                        M: WeavedMvpActivity.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -874,11 +915,15 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.Wrapper.MyFragment"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpFragment.class
+                        M: WeavedMvpFragment.class,
+                        _: [WeaveInto.class]
                 ]
         )
 
@@ -933,11 +978,15 @@ public final class MvpHelperSpecification
 
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.Wrapper.MyView"
+                )
                 abstract class #T implements #M {
                 }
                 """,
                 [
-                        M: WeavedMvpView.class
+                        M: WeavedMvpView.class,
+                        _: [WeaveInto.class]
                 ]
         )
 

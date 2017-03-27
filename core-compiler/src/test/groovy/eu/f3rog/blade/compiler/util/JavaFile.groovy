@@ -106,6 +106,7 @@ public final class JavaFile {
         } else if (value instanceof JavaFileObject) {
             className = ((JavaFileObject) value).getName()
                     .replace(java.io.File.separator, ".")
+                    .replace("/", ".") // NOTE: Windows seems to return / for separators from getName()
                     .replace(".java", "");
         }
 

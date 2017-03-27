@@ -15,6 +15,7 @@ import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import blade.Bundler
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.WeaveInto
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
@@ -117,6 +118,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -137,7 +141,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -184,6 +188,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -206,7 +213,7 @@ public final class ExtraHelperSpecification
                 [
                         I : input,
                         CB: customBundler,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -240,6 +247,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyService_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -259,7 +269,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -297,6 +307,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyIntentService_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -316,7 +329,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -346,6 +359,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -366,7 +382,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -396,6 +412,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -416,7 +435,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Intent.class, Serializable.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Serializable.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -449,6 +468,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyActivity"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -469,7 +491,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -508,6 +530,9 @@ public final class ExtraHelperSpecification
         expect:
         final JavaFileObject expected1 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity1_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyActivity1"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -528,11 +553,14 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity2_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyActivity2"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -553,7 +581,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Weave.class, WeaveInto.class]
                 ]
         )
 

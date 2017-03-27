@@ -11,6 +11,7 @@ import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import blade.Bundler
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.WeaveInto
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
@@ -106,6 +107,9 @@ public final class ArgHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -125,7 +129,7 @@ public final class ArgHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Weave.class]
+                        _: [BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -172,6 +176,9 @@ public final class ArgHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -193,7 +200,7 @@ public final class ArgHelperSpecification
                 [
                         I : input,
                         CB: customBundler,
-                        _ : [BundleWrapper.class, Weave.class]
+                        _ : [BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -223,6 +230,9 @@ public final class ArgHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -242,7 +252,7 @@ public final class ArgHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        _ : [BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -272,6 +282,9 @@ public final class ArgHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -291,7 +304,7 @@ public final class ArgHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Weave.class, Serializable.class]
+                        _ : [BundleWrapper.class, Weave.class, Serializable.class, WeaveInto.class]
                 ]
         )
 
@@ -324,6 +337,9 @@ public final class ArgHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyFragment"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -343,7 +359,7 @@ public final class ArgHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        _ : [BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -382,6 +398,9 @@ public final class ArgHelperSpecification
         expect:
         final JavaFileObject expected1 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment1_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyFragment1"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -401,11 +420,14 @@ public final class ArgHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        _ : [BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment2_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyFragment2"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -425,7 +447,7 @@ public final class ArgHelperSpecification
                 """,
                 [
                         I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        _ : [BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 

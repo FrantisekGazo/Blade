@@ -12,6 +12,7 @@ import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.WeaveInto
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
@@ -39,6 +40,9 @@ public final class CombinedSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -87,7 +91,8 @@ public final class CombinedSpecification
                         _ : [
                                 Bundle.class,
                                 BundleWrapper.class,
-                                Weave.class
+                                Weave.class,
+                                WeaveInto.class
                         ]
                 ]
         )
@@ -124,6 +129,9 @@ public final class CombinedSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -174,7 +182,8 @@ public final class CombinedSpecification
                                 Bundle.class,
                                 BundleWrapper.class,
                                 Intent.class,
-                                Weave.class
+                                Weave.class,
+                                WeaveInto.class
                         ]
                 ]
         )

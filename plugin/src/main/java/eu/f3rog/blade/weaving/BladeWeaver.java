@@ -36,16 +36,7 @@ public final class BladeWeaver
     public void weave(ClassPool classPool, List<CtClass> classes) {
         final List<Tuple2<CtClass, CtClass>> processingList = new ArrayList<>();
         for (CtClass cls : classes) {
-            String className = cls.getName();
-            if (className.endsWith("_Helper")) {
-                CtClass intoClass;
-                try {
-                    intoClass = classPool.get(className.replace("_Helper", ""));
-                } catch (NotFoundException e) {
-                    continue;
-                }
-                processingList.add(new Tuple2<>(cls, intoClass));
-            } else if (cls.hasAnnotation(WeaveInto.class)) {
+            if (cls.hasAnnotation(WeaveInto.class)) {
                 CtClass intoClass;
                 try {
                     intoClass = classPool.get(getWeaveClassTarget(cls));

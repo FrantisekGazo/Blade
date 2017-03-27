@@ -17,6 +17,7 @@ import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import blade.Bundler
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.WeaveInto
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
@@ -95,6 +96,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     public static void saveState(#I target, Bundle state) {
                         if (state == null) {
@@ -118,7 +122,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class]
+                        _: [Bundle.class, BundleWrapper.class, WeaveInto.class]
                 ]
         )
 
@@ -164,6 +168,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     public static void saveState(#I target, Bundle state) {
                         if (state == null) {
@@ -192,7 +199,7 @@ public final class StateHelperSpecification
                         CB: customBundler,
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        _ : [Bundle.class, BundleWrapper.class, WeaveInto.class]
                 ]
         )
 
@@ -222,6 +229,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0_onSaveInstanceState",
@@ -255,7 +265,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -285,6 +295,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0_onSaveInstanceState",
@@ -318,7 +331,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -349,6 +362,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyPresenter_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0_onSaveState",
@@ -382,7 +398,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -416,6 +432,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0^onSaveInstanceState",
@@ -448,7 +467,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -487,6 +506,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0^onSaveInstanceState/onSaveInstanceState_BladeState",
@@ -519,7 +541,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -557,6 +579,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0^onSaveInstanceState",
@@ -589,7 +614,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -632,6 +657,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
                     @Weave(
                         into = "0^onSaveInstanceState/onSaveInstanceState_BladeState",
@@ -664,7 +692,7 @@ public final class StateHelperSpecification
                 [
                         I: input,
                         E: IllegalArgumentException.class,
-                        _: [Bundle.class, BundleWrapper.class, Weave.class]
+                        _: [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -694,6 +722,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     public static <T> void saveState(#I<T> target, Bundle state) {
@@ -718,7 +749,7 @@ public final class StateHelperSpecification
                 [
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        _ : [Bundle.class, BundleWrapper.class, WeaveInto.class]
                 ]
         )
 
@@ -748,6 +779,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I"
+                )
                 abstract class #T {
 
                     public static <T extends Serializable> void saveState(#I<T> target, Bundle state) {
@@ -772,7 +806,7 @@ public final class StateHelperSpecification
                 [
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class, Serializable.class]
+                        _ : [Bundle.class, BundleWrapper.class, Serializable.class, WeaveInto.class]
                 ]
         )
 
@@ -809,6 +843,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyView_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyView"
+                )
                 abstract class #T {
 
                     @Weave(
@@ -842,7 +879,7 @@ public final class StateHelperSpecification
                 [
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class, Weave.class]
+                        _ : [Bundle.class, BundleWrapper.class, Weave.class, WeaveInto.class]
                 ]
         )
 
@@ -875,6 +912,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyClass"
+                )
                 abstract class #T {
 
                     public static void saveState(#I.MyClass target, Bundle state) {
@@ -899,7 +939,7 @@ public final class StateHelperSpecification
                 [
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        _ : [Bundle.class, BundleWrapper.class, WeaveInto.class]
                 ]
         )
 
@@ -938,6 +978,9 @@ public final class StateHelperSpecification
         expect:
         final JavaFileObject expected1 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass1_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyClass1"
+                )
                 abstract class #T {
 
                     public static void saveState(#I.MyClass1 target, Bundle state) {
@@ -962,11 +1005,14 @@ public final class StateHelperSpecification
                 [
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        _ : [Bundle.class, BundleWrapper.class, WeaveInto.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass2_Helper",
                 """
+                @WeaveInto(
+                    target = "com.example.#I.MyClass2"
+                )
                 abstract class #T {
 
                     public static void saveState(#I.MyClass2 target, Bundle state) {
@@ -991,7 +1037,7 @@ public final class StateHelperSpecification
                 [
                         I : input,
                         E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        _ : [Bundle.class, BundleWrapper.class, WeaveInto.class]
                 ]
         )
 

@@ -13,6 +13,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
+import eu.f3rog.blade.compiler.builder.annotation.WeaveIntoBuilder;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.util.ClassComparator;
 import eu.f3rog.blade.compiler.util.ProcessorError;
@@ -40,6 +41,9 @@ public class HelperClassBuilder
         super.start();
 
         getBuilder().addModifiers(Modifier.ABSTRACT);
+        if (getArgClassName() != null) {
+            getBuilder().addAnnotation(WeaveIntoBuilder.buildFor(getArgClassName()));
+        }
     }
 
     @Override
