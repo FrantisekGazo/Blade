@@ -3,6 +3,7 @@ package eu.f3rog.blade.sample.arg;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.Random;
 
@@ -23,6 +24,11 @@ public class TestArgActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_show_fragment)
     public void showFragment() {
+        if (mEditNumber.getText().length() == 0) {
+            Toast.makeText(this, "Input a number!", Toast.LENGTH_SHORT).show();
+            mEditNumber.requestFocus();
+            return;
+        }
         int number = Integer.parseInt(mEditNumber.getText().toString());
         String text = mEditText.getText().toString();
         Data data = new Data(number, text);
