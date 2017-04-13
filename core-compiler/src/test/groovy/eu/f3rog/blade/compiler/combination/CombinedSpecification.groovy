@@ -14,6 +14,7 @@ import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.mvp.WeavedMvpActivity
 import eu.f3rog.blade.mvp.WeavedMvpFragment
 import spock.lang.Unroll
 
@@ -24,7 +25,7 @@ public final class CombinedSpecification
         extends BaseSpecification {
 
     @Unroll
-    def "generate _Helper for a class with a @Arg+@State field (#annotations)"() {
+    def "generate _Helper for a Fragment class with a @Arg+@State field (#annotations)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
@@ -109,7 +110,7 @@ public final class CombinedSpecification
     }
 
     @Unroll
-    def "generate _Helper for a class with a @Extra+@State field (#annotations)"() {
+    def "generate _Helper for an Activity class with a @Extra+@State field (#annotations)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -196,7 +197,7 @@ public final class CombinedSpecification
     }
 
     @Unroll
-    def "generate _Helper for a class with #field1 #field2 #field3"() {
+    def "generate _Helper for a Fragment class with #field1 #field2 #field3"() {
         given:
         final JavaFileObject presenter = JavaFile.newFile("com.example", "MyPresenter",
                 """
@@ -249,7 +250,7 @@ public final class CombinedSpecification
                     @Weave(
                         into = "0_onSaveInstanceState",
                         args = {"android.os.Bundle"},
-                        statement = "com.example.#T.saveState(this, \\\$1);"
+                        statement = "com.example.#T.saveState(this, \$1);"
                     )
                     public static void saveState(#I target, Bundle state) {
                         if (state == null) {
@@ -262,7 +263,7 @@ public final class CombinedSpecification
                     @Weave(
                         into = "1^onCreate",
                         args = {"android.os.Bundle"},
-                        statement = "com.example.#T.restoreState(this, \\\$1);"
+                        statement = "com.example.#T.restoreState(this, \$1);"
                     )
                     public static void restoreState(#I target, Bundle state) {
                         if (state == null) {
@@ -299,5 +300,113 @@ public final class CombinedSpecification
         '@#I #P mPresenter;' | '@#A String mTitle;' | '@#S boolean mFlag;' | _
         '@#S boolean mFlag;' | '@#A String mTitle;' | '@#I #P mPresenter;' | _
         '@#S boolean mFlag;' | '@#I #P mPresenter;' | '@#A String mTitle;' | _
+    }
+
+    @Unroll
+    def "generate _Helper for an Activity class with #field1 #field2 #field3"() {
+        given:
+        final JavaFileObject presenter = JavaFile.newFile("com.example", "MyPresenter",
+                """
+                public class #T extends #P<#V> {
+                }
+                """,
+                [
+                        P: BasePresenter.class,
+                        V: IView.class,
+                        _: []
+                ]
+        )
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T extends Activity implements #V {
+
+                    $field1
+                    $field2
+                    $field3
+                }
+                """,
+                [
+                        E: Extra.class,
+                        I: Inject.class,
+                        S: State.class,
+                        P: presenter,
+                        V: IView.class,
+                        _: [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
+                """
+                abstract class #T implements WeavedMvpActivity {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mTitle = extras.get("<Extra-mTitle>", target.mTitle);
+                    }
+
+                    @Weave(
+                        into = "0_onSaveInstanceState",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.saveState(this, \$1);"
+                    )
+                    public static void saveState(#I target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mFlag>", target.mFlag);
+                    }
+
+                    @Weave(
+                        into = "1^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.restoreState(this, \$1);"
+                    )
+                    public static void restoreState(#I target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mFlag = bundleWrapper.get("<Stateful-mFlag>", target.mFlag);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [
+                                Bundle.class,
+                                BundleWrapper.class,
+                                Intent.class,
+                                Weave.class,
+                                WeavedMvpActivity.class
+                        ]
+                ]
+        )
+
+        assertFiles(presenter, input)
+                .with(BladeProcessor.Module.EXTRA, BladeProcessor.Module.MVP, BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        field1               | field2               | field3               | _
+        '@#E String mTitle;' | '@#I #P mPresenter;' | '@#S boolean mFlag;' | _
+        '@#E String mTitle;' | '@#S boolean mFlag;' | '@#I #P mPresenter;' | _
+        '@#I #P mPresenter;' | '@#S boolean mFlag;' | '@#E String mTitle;' | _
+        '@#I #P mPresenter;' | '@#E String mTitle;' | '@#S boolean mFlag;' | _
+        '@#S boolean mFlag;' | '@#E String mTitle;' | '@#I #P mPresenter;' | _
+        '@#S boolean mFlag;' | '@#I #P mPresenter;' | '@#E String mTitle;' | _
     }
 }
