@@ -1,44 +1,50 @@
 Change Log
 ==========
 
+Version 2.6.3 *(2017-04-16)*
+----------------------------
+
+ * Fix: Presenter state restoration.
+ * New: Add more unit tests.
+
 Version 2.6.2 *(2017-03-11)*
 ----------------------------
 
- * Fix: Processing of `@Inject` annotations for `mvp` module
+ * Fix: Processing of `@Inject` annotations for `mvp` module.
 
 Version 2.6.1 *(2017-01-28)*
 ----------------------------
 
- * Fix: `mvp` generated Activity classes
+ * Fix: `mvp` generated Activity classes.
 
 Version 2.6.0 *(2017-01-01)*
 ----------------------------
 
- * New: Add support for custom `Bundler` for `@Arg`, `@Extra` and `@State`
+ * New: Add support for custom `Bundler` for `@Arg`, `@Extra` and `@State`.
 
 Version 2.5.1 *(2016-12-26)*
 ----------------------------
 
- * Change: Configuration file is now required
+ * Change: Configuration file is now required.
 
 Version 2.5.0 *(2016-12-26)*
 ----------------------------
 
- * Change: Add support for android gradle plugin 2.2+ `annotationProcessor`. (android-apt is no longer added automatically)
- * New: Add support for **YAML** format of configuration file `blade.yaml`
+ * Change: Add support for android gradle plugin 2.2+ `annotationProcessor`. (android-apt is no longer added automatically).
+ * New: Add support for **YAML** format of configuration file `blade.yaml`.
 
 Version 2.4.0 *(2016-12-07)*
 ----------------------------
 
- * Change: Refactor **mvp** module to use Dagger2 and support Fragments
- * Fix: `@State` inside android View subclasses
+ * Change: Refactor **mvp** module to use Dagger2 and support Fragments.
+ * Fix: `@State` inside android View subclasses.
 
 Version 2.3.0 *(2016-10-28)*
 ----------------------------
 
  * New: Add more plugin tests
- * Fix: Refactor code for bytecode weaving
- * Fix: Handle order of weaved code correctly
+ * Fix: Refactor code for bytecode weaving.
+ * Fix: Handle order of weaved code correctly.
 
 Version 2.2.0 *(2016-05-21)*
 ----------------------------
