@@ -189,7 +189,9 @@ public final class PresenterManager {
             presenter = provider.get();
             apm.put(view, fieldName, presenter);
 
-            presenter.onCreate(view.getWeavedState());
+            final Bundle viewState = view.getWeavedState();
+            final Bundle presenterState = (viewState != null) ? viewState.getBundle(getPresenterStateKey(fieldName)) : null;
+            presenter.onCreate(presenterState);
         }
         presenter.onBind(view);
 
@@ -216,7 +218,12 @@ public final class PresenterManager {
 
         final Bundle presenterState = new Bundle();
         presenter.onSaveState(presenterState);
-        outState.putBundle(String.format(STATE_VIEW_PRESENTER, fieldName), presenterState);
+        outState.putBundle(getPresenterStateKey(fieldName), presenterState);
+    }
+
+    @NonNull
+    private String getPresenterStateKey(@NonNull final String fieldName) {
+        return String.format(STATE_VIEW_PRESENTER, fieldName);
     }
 
     //endregion save presenter
