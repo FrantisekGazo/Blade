@@ -66,15 +66,7 @@ public final class StateHelperSpecification
         )
 
         expect:
-        try {
-            assertFiles(input)
-                    .with(BladeProcessor.Module.STATE)
-                    .compilesWithoutError()
-                    .and()
-                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "com.example", "MyClass_Helper.class")
-        } catch (AssertionError e) {
-            assert e.getMessage().contains("Did not find a generated file corresponding to MyClass_Helper.class in package com.example")
-        }
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyClass_Helper", BladeProcessor.Module.STATE, input)
     }
 
     def "generate for a class with 2 @State"() {

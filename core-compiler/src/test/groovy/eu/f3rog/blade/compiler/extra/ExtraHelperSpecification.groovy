@@ -87,15 +87,7 @@ public final class ExtraHelperSpecification
         )
 
         expect:
-        try {
-            assertFiles(input)
-                    .with(BladeProcessor.Module.EXTRA)
-                    .compilesWithoutError()
-                    .and()
-                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "com.example", "MyActivity_Helper.class")
-        } catch (AssertionError e) {
-            assert e.getMessage().contains("Did not find a generated file corresponding to MyActivity_Helper.class in package com.example")
-        }
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyActivity_Helper", BladeProcessor.Module.EXTRA, input)
     }
 
     def "generate _Helper if 2 @ are in an Activity"() {
