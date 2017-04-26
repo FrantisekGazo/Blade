@@ -5,18 +5,34 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import blade.Blade
+import blade.Bundler
 import blade.Extra
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
-import blade.Bundler
 import eu.f3rog.blade.core.GeneratedFor
+import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
 
 public final class IntentBuilderSpecification
         extends BaseSpecification {
+
+    def "do not generate if no Activity class need it"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T extends Activity {}
+                """,
+                [
+                        _: [Activity.class]
+                ]
+        )
+
+        expect:
+        compilesWithoutErrorAndDoesntGenerate("blade", "I", BladeProcessor.Module.EXTRA, input)
+    }
 
     def "generate for an Activity with only @Blade"() {
         given:
@@ -66,7 +82,66 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for an Activity with 1 @Extra"() {
+    @Unroll
+    def "generate for an Activity class with 1 @Extra #type"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T extends Activity {
+
+                    @#E $type mField;
+                }
+                """,
+                [
+                        E: Extra.class,
+                        _: [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("blade", "I",
+                """
+                public class #T {
+
+                    @#GF(#A.class)
+                    public static Intent for#A(Context context, $type mField) {
+                        Intent intent = new Intent(context, #A.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mField>", mField);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
+
+                    @#GF(#A.class)
+                    public static void start#A(Context context, $type mField) {
+                        context.startActivity(for#A(context, mField));
+                    }
+                }
+                """,
+                [
+                        A : input,
+                        BW: BundleWrapper.class,
+                        GF: GeneratedFor.class,
+                        _ : [Intent.class, Context.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        type      | _
+        'byte'    | _
+        'boolean' | _
+        'int'     | _
+        'float'   | _
+        'double'  | _
+    }
+
+    def "generate for an Activity class with 1 @Extra String"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -86,20 +161,19 @@ public final class IntentBuilderSpecification
                 """
                 public class #T {
 
-                @#GF(#A.class)
-                   public static Intent for#A(Context context, String mText) {
-                       Intent intent = new Intent(context, #A.class);
-                       #BW extras = new #BW();
-                       extras.put("<Extra-mText>", mText);
-                       intent.putExtras(extras.getBundle());
-                       return intent;
-                   }
+                    @#GF(#A.class)
+                    public static Intent for#A(Context context, String mText) {
+                        Intent intent = new Intent(context, #A.class);
+                        #BW extras = new #BW();
+                        extras.put("<Extra-mText>", mText);
+                        intent.putExtras(extras.getBundle());
+                        return intent;
+                    }
 
-                   @#GF(#A.class)
-                   public static void start#A(Context context, String mText) {
-                       context.startActivity(for#A(context, mText));
-                   }
-
+                    @#GF(#A.class)
+                    public static void start#A(Context context, String mText) {
+                        context.startActivity(for#A(context, mText));
+                    }
                 }
                 """,
                 [
@@ -115,9 +189,17 @@ public final class IntentBuilderSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        type      | imp | _
+        'byte'    | ""  | _
+        'boolean' | ""  | _
+        'int'     | ""  | _
+        'float'   | ""  | _
+        'double'  | ""  | _
     }
 
-    def "generate for 2 Activities with @Extra"() {
+    def "generate for 2 Activity classes with @Extra"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "FirstActivity",
                 """
@@ -197,7 +279,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for 2 Activities with inherited @Extra"() {
+    def "generate for 2 Activity classes with inherited @Extra"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "BaseActivity",
                 """
@@ -274,7 +356,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for 1 Activity with inherited @Extra from abstract class"() {
+    def "generate for 1 Activity class with inherited @Extra from an abstract class"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "BaseActivity",
                 """
@@ -336,7 +418,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for an Activity with @Extra and custom Bundler"() {
+    def "generate for an Activity class with @Extra and custom Bundler"() {
         given:
         final JavaFileObject customBundler = JavaFile.newFile("com.example", "StringBundler",
                 """
@@ -412,7 +494,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a generic Activity with 2 @Extra"() {
+    def "generate for a generic Activity class <T> with 2 @Extra"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -423,8 +505,8 @@ public final class IntentBuilderSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        _: [Activity.class]
                 ]
         )
 
@@ -464,7 +546,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for a generic Activity field with 2 @Extra"() {
+    def "generate for a generic Activity class <T extends Serializable> with 2 @Extra"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -475,8 +557,8 @@ public final class IntentBuilderSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class, Serializable.class]
+                        E: Extra.class,
+                        _: [Activity.class, Serializable.class]
                 ]
         )
 
@@ -516,7 +598,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for an inner Activity class"() {
+    def "generate for an inner Activity class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
@@ -530,8 +612,8 @@ public final class IntentBuilderSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        _: [Activity.class]
                 ]
         )
 
@@ -571,7 +653,7 @@ public final class IntentBuilderSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for 2 inner Activity classes"() {
+    def "generate for 2 inner Activity classes"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
@@ -591,8 +673,8 @@ public final class IntentBuilderSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        _: [Activity.class]
                 ]
         )
 
