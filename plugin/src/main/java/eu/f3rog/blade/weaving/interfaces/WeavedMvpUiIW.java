@@ -123,14 +123,18 @@ abstract class WeavedMvpUiIW
     private List<String> getPresenterFieldNames(CtClass targetClass) throws NotFoundException {
         List<String> presenterFieldNames = new ArrayList<>();
 
-        ClassPool classPool = targetClass.getClassPool();
-        CtField[] declaredFields = targetClass.getDeclaredFields();
-        CtClass presenterInterface = classPool.get("blade.mvp.IPresenter");
+        CtClass ctClass = targetClass;
+        while (ctClass != null) {
+            ClassPool classPool = ctClass.getClassPool();
+            CtField[] declaredFields = ctClass.getDeclaredFields();
+            CtClass presenterInterface = classPool.get("blade.mvp.IPresenter");
 
-        for (CtField declaredField : declaredFields) {
-            if (declaredField.hasAnnotation(Inject.class) && declaredField.getType().subtypeOf(presenterInterface)) {
-                presenterFieldNames.add(declaredField.getName());
+            for (CtField declaredField : declaredFields) {
+                if (declaredField.hasAnnotation(Inject.class) && declaredField.getType().subtypeOf(presenterInterface)) {
+                    presenterFieldNames.add(declaredField.getName());
+                }
             }
+            ctClass = ctClass.getSuperclass();
         }
 
         return presenterFieldNames;
