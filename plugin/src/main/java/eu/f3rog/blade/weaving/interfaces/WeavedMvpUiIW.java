@@ -130,6 +130,9 @@ abstract class WeavedMvpUiIW
             CtClass presenterInterface = classPool.get("blade.mvp.IPresenter");
 
             for (CtField declaredField : declaredFields) {
+                if (!declaredField.visibleFrom(targetClass)) {
+                    continue;
+                }
                 if (declaredField.hasAnnotation(Inject.class) && declaredField.getType().subtypeOf(presenterInterface)) {
                     presenterFieldNames.add(declaredField.getName());
                 }
