@@ -14,7 +14,7 @@ import eu.f3rog.blade.core.Weave
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
-import javax.tools.StandardLocation
+
 
 public final class ArgHelperSpecification
         extends BaseSpecification {

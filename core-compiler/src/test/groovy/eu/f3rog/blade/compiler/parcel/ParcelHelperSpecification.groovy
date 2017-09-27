@@ -113,9 +113,7 @@ public final class ParcelHelperSpecification
         )
 
         expect:
-        assertFiles(input)
-                .with(BladeProcessor.Module.PARCEL)
-                .compilesWithoutError()
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyClass_Helper", BladeProcessor.Module.PARCEL, input)
     }
 
     def "generate _Helper for a class with fields"() {

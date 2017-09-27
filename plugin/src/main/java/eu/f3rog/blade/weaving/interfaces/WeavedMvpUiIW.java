@@ -120,19 +120,33 @@ abstract class WeavedMvpUiIW
     protected abstract void weave(CtClass targetClass, JavassistHelper javassistHelper, List<String> presenterFieldNames)
             throws CannotCompileException, NotFoundException, AfterBurnerImpossibleException;
 
-    private List<String> getPresenterFieldNames(CtClass targetClass) throws NotFoundException {
-        List<String> presenterFieldNames = new ArrayList<>();
+    /**
+     * Returns all presenter field names (also the ones defined by parent classes) because dagger injects all of them.
+     *
+     * @param targetClass Target class
+     * @return List of field names.
+     * @throws NotFoundException
+     */
+    private List<String> getPresenterFieldNames(final CtClass targetClass) throws NotFoundException {
+        final List<String> allPresenterFieldNames = new ArrayList<>();
 
-        ClassPool classPool = targetClass.getClassPool();
-        CtField[] declaredFields = targetClass.getDeclaredFields();
-        CtClass presenterInterface = classPool.get("blade.mvp.IPresenter");
+        final ClassPool classPool = targetClass.getClassPool();
+        final CtClass presenterInterface = classPool.get("blade.mvp.IPresenter");
 
-        for (CtField declaredField : declaredFields) {
-            if (declaredField.hasAnnotation(Inject.class) && declaredField.getType().subtypeOf(presenterInterface)) {
-                presenterFieldNames.add(declaredField.getName());
+        CtClass currentClass = targetClass;
+        while (currentClass != null) {
+            final CtField[] declaredFields = currentClass.getDeclaredFields();
+            for (final CtField declaredField : declaredFields) {
+                if (!declaredField.visibleFrom(targetClass)) {
+                    continue;
+                }
+                if (declaredField.hasAnnotation(Inject.class) && declaredField.getType().subtypeOf(presenterInterface)) {
+                    allPresenterFieldNames.add(declaredField.getName());
+                }
             }
+            currentClass = currentClass.getSuperclass();
         }
 
-        return presenterFieldNames;
+        return allPresenterFieldNames;
     }
 }
