@@ -7,23 +7,22 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
 import blade.Blade
+import blade.Bundler
 import blade.Extra
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.ErrorMsg
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
-import blade.Bundler
 import eu.f3rog.blade.core.Weave
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
-import javax.tools.StandardLocation
 
 public final class ExtraHelperSpecification
         extends BaseSpecification {
 
-    def "fail if @ is in invalid class"() {
+    def "fail if @Extra is in invalid class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
                 """
@@ -45,7 +44,7 @@ public final class ExtraHelperSpecification
     }
 
     @Unroll
-    def "fail if @ is on #accessor field"() {
+    def "fail if @Extra is on #accessor field"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -73,7 +72,7 @@ public final class ExtraHelperSpecification
         'final'     | _
     }
 
-    def "do NOT generate _Helper if an Activity has only @Blade"() {
+    def "do NOT generate _Helper if an Activity class has only @Blade"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -87,18 +86,68 @@ public final class ExtraHelperSpecification
         )
 
         expect:
-        try {
-            assertFiles(input)
-                    .with(BladeProcessor.Module.EXTRA)
-                    .compilesWithoutError()
-                    .and()
-                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "com.example", "MyActivity_Helper.class")
-        } catch (AssertionError e) {
-            assert e.getMessage().contains("Did not find a generated file corresponding to MyActivity_Helper.class in package com.example")
-        }
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyActivity_Helper", BladeProcessor.Module.EXTRA, input)
     }
 
-    def "generate _Helper if 2 @ are in an Activity"() {
+    @Unroll
+    def "generate _Helper if 1 @Extra #type is in an Activity class"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                public class #T extends Activity {
+
+                    @#E $type mFlag;
+                }
+                """,
+                [
+                        E: Extra.class,
+                        _: [Activity.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into = "0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I target) {
+                        Intent intent = target.getIntent();
+                        if (intent == null || intent.getExtras() == null) {
+                            return;
+                        }
+                        BundleWrapper extras = BundleWrapper.from(intent.getExtras());
+                        target.mFlag = extras.get("<Extra-mFlag>", target.mFlag);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.EXTRA)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        type      | _
+        'byte'    | _
+        'boolean' | _
+        'int'     | _
+        'float'   | _
+        'double'  | _
+        'String'  | _
+    }
+
+    def "generate _Helper if 2 @Extra are in an Activity class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -148,7 +197,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper if 2 @ are in an Activity - 1 custom Bundler"() {
+    def "generate _Helper if 2 @Extra are in an Activity class - 1 custom Bundler"() {
         given:
         final JavaFileObject customBundler = JavaFile.newFile("com.example", "StringBundler",
                 """
@@ -217,7 +266,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper if 2 @ are in an Service"() {
+    def "generate _Helper if 2 @Extra are in a Service class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyService",
                 """
@@ -270,7 +319,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper if 2 @ are in an IntentService"() {
+    def "generate _Helper if 2 @Extra are in an IntentService class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyIntentService",
                 """
@@ -327,7 +376,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for a generic Activity with 2 @Extra"() {
+    def "generate _Helper if 2 @Extra are in a generic Activity class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -338,8 +387,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        _: [Activity.class]
                 ]
         )
 
@@ -365,8 +414,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Intent.class, Weave.class]
                 ]
         )
 
@@ -377,7 +426,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for a generic Activity field with 2 @Extra"() {
+    def "generate _Helper if 2 @Extra are in a generic Activity class where T extends Serializable"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -388,8 +437,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class, Serializable.class]
+                        E: Extra.class,
+                        _: [Activity.class, Serializable.class]
                 ]
         )
 
@@ -415,8 +464,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Intent.class, Serializable.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Intent.class, Serializable.class, Weave.class]
                 ]
         )
 
@@ -427,7 +476,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for an inner Activity class"() {
+    def "generate _Helper if 2 @Extra are in an inner Activity class"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
@@ -441,8 +490,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        _: [Activity.class]
                 ]
         )
 
@@ -468,8 +517,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Intent.class, Weave.class]
                 ]
         )
 
@@ -480,7 +529,7 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for 2 inner Activity classes"() {
+    def "generate _Helper if 2 @Extra are in multiple inner Activity classes"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
@@ -500,8 +549,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        E : Extra.class,
-                        _ : [Activity.class]
+                        E: Extra.class,
+                        _: [Activity.class]
                 ]
         )
 
@@ -527,8 +576,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Intent.class, Weave.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity2_Helper",
@@ -552,8 +601,8 @@ public final class ExtraHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Intent.class, Weave.class]
                 ]
         )
 

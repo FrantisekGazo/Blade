@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
 import blade.Blade
+import blade.Bundler
 import blade.State
 import blade.mvp.IPresenter
 import blade.mvp.IView
@@ -15,12 +16,10 @@ import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.ErrorMsg
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
-import blade.Bundler
 import eu.f3rog.blade.core.Weave
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
-import javax.tools.StandardLocation
 
 public final class StateHelperSpecification
         extends BaseSpecification {
@@ -66,15 +65,66 @@ public final class StateHelperSpecification
         )
 
         expect:
-        try {
-            assertFiles(input)
-                    .with(BladeProcessor.Module.STATE)
-                    .compilesWithoutError()
-                    .and()
-                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, "com.example", "MyClass_Helper.class")
-        } catch (AssertionError e) {
-            assert e.getMessage().contains("Did not find a generated file corresponding to MyClass_Helper.class in package com.example")
-        }
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyClass_Helper", BladeProcessor.Module.STATE, input)
+    }
+
+    @Unroll
+    def "generate for a class with 1 @State #type"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
+                """
+                public class #T {
+
+                    @#S $type mField;
+                }
+                """,
+                [
+                        S: State.class
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyClass_Helper",
+                """
+                abstract class #T {
+                    public static void saveState(#I target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-mField>", target.mField);
+                    }
+
+                    public static void restoreState(#I target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.mField = bundleWrapper.get("<Stateful-mField>", target.mField);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        type      | _
+        'byte'    | _
+        'boolean' | _
+        'int'     | _
+        'long'    | _
+        'float'   | _
+        'double'  | _
     }
 
     def "generate for a class with 2 @State"() {
@@ -203,7 +253,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for an Activity with 2 @State"() {
+    def "generate for an Activity class with 2 @State"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -266,7 +316,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a Fragment with 2 @State"() {
+    def "generate for a Fragment class with 2 @State"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
@@ -329,7 +379,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a Presenter with 2 @State"() {
+    def "generate for a Presenter class with 2 @State"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyPresenter",
                 """
@@ -393,7 +443,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a View with 2 @State"() {
+    def "generate for a View class with 2 @State"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyView",
                 """
@@ -459,7 +509,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a View with 2 @State with onSaveInstanceState()"() {
+    def "generate for a View class with 2 @State with onSaveInstanceState()"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyView",
                 """
@@ -530,7 +580,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a View with 2 @State with onRestoreInstanceState()"() {
+    def "generate for a View class with 2 @State with onRestoreInstanceState()"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyView",
                 """
@@ -600,7 +650,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate for a View with 2 @State with onSaveInstanceState() and onRestoreInstanceState()"() {
+    def "generate for a View class with 2 @State with onSaveInstanceState() and onRestoreInstanceState()"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyView",
                 """
@@ -675,7 +725,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for a generic Activity with 2 @Extra"() {
+    def "generate _Helper for a generic Activity class <T> with 2 @State"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
                 """
@@ -686,8 +736,8 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        S : State.class,
-                        _ : []
+                        S: State.class,
+                        _: []
                 ]
         )
 
@@ -716,9 +766,9 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class]
                 ]
         )
 
@@ -729,7 +779,7 @@ public final class StateHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper for a generic Activity field with 2 @Extra"() {
+    def "generate _Helper for a generic Activity class <T extends Serializable> with 2 @State"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
                 """
@@ -740,8 +790,8 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        S : State.class,
-                        _ : [Serializable.class]
+                        S: State.class,
+                        _: [Serializable.class]
                 ]
         )
 
@@ -770,9 +820,9 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class, Serializable.class]
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class, Serializable.class]
                 ]
         )
 
@@ -801,8 +851,8 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        S : State.class,
-                        _ : [Context.class, View.class]
+                        S: State.class,
+                        _: [Context.class, View.class]
                 ]
         )
 
@@ -840,9 +890,9 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class, Weave.class]
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class, Weave.class]
                 ]
         )
 
@@ -867,8 +917,8 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        S : State.class,
-                        _ : []
+                        S: State.class,
+                        _: []
                 ]
         )
 
@@ -897,9 +947,9 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class]
                 ]
         )
 
@@ -930,8 +980,8 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        S : State.class,
-                        _ : []
+                        S: State.class,
+                        _: []
                 ]
         )
 
@@ -960,9 +1010,9 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyClass2_Helper",
@@ -989,9 +1039,9 @@ public final class StateHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        E : IllegalArgumentException.class,
-                        _ : [Bundle.class, BundleWrapper.class]
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [Bundle.class, BundleWrapper.class]
                 ]
         )
 

@@ -4,8 +4,10 @@ import android.app.Activity
 import android.app.Fragment
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import blade.Arg
 import blade.Extra
+import blade.Parcel
 import blade.State
 import blade.mvp.BasePresenter
 import blade.mvp.IView
@@ -25,7 +27,7 @@ public final class CombinedSpecification
         extends BaseSpecification {
 
     @Unroll
-    def "generate _Helper for a Fragment class with a @Arg+@State field (#annotations)"() {
+    def "generate _Helper for a Fragment class with #annotations"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
@@ -110,7 +112,7 @@ public final class CombinedSpecification
     }
 
     @Unroll
-    def "generate _Helper for an Activity class with a @Extra+@State field (#annotations)"() {
+    def "generate _Helper for an Activity class with #annotations"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
@@ -408,5 +410,112 @@ public final class CombinedSpecification
         '@#I #P mPresenter;' | '@#E String mTitle;' | '@#S boolean mFlag;' | _
         '@#S boolean mFlag;' | '@#E String mTitle;' | '@#I #P mPresenter;' | _
         '@#S boolean mFlag;' | '@#I #P mPresenter;' | '@#E String mTitle;' | _
+    }
+
+    def "generate _Helper for a class with @Parcel + @State"() {
+        given:
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
+                """
+                @#P
+                public class #T implements Parcelable {
+
+                    @#S
+                    int number;
+
+                    public #T(android.os.Parcel p) {
+                    }
+
+                    @Override
+                    public int describeContents() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void writeToParcel(android.os.Parcel dest, int flags) {
+                    }
+                }
+                """,
+                [
+                        P: Parcel.class,
+                        S: State.class,
+                        _: [Parcelable.class]
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyActivity_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into = "<FIELD>",
+                        statement = "com.example.#T.CREATOR"
+                    )
+                    public static final Parcelable.Creator<#I> CREATOR = 
+                      new Parcelable.Creator<#I>() {
+                        @Override
+                        public #I createFromParcel(Parcel in) {
+                            return new #I(in);
+                        }                    
+                        @Override
+                        public #I[] newArray(int size) {
+                            return new #I[size];
+                        }
+                    };
+
+                    @Weave(
+                        into = "0>writeToParcel",
+                        args = {"android.os.Parcel", "int"},
+                        statement = "com.example.#T.writeToParcel(this, \$1);"
+                    )
+                    public static void writeToParcel(#I target, Parcel parcel) {
+                        parcel.writeInt(target.number);
+                    }
+
+                    @Weave(
+                        into = "",
+                        args = {"android.os.Parcel"},
+                        statement = "com.example.#T.readFromParcel(this, \$1);"
+                    )
+                    public static void readFromParcel(#I target, Parcel parcel) {
+                        target.number = parcel.readInt();
+                    }
+
+                    public static void saveState(#I target, Bundle state) {
+                        if (state == null) {
+                            throw new #E("State cannot be null!");
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        bundleWrapper.put("<Stateful-number>", target.number);
+                    }
+
+                    public static void restoreState(#I target, Bundle state) {
+                        if (state == null) {
+                            return;
+                        }
+                        BundleWrapper bundleWrapper = BundleWrapper.from(state);
+                        target.number = bundleWrapper.get("<Stateful-number>", target.number);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        E: IllegalArgumentException.class,
+                        _: [
+                                android.os.Parcel.class,
+                                Parcelable.class,
+                                Override.class,
+                                Bundle.class,
+                                BundleWrapper.class,
+                                Weave.class
+                        ]
+                ]
+        )
+
+        assertFiles(input)
+                .with(BladeProcessor.Module.PARCEL, BladeProcessor.Module.STATE)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
     }
 }
