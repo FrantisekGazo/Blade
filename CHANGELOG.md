@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.6.4 *(2017-10-16)*
+----------------------------
+
+ * Fix: Superclass Presenter injection.
+ * New: Add more unit tests.
+
 Version 2.6.3 *(2017-04-16)*
 ----------------------------
 
