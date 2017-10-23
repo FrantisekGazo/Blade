@@ -17,13 +17,13 @@ package eu.f3rog.ptu
         final String androidConfig
         if (hasAndroidPlugin()) {
             androidConfig = """android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "com.example"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
