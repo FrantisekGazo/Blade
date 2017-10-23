@@ -3,6 +3,10 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.2'
@@ -19,6 +23,10 @@ allprojects {
     repositories {
         jcenter()
         mavenLocal()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
 
     // this is needed for running plugin tests
@@ -105,8 +113,8 @@ ext.deps = [
         javapoet           : 'com.squareup:javapoet:1.4.0',
 
         // Dagger2
-        dagger2            : 'com.google.dagger:dagger:2.7',
-        dagger2_compiler   : 'com.google.dagger:dagger-compiler:2.7',
+        dagger2            : 'com.google.dagger:dagger:2.11',
+        dagger2_compiler   : 'com.google.dagger:dagger-compiler:2.11',
 
         // Plugin
         javassist_helper   : 'eu.f3rog.javassist:helper:0.1.10',
