@@ -13,7 +13,7 @@ buildscript {
         }
 
         classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'eu.f3rog.blade:plugin:2.6.4'
+        classpath 'eu.f3rog.blade:plugin:2.7.0-beta1'
     }
 }
 

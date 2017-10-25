@@ -16,6 +16,7 @@ import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.Weaves
 import eu.f3rog.blade.mvp.WeavedMvpActivity
 import eu.f3rog.blade.mvp.WeavedMvpFragment
 import spock.lang.Unroll
@@ -133,13 +134,19 @@ public final class CombinedSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -181,6 +188,7 @@ public final class CombinedSpecification
                                 Bundle.class,
                                 BundleWrapper.class,
                                 Intent.class,
+                                Weaves.class,
                                 Weave.class
                         ]
                 ]
@@ -342,13 +350,19 @@ public final class CombinedSpecification
                 """
                 abstract class #T implements WeavedMvpActivity {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -391,6 +405,7 @@ public final class CombinedSpecification
                                 BundleWrapper.class,
                                 Intent.class,
                                 Weave.class,
+                                Weaves.class,
                                 WeavedMvpActivity.class
                         ]
                 ]
