@@ -97,11 +97,7 @@ public final class ExtraHelperModule
 
         addClassAsParameter(method, builder.getArgClassName(), target);
 
-        if (mInjected == Injected.ACTIVITY) {
-            method.addStatement("$T $N = $N.getIntent()", Intent.class, intent, target);
-        } else {
-            method.addParameter(Intent.class, intent);
-        }
+        method.addParameter(Intent.class, intent);
 
         method.beginControlFlow("if ($N == null || $N.getExtras() == null)", intent, intent)
                 .addStatement("return")
@@ -116,18 +112,23 @@ public final class ExtraHelperModule
     }
 
     private AnnotationSpec weaveAnnotation(final HelperClassBuilder builder) {
+        final String fullClassName = fullName(builder.getClassName());
         switch (mInjected) {
             case ACTIVITY:
-                return WeaveBuilder.weave().method("onCreate", Bundle.class)
-                        .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                return WeaveBuilder.weave()
+                        .method("onCreate", Bundle.class)
+                        .withStatement("%s.%s(this, this.getIntent());", fullClassName, METHOD_NAME_INJECT)
+                        .and()
+                        .method("onNewIntent", Intent.class)
+                        .withStatement("%s.%s(this, $1);", fullClassName, METHOD_NAME_INJECT)
                         .build();
             case SERVICE:
                 return WeaveBuilder.weave().method("onStartCommand", Intent.class, int.class, int.class)
-                        .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                        .withStatement("%s.%s(this, $1);", fullClassName, METHOD_NAME_INJECT)
                         .build();
             case INTENT_SERVICE:
                 return WeaveBuilder.weave().method("onHandleIntent", Intent.class)
-                        .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
+                        .withStatement("%s.%s(this, $1);", fullClassName, METHOD_NAME_INJECT)
                         .build();
             default:
                 throw new IllegalStateException();

@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2.7.0 *(2017-10-27)*
+----------------------------
+
+ * New: Add support for a `launchMode:singleTop` Activity into the `extra` module.
+
 Version 2.6.4 *(2017-10-16)*
 ----------------------------
 

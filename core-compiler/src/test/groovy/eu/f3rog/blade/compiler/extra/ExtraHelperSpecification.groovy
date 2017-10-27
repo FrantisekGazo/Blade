@@ -15,6 +15,7 @@ import eu.f3rog.blade.compiler.ErrorMsg
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.Weave
+import eu.f3rog.blade.core.Weaves
 import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
@@ -110,13 +111,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into = "0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -127,7 +134,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -168,13 +175,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into = "0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -186,7 +199,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -235,13 +248,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into = "0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -255,7 +274,7 @@ public final class ExtraHelperSpecification
                 [
                         I : input,
                         CB: customBundler,
-                        _ : [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -397,13 +416,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static <T> void inject(#I<T> target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static <T> void inject(#I<T> target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -415,7 +440,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -447,13 +472,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static <T extends Serializable> void inject(#I<T> target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static <T extends Serializable> void inject(#I<T> target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -465,7 +496,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Serializable.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Serializable.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -500,13 +531,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I.MyActivity target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I.MyActivity target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -518,7 +555,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -559,13 +596,19 @@ public final class ExtraHelperSpecification
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I.MyActivity1 target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I.MyActivity1 target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -577,20 +620,26 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyActivity2_Helper",
                 """
                 abstract class #T {
 
-                    @Weave(
-                        into="0^onCreate",
-                        args = {"android.os.Bundle"},
-                        statement = "com.example.#T.inject(this);"
-                    )
-                    public static void inject(#I.MyActivity2 target) {
-                        Intent intent = target.getIntent();
+                    @Weaves({
+                        @Weave(
+                            into="0^onCreate",
+                            args = {"android.os.Bundle"},
+                            statement = "com.example.#T.inject(this, this.getIntent());"
+                        ),
+                        @Weave(
+                            into="0^onNewIntent",
+                            args = {"android.content.Intent"},
+                            statement = "com.example.#T.inject(this, \$1);"
+                        )
+                    })
+                    public static void inject(#I.MyActivity2 target, Intent intent) {
                         if (intent == null || intent.getExtras() == null) {
                             return;
                         }
@@ -602,7 +651,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         I: input,
-                        _: [BundleWrapper.class, Intent.class, Weave.class]
+                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
