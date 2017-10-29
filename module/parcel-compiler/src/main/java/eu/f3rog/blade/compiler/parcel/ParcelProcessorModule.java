@@ -8,7 +8,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
 import blade.Parcel;
-import eu.f3rog.blade.compiler.ProcessorModule;
+import eu.f3rog.blade.compiler.BaseProcessorModule;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
@@ -19,7 +19,7 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * @version 2015-12-19
  */
 public class ParcelProcessorModule
-        implements ProcessorModule {
+        extends BaseProcessorModule {
 
     @Override
     public void process(TypeElement bladeElement) throws ProcessorError {

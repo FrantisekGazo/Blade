@@ -14,5 +14,6 @@ public interface MvpErrorMsg extends ErrorMsg {
 
     String Invalid_class_with_injected_Presenter = "Only Activity or Fragment subclass that implements " + IView.class.getCanonicalName() + " can inject class that implements " + IPresenter.class.getSimpleName() + ".";
     String Invalid_view_class = "Class must implement %s interface in order to work with %s.";
+    String Missing_dagger_dependency = "Blade module 'mvp' requires dagger2 dependency! See https://github.com/FrantisekGazo/Blade/wiki/mvp for more information.";
 
 }

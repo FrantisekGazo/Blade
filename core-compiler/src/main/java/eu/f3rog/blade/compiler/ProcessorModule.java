@@ -13,6 +13,8 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  */
 public interface ProcessorModule {
 
+    void prepare() throws ProcessorError;
+
     void process(TypeElement bladeElement) throws ProcessorError;
 
     void process(RoundEnvironment roundEnv) throws ProcessorError;

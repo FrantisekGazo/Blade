@@ -69,6 +69,10 @@ public class BladeProcessor extends BaseProcessor {
     protected void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
         ProcessorUtils.setProcessingEnvironment(getProcessingEnvironment());
         ClassManager.init();
+
+        for (int i = 0; i < mModules.size(); i++) {
+            mModules.get(i).prepare();
+        }
     }
 
     @Override
