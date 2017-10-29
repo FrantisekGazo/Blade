@@ -15,6 +15,8 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 final class BladePluginSpecification
         extends Specification {
 
+    private static String MVP_MODULE_ERROR_DAGGER_MISSING = "Blade module 'mvp' requires dagger2 dependency!"
+
     private static final String APT_CLASSPATH = "com.neenbedankt.gradle.plugins:android-apt:1.8"
     private static final String APT_PLUGIN = "com.neenbedankt.android-apt"
 
@@ -27,9 +29,11 @@ final class BladePluginSpecification
             ['1.5.0', '2.9', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.JSON],
             ['2.0.0', '2.10', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.JSON],
             ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.JSON],
+            ['3.0.0', '4.1', [], [], BladeTempFileBuilder.FileType.JSON],
             ['1.5.0', '2.9', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.YAML],
             ['2.0.0', '2.10', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.YAML],
-            ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.YAML]
+            ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.YAML],
+            ['3.0.0', '4.1', [], [], BladeTempFileBuilder.FileType.YAML]
     ]
 
     @Rule
@@ -48,7 +52,7 @@ final class BladePluginSpecification
     @Unroll
     def "fail without android plugin - for #gradleToolsVersion"() {
         given:
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
                 .plugins(["blade"])
         )
@@ -69,14 +73,14 @@ final class BladePluginSpecification
         e.getMessage().contains(BladePlugin.ERROR_ANDROID_PLUGIN_REQUIRED)
 
         where:
-        [gradleToolsVersion, _, _, _, _] << WHERE_DATA[0..2]
+        [gradleToolsVersion, _, _, _, _] << WHERE_DATA[0..3]
     }
 
     @Unroll
     def "fail if non-existing module name used - for #gradleToolsVersion, #bladeFileType"() {
         given:
         projectFolder.addBladeFile(bladeFileType, ["arg", "fake"])
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
                 .plugins(["com.android.application", "blade"])
         )
@@ -105,7 +109,7 @@ final class BladePluginSpecification
     def "fail if apt is not applied in gradle <2.2.0 - for #gradleToolsVersion, #bladeFileType"() {
         given:
         projectFolder.addBladeFile(bladeFileType, ["arg"])
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
                 .plugins(["com.android.application", "blade"])
         )
@@ -127,13 +131,13 @@ final class BladePluginSpecification
         e.getMessage().contains(BladePlugin.ERROR_APT_IS_MISSING)
 
         where:
-        [gradleToolsVersion, gradleVersion, _, _, bladeFileType] << WHERE_DATA[0..1] + WHERE_DATA[3..4]
+        [gradleToolsVersion, gradleVersion, _, _, bladeFileType] << WHERE_DATA[0..1] + WHERE_DATA[4..5]
     }
 
     @Unroll
     def "fail without blade file - for #gradleToolsVersion"() {
         given:
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
                 .plugins(["com.android.application"] + apt + ["blade"])
         )
@@ -155,7 +159,7 @@ final class BladePluginSpecification
         e.getMessage().contains(BladePlugin.ERROR_CONFIG_FILE_IS_MISSING)
 
         where:
-        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA[0..2]
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA[0..3]
     }
 
     @Unroll
@@ -163,7 +167,7 @@ final class BladePluginSpecification
         given:
         def bladeModules = ["arg"]
         projectFolder.addBladeFile(bladeFileType, bladeModules)
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
                 .plugins(["com.android.application"] + apt + ["blade"])
         )
@@ -195,7 +199,7 @@ final class BladePluginSpecification
     def "build successfully [EXTRA, arg] modules - for #gradleToolsVersion, #bladeFileType"() {
         given:
         projectFolder.addBladeFile(bladeFileType, ["EXTRA", "arg"]) // also test it's case insensitive
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
                 .plugins(["com.android.application"] + apt + ["blade"])
         )
@@ -217,13 +221,43 @@ final class BladePluginSpecification
     }
 
     @Unroll
+    def "fail [mvp] without dagger dependency - for #gradleToolsVersion"() {
+        given:
+        projectFolder.addBladeFile(bladeFileType, ['mvp'])
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
+                .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
+                .plugins(["com.android.application"] + apt + ["blade"])
+        )
+
+        when:
+        Exception e = null
+        try {
+            GradleRunner.create()
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(projectFolder.root)
+                    .withArguments(':build')
+                    .build()
+        } catch (Exception ex) {
+            e = ex
+        }
+
+        then:
+        e != null
+        e.getMessage().contains(MVP_MODULE_ERROR_DAGGER_MISSING)
+
+        where:
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA
+    }
+
+    @Unroll
     def "build successfully [mvp] module - for #gradleToolsVersion, #bladeFileType"() {
         given:
         projectFolder.addBladeFile(bladeFileType, ['mvp'])
-        projectFolder.addGradleFile(new GradleConfig()
+        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
                 .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
                 .plugins(["com.android.application"] + apt + ["blade"])
-                .dependencies(["compile 'com.google.dagger:dagger:2.0.2'"])
+                .dependencies(["com.google.dagger:dagger:2.11"])
+                .apDependencies(["com.google.dagger:dagger-compiler:2.11"])
         )
 
         when:

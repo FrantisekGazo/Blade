@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.7.1 *(2017-10-29)*
+----------------------------
+
+ * New: Add support for `com.android.tools.build:gradle:3.+`.
+ * New: Show a better error message if `dagger2` dependency is missing while using `mvp` module.
+
 Version 2.7.0 *(2017-10-27)*
 ----------------------------
 
