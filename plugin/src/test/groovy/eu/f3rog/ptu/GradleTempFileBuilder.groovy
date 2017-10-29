@@ -15,7 +15,7 @@ package eu.f3rog.ptu
     @Override
     public String getBody() {
         final String androidConfig
-        if (hasAndroidPlugin()) {
+        if (mConfig.hasAndroidPlugin()) {
             androidConfig = """android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
@@ -44,24 +44,23 @@ package eu.f3rog.ptu
 
 
         return """buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        ${mConfig.getRepository()}
+    }
     dependencies {
-        repositories {
-            mavenLocal()
-            mavenCentral()
-            jcenter()
-        }
-
-        ${mConfig.getClasspaths().collect({ "classpath '$it'" }).join("\n")}
+        ${mConfig.getFormattedClasspaths()}
     }
 }
 
-${mConfig.getPlugins().collect({ "apply plugin: '$it'" }).join("\n")}
+${mConfig.getFormattedPlugins()}
 
 ${androidConfig}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    ${mConfig.getDependencies().join("\n")}
+    ${mConfig.getFormattedDependencies()}
 }
 
 project.plugins.each {
@@ -73,10 +72,6 @@ project.plugins.each {
 
     @Override
     public TempFileBuilder[] getRelatedFiles() {
-        return hasAndroidPlugin() ? [new AndroidManifestTempFileBuilder(), new MainActivityTempFileBuilder()] : []
-    }
-
-    private boolean hasAndroidPlugin() {
-        return mConfig.getPlugins().contains('com.android.application')
+        return mConfig.hasAndroidPlugin() ? [new AndroidManifestTempFileBuilder(), new MainActivityTempFileBuilder()] : []
     }
 }

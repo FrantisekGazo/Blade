@@ -32,7 +32,7 @@ public final class BladePlugin
     public static String ERROR_CONFIG_FILE_IS_MISSING = "Blade configuration file is missing! (more info here: https://github.com/FrantisekGazo/Blade/wiki#1-create-configuration-file)"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.7.1-beta1"
+    public static String LIB_VERSION = "2.7.1-beta3"
     public static String LIB_CONFIG_FILE_NAME = "blade"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
@@ -56,11 +56,12 @@ public final class BladePlugin
 
         project.repositories.add(project.getRepositories().jcenter())
         def apList = determineAnnotationProcessorPlugin(project)
+        def usageConfiguration = determineUsageConfiguration(project)
         // core
-        project.dependencies.add("compile", "$LIB_GROUP_ID:core:$LIB_VERSION")
+        project.dependencies.add(usageConfiguration, "$LIB_GROUP_ID:core:$LIB_VERSION")
         // modules
         for (final String moduleName : mConfig.modules) {
-            project.dependencies.add("compile", "$LIB_GROUP_ID:$moduleName:$LIB_VERSION")
+            project.dependencies.add(usageConfiguration, "$LIB_GROUP_ID:$moduleName:$LIB_VERSION")
             for (final String ap : apList) {
                 project.dependencies.add(ap, "$LIB_GROUP_ID:$moduleName-compiler:$LIB_VERSION")
             }
@@ -86,6 +87,11 @@ public final class BladePlugin
         } else {
             throw new IllegalStateException(ERROR_APT_IS_MISSING)
         }
+    }
+
+    private String determineUsageConfiguration(Project project) {
+        def hasImplementationConfiguration = project.getConfigurations().findByName('implementation') != null
+        return hasImplementationConfiguration ? 'implementation' : 'compile'
     }
 
     private static boolean isTransformAvailable() {
