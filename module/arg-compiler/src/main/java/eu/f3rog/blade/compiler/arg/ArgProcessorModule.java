@@ -8,7 +8,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
 import blade.Arg;
-import eu.f3rog.blade.compiler.ProcessorModule;
+import eu.f3rog.blade.compiler.BaseProcessorModule;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
@@ -18,7 +18,7 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * @author FrantisekGazo
  */
 public final class ArgProcessorModule
-        implements ProcessorModule {
+        extends BaseProcessorModule {
 
     @Override
     public void process(final TypeElement bladeElement) throws ProcessorError {

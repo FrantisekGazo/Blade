@@ -32,11 +32,11 @@ public final class BladePlugin
     public static String ERROR_CONFIG_FILE_IS_MISSING = "Blade configuration file is missing! (more info here: https://github.com/FrantisekGazo/Blade/wiki#1-create-configuration-file)"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.7.0"
+    public static String LIB_VERSION = "2.7.1-beta1"
     public static String LIB_CONFIG_FILE_NAME = "blade"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
-    private BladeConfig mConfig;
+    private BladeConfig mConfig
 
     @Override
     void apply(Project project) {

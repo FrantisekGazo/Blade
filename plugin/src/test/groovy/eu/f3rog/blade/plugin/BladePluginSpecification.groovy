@@ -15,6 +15,8 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 final class BladePluginSpecification
         extends Specification {
 
+    private static String MVP_MODULE_ERROR_DAGGER_MISSING = "Blade module 'mvp' requires dagger2 dependency!"
+
     private static final String APT_CLASSPATH = "com.neenbedankt.gradle.plugins:android-apt:1.8"
     private static final String APT_PLUGIN = "com.neenbedankt.android-apt"
 
@@ -211,6 +213,35 @@ final class BladePluginSpecification
         result.task(":build").outcome == SUCCESS
         result.task(":transformClassesWithBladeForDebug").outcome == SUCCESS
         result.task(":transformClassesWithBladeForRelease").outcome == SUCCESS
+
+        where:
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA
+    }
+
+    @Unroll
+    def "fail [mvp] without dagger dependency - for #gradleToolsVersion"() {
+        given:
+        projectFolder.addBladeFile(bladeFileType, ['mvp'])
+        projectFolder.addGradleFile(new GradleConfig()
+                .classpaths([buildGradleClasspath(gradleToolsVersion)] + aptClasspath + [bladeClasspath])
+                .plugins(["com.android.application"] + apt + ["blade"])
+        )
+
+        when:
+        Exception e = null
+        try {
+            GradleRunner.create()
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(projectFolder.root)
+                    .withArguments(':build')
+                    .build()
+        } catch (Exception ex) {
+            e = ex
+        }
+
+        then:
+        e != null
+        e.getMessage().contains(MVP_MODULE_ERROR_DAGGER_MISSING)
 
         where:
         [gradleToolsVersion, gradleVersion, aptClasspath, apt, bladeFileType] << WHERE_DATA

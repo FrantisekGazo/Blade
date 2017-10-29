@@ -9,7 +9,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
-import eu.f3rog.blade.compiler.ProcessorModule;
+import eu.f3rog.blade.compiler.BaseProcessorModule;
 import eu.f3rog.blade.compiler.builder.ClassManager;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 
@@ -19,7 +19,18 @@ import eu.f3rog.blade.compiler.util.ProcessorError;
  * @author FrantisekGazo
  */
 public final class MvpProcessorModule
-        implements ProcessorModule {
+        extends BaseProcessorModule {
+
+    @Override
+    public void prepare() throws ProcessorError {
+        try {
+            // check if dagger dependency is present
+            Class inject = Class.forName("javax.inject.Inject");
+            Class membersInjector = Class.forName("dagger.internal.MembersInjectors");
+        } catch (Exception e) {
+            throw new ProcessorError(null, MvpErrorMsg.Missing_dagger_dependency);
+        }
+    }
 
     @Override
     public void process(TypeElement bladeElement) throws ProcessorError {
