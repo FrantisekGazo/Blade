@@ -1,6 +1,5 @@
 package eu.f3rog.blade.weaving.interfaces;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import eu.f3rog.javassist.JavassistHelper;
@@ -43,57 +42,49 @@ final class DaggerMiddleMan {
     private static final class DaggerMethodEditor
             extends MethodEditor {
 
+        private static final String PROVIDER_FIELD_NAME_SUFFIX = "Provider";
+        private static final String PROVIDER_GET_METHOD_NAME = "get";
+
         private final List<String> mPresenterFieldNames;
         private final String mWrapMethod;
-        private final List<String> mFieldAccessList;
-        private int mCurrentFieldAccess;
-        private boolean mFindFields;
+        private String mLastAccessedProviderFieldName;
 
         DaggerMethodEditor(List<String> presenterFieldNames, String wrapMethod) {
             mPresenterFieldNames = presenterFieldNames;
             mWrapMethod = wrapMethod;
-            mFieldAccessList = new ArrayList<>();
-            mCurrentFieldAccess = 0;
-            mFindFields = false;
+            mLastAccessedProviderFieldName = null;
         }
 
         @Override
-        public void edit(FieldAccess f) throws CannotCompileException {
+        public void edit(final FieldAccess f) throws CannotCompileException {
             super.edit(f);
 
-            if (mFindFields) {
-                String fieldName = f.getFieldName();
+            final String fieldName = f.getFieldName();
+            if (fieldName.endsWith(PROVIDER_FIELD_NAME_SUFFIX)) {
                 //System.out.printf("field access '%s' ...\n", fieldName);
-
-                mFieldAccessList.add(fieldName);
-            } else {
-                mCurrentFieldAccess += 1;
+                mLastAccessedProviderFieldName = fieldName;
             }
         }
 
         @Override
-        public void edit(MethodCall m) throws CannotCompileException {
+        public void edit(final MethodCall m) throws CannotCompileException {
             super.edit(m);
 
-            if (mFindFields) {
-                return;
-            }
-
-            if (!m.getMethodName().equals("get")) {
-                return;
-            }
-
-            String providerField = mFieldAccessList.get(mCurrentFieldAccess - 1);
-            String instanceField = mFieldAccessList.get(mCurrentFieldAccess);
-
-            if (!mPresenterFieldNames.contains(instanceField)) {
+            if (!m.getMethodName().equals(PROVIDER_GET_METHOD_NAME)) {
                 return;
             }
 
             //System.out.printf("replacing %s ", m.getMethodName());
 
-            String statement = String.format("{ $_ = %s(%s, \"%s\", %s); }",
-                    mWrapMethod, "instance", instanceField, providerField);
+            final String providerFieldName = mLastAccessedProviderFieldName;
+            final String instanceFieldName = providerFieldName.substring(0, providerFieldName.length() - PROVIDER_FIELD_NAME_SUFFIX.length());
+
+            if (!mPresenterFieldNames.contains(instanceFieldName)) {
+                return;
+            }
+
+            final String statement = String.format("{ $_ = %s(%s, \"%s\", %s); }",
+                    mWrapMethod, "instance", instanceFieldName, providerFieldName);
 
             //System.out.printf("with %s\n", statement);
 
@@ -101,16 +92,8 @@ final class DaggerMiddleMan {
         }
 
         @Override
-        public void instrument(CtMethod method) throws CannotCompileException {
-            mFieldAccessList.clear();
-            mCurrentFieldAccess = 0;
-
-            // go through the method and find all field accesses
-            mFindFields = true;
-            method.instrument(this);
-
-            // got through the method and modify it
-            mFindFields = false;
+        public void instrument(final CtMethod method) throws CannotCompileException {
+            mLastAccessedProviderFieldName = null;
             method.instrument(this);
         }
     }
