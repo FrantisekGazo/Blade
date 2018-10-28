@@ -6,4 +6,5 @@ rm -Rf ~/Library/Android/sdk/extras/android/m2repository/eu/
 mkdir ~/Library/Android/sdk/extras/android/m2repository/eu/
 cp -R ~/.m2/repository/eu/ ~/Library/Android/sdk/extras/android/m2repository/eu/
 
-./gradlew :plugin:test
+#./gradlew :plugin:test
+./gradlew :sample:assembleProdDebug

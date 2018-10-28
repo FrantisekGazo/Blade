@@ -5,6 +5,7 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.annotation.Annotation;
 
 /**
  * Class {@link WeavingUtil}
@@ -51,15 +52,26 @@ public final class WeavingUtil {
         return false;
     }
 
-    public static AnnotationsAttribute getAnnotations(CtClass ctClass) {
+    public static boolean hasAnnotation(final CtClass targetClass, final String... annotationClassNames) {
+        final AnnotationsAttribute annotations = getAnnotations(targetClass);
+        for (final String annotationClassName : annotationClassNames) {
+            final Annotation a = annotations.getAnnotation(annotationClassName);
+            if (a != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static AnnotationsAttribute getAnnotations(final CtClass ctClass) {
         return (AnnotationsAttribute) ctClass.getClassFile().getAttribute(AnnotationsAttribute.visibleTag);
     }
 
-    public static AnnotationsAttribute getAnnotations(CtMethod ctMethod) {
+    public static AnnotationsAttribute getAnnotations(final CtMethod ctMethod) {
         return (AnnotationsAttribute) ctMethod.getMethodInfo().getAttribute(AnnotationsAttribute.visibleTag);
     }
 
-    public static AnnotationsAttribute getAnnotations(CtField ctField) {
+    public static AnnotationsAttribute getAnnotations(final CtField ctField) {
         return (AnnotationsAttribute) ctField.getFieldInfo().getAttribute(AnnotationsAttribute.visibleTag);
     }
 

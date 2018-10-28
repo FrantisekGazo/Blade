@@ -13,7 +13,7 @@ buildscript {
         }
 
         classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'eu.f3rog.blade:plugin:2.7.0-beta1'
+        classpath 'eu.f3rog.blade:plugin:2.7.2-beta2'
     }
 }
 
@@ -74,8 +74,8 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:26.1.0'
 
     /* Dagger2 - needed for MVP module */
-    compile 'com.google.dagger:dagger:2.11'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
+    compile 'com.google.dagger:dagger:2.13'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
     /* ButterKnife */
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'

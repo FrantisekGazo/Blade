@@ -152,16 +152,14 @@ public final class PresenterManager {
     //region provide/create/bind presenter
 
     /**
-     * Provides presenter.
+     * Checks if a presenter exists for given view.
      * <p/>
      * NOTE: This method is only for internal usage of this library. Do not call it manually.
      */
-    @NonNull
-    public final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
-    P get(@NonNull final V view, @NonNull final String fieldName, @NonNull final Provider<P> provider) {
+    public final <V extends IView & WeavedMvpUi>
+    boolean exists(@NonNull final V view, @NonNull final String fieldName) {
         nonNull(view, "view");
         nonNull(fieldName, "filedName");
-        nonNull(provider, "provider");
 
         final ActivityPresenterManager apm;
 
@@ -184,9 +182,75 @@ public final class PresenterManager {
             throw new IllegalArgumentException("view has unsupported type");
         }
 
+        return apm.get(view, fieldName) != null;
+    }
+
+    /**
+     * Provides presenter.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    @NonNull
+    public final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
+    P getInitialized(@NonNull final V view, @NonNull final String fieldName) {
+        nonNull(view, "view");
+        nonNull(fieldName, "filedName");
+
+        final ActivityPresenterManager apm = findActivityPresenterManager(view);
+
         P presenter = apm.get(view, fieldName);
         if (presenter == null) {
-            presenter = provider.get();
+            throw new IllegalStateException("presenter is missing");
+        }
+        presenter.onBind(view);
+
+        return presenter;
+    }
+
+    /**
+     * Provides presenter.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    @NonNull
+    public final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
+    P initialize(@NonNull final V view, @NonNull final String fieldName, @NonNull final P presenter) {
+        nonNull(view, "view");
+        nonNull(fieldName, "filedName");
+        nonNull(presenter, "presenter");
+
+        final ActivityPresenterManager apm = findActivityPresenterManager(view);
+
+        apm.put(view, fieldName, presenter);
+
+        final Bundle viewState = view.getWeavedState();
+        final Bundle presenterState = (viewState != null) ? viewState.getBundle(getPresenterStateKey(fieldName)) : null;
+        presenter.onCreate(presenterState);
+
+        presenter.onBind(view);
+
+        return presenter;
+    }
+
+    /**
+     * Provides presenter.
+     * <p/>
+     * NOTE: This method is only for internal usage of this library. Do not call it manually.
+     */
+    @NonNull
+    public final <V extends IView & WeavedMvpUi, P extends IPresenter<V>>
+    P get(@NonNull final V view, @NonNull final String fieldName, @NonNull final Provider provider) {
+        nonNull(view, "view");
+        nonNull(fieldName, "filedName");
+        nonNull(provider, "provider");
+
+        final ActivityPresenterManager apm = findActivityPresenterManager(view);
+
+        P presenter = apm.get(view, fieldName);
+        if (presenter == null) {
+            // cast it here instead of requiring Provider<P> as parameter because of the weaved code
+            //noinspection unchecked
+            presenter = (P) provider.get();
             apm.put(view, fieldName, presenter);
 
             final Bundle viewState = view.getWeavedState();
@@ -196,6 +260,27 @@ public final class PresenterManager {
         presenter.onBind(view);
 
         return presenter;
+    }
+
+    private ActivityPresenterManager findActivityPresenterManager(@NonNull final IView view) {
+        if (view instanceof WeavedMvpActivity) {
+            final WeavedMvpActivity mvpActivity = (WeavedMvpActivity) view;
+
+            final String activityId = mvpActivity.getWeavedId();
+            return getActivityPresenterManagerOrCreate(activityId);
+        } else if (view instanceof WeavedMvpFragment) {
+            final WeavedMvpFragment mvpFragment = (WeavedMvpFragment) view;
+
+            final String activityId = getActivityIdPart(mvpFragment);
+            return getActivityPresenterManagerOrCreate(activityId);
+        } else if (view instanceof WeavedMvpView) {
+            final WeavedMvpView mvpView = (WeavedMvpView) view;
+
+            final String activityId = getActivityIdPart(mvpView);
+            return getActivityPresenterManagerOrCreate(activityId);
+        } else {
+            throw new IllegalArgumentException("view has unsupported type");
+        }
     }
 
     //endregion provide presenter

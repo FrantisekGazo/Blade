@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import eu.f3rog.blade.weaving.interfaces.dagger.DaggerMiddleMan;
 import eu.f3rog.javassist.JavassistHelper;
 import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
 import javassist.CannotCompileException;

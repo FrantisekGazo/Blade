@@ -8,6 +8,7 @@ import java.util.List;
 import eu.f3rog.blade.compiler.builder.annotation.WeaveParser;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
+import eu.f3rog.blade.weaving.interfaces.dagger.DaggerMiddleMan;
 import eu.f3rog.blade.weaving.interfaces.Interfaces;
 import eu.f3rog.blade.weaving.util.AWeaver;
 import eu.f3rog.javassist.exception.AfterBurnerImpossibleException;
@@ -30,8 +31,10 @@ public final class BladeWeaver
 
     @Override
     public void weave(ClassPool classPool, List<CtClass> classes) {
-        for (CtClass cls : classes) {
-            String className = cls.getName();
+        DaggerMiddleMan.init(classPool, classes);
+
+        for (final CtClass cls : classes) {
+            final String className = cls.getName();
             if (className.endsWith("_Helper")) {
                 CtClass intoClass;
                 try {
