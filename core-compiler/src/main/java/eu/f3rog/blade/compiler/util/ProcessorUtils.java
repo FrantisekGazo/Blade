@@ -177,11 +177,15 @@ public class ProcessorUtils {
     }
 
     public static boolean isActivitySubClass(TypeElement inspectedType) {
-        return isSubClassOf(inspectedType, Activity.class) || isSubClassOf(inspectedType, ClassNames.AppCompatActivity);
+        return isSubClassOf(inspectedType, Activity.class) ||
+               isSubClassOf(inspectedType, ClassNames.SupportActivity) ||
+               isSubClassOf(inspectedType, ClassNames.AndroidxActivity);
     }
 
     public static boolean isFragmentSubClass(TypeElement inspectedType) {
-        return isSubClassOf(inspectedType, Fragment.class) || isSubClassOf(inspectedType, ClassNames.SupportFragment);
+        return isSubClassOf(inspectedType, Fragment.class) ||
+               isSubClassOf(inspectedType, ClassNames.SupportFragment) ||
+               isSubClassOf(inspectedType, ClassNames.AndroidxFragment);
     }
 
     public static boolean isSubClassOf(TypeElement inspectedType, Class lookupClass) {

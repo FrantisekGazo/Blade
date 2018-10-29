@@ -11,7 +11,9 @@ import com.squareup.javapoet.ClassName;
 public interface ClassNames {
 
     // Android support lib classes
-    ClassName AppCompatActivity = ClassName.get("android.support.v7.app", "AppCompatActivity");
-    ClassName SupportFragment = ClassName.get("android.support.v4.app", "Fragment");
+    ClassName SupportActivity = ClassName.get("android.support.v7.app", "AppCompatActivity");
+    ClassName AndroidxActivity = ClassName.get("androidx.appcompat.app", "AppCompatActivity");
 
+    ClassName SupportFragment = ClassName.get("android.support.v4.app", "Fragment");
+    ClassName AndroidxFragment = ClassName.get("androidx.fragment.app", "Fragment");
 }

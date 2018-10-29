@@ -13,11 +13,15 @@ import javax.tools.StandardLocation
 public abstract class BaseSpecification
         extends Specification {
 
-    protected ITruthWrapper assertFiles(JavaFileObject... f) {
-        List<JavaFileObject> files = new ArrayList<>()
-        files.addAll(Arrays.asList(f))
+    protected ITruthWrapper assertFiles(Object... files) {
+        List<JavaFileObject> allFiles = new ArrayList<>()
+        for (file in files) {
+            if (file instanceof JavaFileObject) {
+                allFiles.add((JavaFileObject) file)
+            }
+        }
 
-        return new TruthWrapper(files)
+        return new TruthWrapper(allFiles)
     }
 
     public interface ITruthWrapper {
@@ -44,7 +48,7 @@ public abstract class BaseSpecification
     protected boolean compilesWithoutErrorAndDoesntGenerate(String pkg,
                                                             String className,
                                                             BladeProcessor.Module module,
-                                                            JavaFileObject... inputFiles) {
+                                                            Object... inputFiles) {
         try {
             assertFiles(inputFiles)
                     .with(module)
