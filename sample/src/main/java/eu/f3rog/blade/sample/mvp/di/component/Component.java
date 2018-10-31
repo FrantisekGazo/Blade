@@ -1,7 +1,7 @@
 package eu.f3rog.blade.sample.mvp.di.component;
 
 import android.app.Application;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import eu.f3rog.blade.sample.mvp.di.module.app.AppModule;
 import eu.f3rog.blade.sample.mvp.di.module.data.DataModule;

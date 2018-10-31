@@ -55,6 +55,15 @@ package eu.f3rog.ptu
     }
 }
 
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        ${mConfig.getRepository()}
+    }
+}
+
 ${mConfig.getFormattedPlugins()}
 
 ${androidConfig}

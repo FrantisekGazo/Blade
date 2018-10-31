@@ -1,10 +1,8 @@
 package eu.f3rog.blade.compiler.arg
 
-import android.app.Fragment
 import android.os.Bundle
 import blade.Arg
 import blade.Blade
-import eu.f3rog.blade.compiler.MockClass
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.ErrorMsg
@@ -46,14 +44,14 @@ public final class ArgHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#A $accessor String mText;
                 }
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 
@@ -86,10 +84,70 @@ public final class ArgHelperSpecification
 
         expect:
         compilesWithoutErrorAndDoesntGenerate("com.example", "MyFragment_Helper",
-                BladeProcessor.Module.ARG, fragmentClass, input)
+                BladeProcessor.Module.ARG, input)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
+    }
+
+    @Unroll
+    def "generate _Helper for an inherited fragment (where #fragmentClassName)"() {
+        given:
+        final JavaFileObject base = JavaFile.newFile("com.example", "BaseFragment",
+                """
+                public class #T extends #F {
+                }
+                """,
+                [
+                        F: fragmentClass
+                ]
+        )
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T extends #F {
+
+                    @#A String text;
+                }
+                """,
+                [
+                        A: Arg.class,
+                        F: base
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.text = args.get("<Arg-text>", target.text);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class]
+                ]
+        )
+
+        assertFiles(base, input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -135,14 +193,14 @@ public final class ArgHelperSpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -207,14 +265,14 @@ public final class ArgHelperSpecification
                 ]
         )
 
-        assertFiles(fragmentClass, customBundler, input)
+        assertFiles(customBundler, input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -260,14 +318,14 @@ public final class ArgHelperSpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -314,14 +372,14 @@ public final class ArgHelperSpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -370,14 +428,14 @@ public final class ArgHelperSpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -456,13 +514,13 @@ public final class ArgHelperSpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected1, expected2)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 }

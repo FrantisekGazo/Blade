@@ -1,7 +1,7 @@
 package eu.f3rog.blade.sample.mvp.view;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import blade.mvp.IView;
 import eu.f3rog.blade.sample.mvp.model.ActorDetail;

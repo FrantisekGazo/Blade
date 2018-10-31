@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.extra
 
-import android.app.Activity
 import android.app.IntentService
 import android.app.Service
 import android.content.Intent
@@ -12,7 +11,6 @@ import blade.Extra
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.ErrorMsg
-import eu.f3rog.blade.compiler.MockClass
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.Weave
@@ -50,14 +48,14 @@ public final class ExtraHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E $accessor String mText;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -89,10 +87,10 @@ public final class ExtraHelperSpecification
         )
 
         expect:
-        compilesWithoutErrorAndDoesntGenerate("com.example", "MyActivity_Helper", BladeProcessor.Module.EXTRA, input, activityClass)
+        compilesWithoutErrorAndDoesntGenerate("com.example", "MyActivity_Helper", BladeProcessor.Module.EXTRA, input)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -100,14 +98,14 @@ public final class ExtraHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E $type mFlag;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -209,14 +207,14 @@ public final class ExtraHelperSpecification
                 ]
         )
 
-        assertFiles(activityClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -288,14 +286,14 @@ public final class ExtraHelperSpecification
                 ]
         )
 
-        assertFiles(customBundler, input, activityClass)
+        assertFiles(customBundler, input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     def "generate _Helper if 2 @Extra are in a Service class"() {
@@ -458,14 +456,14 @@ public final class ExtraHelperSpecification
                 ]
         )
 
-        assertFiles(input, activityClass)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -519,14 +517,14 @@ public final class ExtraHelperSpecification
                 ]
         )
 
-        assertFiles(input, activityClass)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -582,14 +580,14 @@ public final class ExtraHelperSpecification
                 ]
         )
 
-        assertFiles(input, activityClass)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -682,13 +680,13 @@ public final class ExtraHelperSpecification
                 ]
         )
 
-        assertFiles(input, activityClass)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected1, expected2)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 }

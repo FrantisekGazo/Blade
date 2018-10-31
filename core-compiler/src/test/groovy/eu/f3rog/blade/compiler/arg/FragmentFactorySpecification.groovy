@@ -5,7 +5,6 @@ import blade.Arg
 import blade.Blade
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
-import eu.f3rog.blade.compiler.MockClass
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import blade.Bundler
@@ -50,14 +49,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -96,14 +95,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -166,14 +165,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, customBundler, input)
+        assertFiles(customBundler, input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -236,14 +235,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input1, input2)
+        assertFiles(input1, input2)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -304,14 +303,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input1, input2)
+        assertFiles(input1, input2)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -363,14 +362,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input1, input2)
+        assertFiles(input1, input2)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -412,14 +411,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -462,14 +461,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -514,14 +513,14 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
     @Unroll
@@ -581,13 +580,13 @@ public final class FragmentFactorySpecification
                 ]
         )
 
-        assertFiles(fragmentClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.ARG)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [fragmentClassName, fragmentClass] << MockClass.fragmentClasses
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 }

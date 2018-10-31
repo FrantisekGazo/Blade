@@ -1,13 +1,12 @@
 package eu.f3rog.blade.sample.mvp.di.module.presenter;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import dagger.Module;
 import dagger.Provides;
 import eu.f3rog.blade.sample.mvp.service.DataService;
 import eu.f3rog.blade.sample.mvp.presenter.ActorListPresenter;
 import eu.f3rog.blade.sample.mvp.presenter.ActorPresenter;
-import rx.Scheduler;
 
 
 @Module

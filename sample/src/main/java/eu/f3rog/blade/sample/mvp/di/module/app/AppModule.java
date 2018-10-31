@@ -2,7 +2,7 @@ package eu.f3rog.blade.sample.mvp.di.module.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import dagger.Module;
 import dagger.Provides;

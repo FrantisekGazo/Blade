@@ -3,7 +3,7 @@ package eu.f3rog.blade.compiler.name;
 import com.squareup.javapoet.ClassName;
 
 /**
- * Enum {@link GCN}
+ * Enum {@link GCN} represents a Generated Class Name.
  *
  * @author FrantisekGazo
  * @version 2015-10-16

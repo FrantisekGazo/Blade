@@ -1,6 +1,6 @@
 package eu.f3rog.blade.sample.mvp;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;

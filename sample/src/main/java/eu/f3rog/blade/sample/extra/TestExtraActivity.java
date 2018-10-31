@@ -1,7 +1,7 @@
 package eu.f3rog.blade.sample.extra;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.EditText;
 
 import blade.Blade;

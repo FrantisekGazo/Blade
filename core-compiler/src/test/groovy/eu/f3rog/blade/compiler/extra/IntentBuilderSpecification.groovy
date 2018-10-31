@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.extra
 
-import android.app.Activity
 import android.app.IntentService
 import android.app.Service
 import android.content.Context
@@ -12,7 +11,6 @@ import blade.Bundler
 import blade.Extra
 import eu.f3rog.blade.compiler.BaseSpecification
 import eu.f3rog.blade.compiler.BladeProcessor
-import eu.f3rog.blade.compiler.MockClass
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import eu.f3rog.blade.core.GeneratedFor
@@ -36,10 +34,10 @@ public final class IntentBuilderSpecification
         )
 
         expect:
-        compilesWithoutErrorAndDoesntGenerate("blade", "I", BladeProcessor.Module.EXTRA, input, activityClass)
+        compilesWithoutErrorAndDoesntGenerate("blade", "I", BladeProcessor.Module.EXTRA, input)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -84,14 +82,14 @@ public final class IntentBuilderSpecification
                 ]
         )
 
-        assertFiles(input, activityClass)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
@@ -99,14 +97,14 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E $type mField;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -197,33 +195,33 @@ public final class IntentBuilderSpecification
                 ]
         )
 
-        assertFiles(activityClass, input)
+        assertFiles(input)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
 
         where:
-        [activityClassName, activityClass] << MockClass.activityClasses
+        [activityClassName, activityClass] << activityClasses
     }
 
     def "generate for 2 activity classes with @Extra"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "FirstActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E int number;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "SecondActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E String text;
                     @#E boolean flag;
@@ -232,7 +230,7 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -291,14 +289,14 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "BaseActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E int number;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "MyActivity",
@@ -368,14 +366,14 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "BaseActivity",
                 """
-                public abstract class #T extends Activity {
+                public abstract class #T extends #A {
 
                     @#E int number;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "MyActivity",
@@ -446,7 +444,7 @@ public final class IntentBuilderSpecification
         )
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E(#CB.class) String mText;
                     @#E int mNumber;
@@ -455,7 +453,7 @@ public final class IntentBuilderSpecification
                 [
                         E : Extra.class,
                         CB: customBundler,
-                        _ : [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -506,7 +504,7 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T<T> extends Activity {
+                public class #T<T> extends #A {
 
                     @#E String mText;
                     @#E int mNumber;
@@ -514,7 +512,7 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -558,7 +556,7 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T<T extends Serializable> extends Activity {
+                public class #T<T extends Serializable> extends #A {
 
                     @#E T mData;
                     @#E int mNumber;
@@ -566,7 +564,8 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class, Serializable.class]
+                        A: androidxActivity,
+                        _: [Serializable.class]
                 ]
         )
 
@@ -612,7 +611,7 @@ public final class IntentBuilderSpecification
                 """
                 public class #T {
 
-                    public static class MyActivity extends Activity {
+                    public static class MyActivity extends #A {
 
                         @#E String mText;
                         @#E int mNumber;
@@ -621,7 +620,7 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -667,13 +666,13 @@ public final class IntentBuilderSpecification
                 """
                 public class #T {
 
-                    public static class MyActivity1 extends Activity {
+                    public static class MyActivity1 extends #A {
 
                         @#E String mText;
                         @#E int mNumber;
                     }
 
-                    public static class MyActivity2 extends Activity {
+                    public static class MyActivity2 extends #A {
 
                         @#E String mText;
                         @#E int mNumber;
@@ -682,7 +681,7 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -741,14 +740,14 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "FirstActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E int number;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "SecondActivity",
@@ -760,7 +759,7 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        A: MockClass.SUPPORT_ACTIVITY
+                        A: supportActivity
                 ]
         )
         final JavaFileObject input3 = JavaFile.newFile("com.example", "ThirdActivity",
@@ -772,7 +771,7 @@ public final class IntentBuilderSpecification
                 """,
                 [
                         E: Extra.class,
-                        A: MockClass.ANDROIDX_ACTIVITY
+                        A: androidxActivity
                 ]
         )
 
@@ -833,7 +832,7 @@ public final class IntentBuilderSpecification
                 ]
         )
 
-        assertFiles(MockClass.SUPPORT_ACTIVITY, MockClass.ANDROIDX_ACTIVITY, input1, input2, input3)
+        assertFiles(input1, input2, input3)
                 .with(BladeProcessor.Module.EXTRA)
                 .compilesWithoutError()
                 .and()
@@ -932,14 +931,14 @@ public final class IntentBuilderSpecification
         given:
         final JavaFileObject activity = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E int number;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
         final JavaFileObject service = JavaFile.newFile("com.example", "MyService",

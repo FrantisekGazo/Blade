@@ -43,7 +43,9 @@ public final class GradleConfig {
 
     public String getRepository() {
         // google() does not work for the 1st test
-        return isV3() ? '''
+        return isV3_2() ? '''
+        google()
+        ''' : isV3() ? '''
         maven {
             url 'https://maven.google.com/'
             name 'Google'
@@ -66,6 +68,10 @@ public final class GradleConfig {
 
     private boolean isV3() {
         return mVersionName.startsWith('3.')
+    }
+
+    private boolean isV3_2() {
+        return mVersionName.startsWith('3.2.')
     }
 
     private String getConfiguration() {

@@ -1,26 +1,23 @@
 apply plugin: 'groovy'
-apply plugin: 'java'
+apply plugin: 'java-library'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    /* needed to create a plugin */
-    compile gradleApi()
-    compile localGroovy()
-
     compileOnly deps.gradle_plugin
-    compile deps.javassist_helper
-    compile deps.google_android
-    compile deps.snakeyaml
+    compileOnly deps.android_runtime
 
-    compile project(':core')
-    compile project(':core-compiler')
+    implementation gradleApi() // needed to create a plugin
+    implementation deps.javassist_helper
+    implementation deps.snakeyaml
+    implementation project(':core')
+    implementation project(':core-compiler')
 
     /* TEST */
-    // use gradle 2.9 (2.10 is throwing exceptions -> https://discuss.gradle.org/t/nosuchmethoderror-in-testkit-after-2-9-2-10-transition/13505)
-    testCompile gradleTestKit()
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.codehaus.groovy:groovy-all:2.4.4'
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testImplementation gradleTestKit()
+    testImplementation deps.junit
+    testImplementation deps.groovy_all
+    testImplementation deps.spock
+    testImplementation deps.android_runtime
 }

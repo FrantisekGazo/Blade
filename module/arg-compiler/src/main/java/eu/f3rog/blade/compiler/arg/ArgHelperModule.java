@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.arg;
 
-import android.os.Bundle;
-
 import com.squareup.javapoet.MethodSpec;
 
 import java.util.ArrayList;
@@ -19,6 +17,7 @@ import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
+import eu.f3rog.blade.compiler.name.ClassNames;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
@@ -77,7 +76,7 @@ public final class ArgHelperModule
     private void addInjectMethod(final BaseClassBuilder builder) {
         final String target = "target";
         final MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_INJECT)
-                .addAnnotation(WeaveBuilder.weave().method("onCreate", Bundle.class)
+                .addAnnotation(WeaveBuilder.weave().method("onCreate", ClassNames.Bundle.get())
                         .withStatement("%s.%s(this);", fullName(builder.getClassName()), METHOD_NAME_INJECT)
                         .build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);

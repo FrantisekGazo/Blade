@@ -1,15 +1,22 @@
 package eu.f3rog.blade.plugin
 
 import com.android.SdkConstants
-import com.android.build.api.transform.*
+import com.android.build.api.transform.Context
+import com.android.build.api.transform.Format
+import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.QualifiedContent.ContentType
 import com.android.build.api.transform.QualifiedContent.Scope
+import com.android.build.api.transform.Transform
+import com.android.build.api.transform.TransformException
+import com.android.build.api.transform.TransformInput
+import com.android.build.api.transform.TransformOutputProvider
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
 import eu.f3rog.blade.weaving.util.IWeaver
 import groovy.io.FileType
 import javassist.ClassPool
 import javassist.LoaderClassPath
+import org.gradle.api.Project
 
 import java.util.jar.JarFile
 
@@ -19,14 +26,16 @@ import java.util.jar.JarFile
 public abstract class BaseTransformer
         extends Transform {
 
-    private boolean mDebug
+    private boolean debug
+    private Project project
 
-    public BaseTransformer(boolean debug) {
-        mDebug = debug
+    public BaseTransformer(Project project, boolean debug) {
+        this.debug = debug
+        this.project = project
     }
 
     boolean isDebug() {
-        return mDebug
+        return this.debug
     }
 
     @Override
@@ -66,7 +75,7 @@ public abstract class BaseTransformer
 
         long tic = System.currentTimeMillis()
 
-        IWeaver weaver = getWeaver(mDebug)
+        IWeaver weaver = getWeaver(isDebug())
 
         String path = getOutputDir(outputProvider).absolutePath
         log " * Output path: ${path}"
@@ -108,7 +117,7 @@ public abstract class BaseTransformer
     private ClassPool createClassPool(Collection<TransformInput> inputs, Collection<TransformInput> referencedInputs) {
         // Don't use ClassPool.getDefault(). Doing consecutive builds in the same run (e.g. debug+release)
         // will use a cached object and all the classes will be frozen.
-        ClassPool classPool = new ClassPool(null)
+        ClassPool classPool = new ClassPool()
         classPool.appendSystemPath()
         classPool.appendClassPath(new LoaderClassPath(getClass().getClassLoader()))
 
@@ -132,7 +141,23 @@ public abstract class BaseTransformer
             }
         }
 
+        addAndroidClassesToClassPool(classPool)
+
         return classPool
+    }
+
+    /**
+     * There is no official way to get the path to android.jar for transform.
+     * See https://code.google.com/p/android/issues/detail?id=209426
+     */
+    private def addAndroidClassesToClassPool(ClassPool classPool) {
+        try {
+            project.extensions.getByName("android").bootClasspath.forEach {
+                classPool.appendClassPath(it.absolutePath)
+            }
+        } catch (Exception e) {
+            log "Cannot get bootClasspath caused by: " + e
+        }
     }
 
     private static Set<String> getClassNames(Collection<TransformInput> inputs) {
@@ -177,11 +202,11 @@ public abstract class BaseTransformer
         Set<String> merged = new HashSet<String>()
         merged.addAll(set1)
         merged.addAll(set2)
-        return merged;
+        return merged
     }
 
     private void log(String s) {
-        if (mDebug) {
+        if (isDebug()) {
             System.out.println(s)
         }
     }

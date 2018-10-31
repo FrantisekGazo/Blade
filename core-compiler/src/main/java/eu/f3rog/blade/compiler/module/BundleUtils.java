@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.module;
 
-import android.os.Bundle;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 
@@ -11,6 +9,7 @@ import java.util.List;
 
 import javax.lang.model.element.VariableElement;
 
+import eu.f3rog.blade.compiler.name.ClassNames;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import blade.Bundler;
 
@@ -116,7 +115,7 @@ public final class BundleUtils {
                 final String newBundleVarName = String.format(FORMAT_NEW_BUNDLE_VARIABLE_NAME, fieldName);
 
                 methodBuilder.addStatement("$T $N = new $T()",
-                        Bundle.class, newBundleVarName, Bundle.class);
+                        ClassNames.Bundle.get(), newBundleVarName, ClassNames.Bundle.get());
                 methodBuilder.addStatement("$T $N = new $T()",
                         customBundler, bundlerVarName, customBundler);
                 methodBuilder.addStatement("$N.save($N.$N, $N)",
@@ -145,7 +144,7 @@ public final class BundleUtils {
             final String newBundleVarName = String.format(FORMAT_NEW_BUNDLE_VARIABLE_NAME, fieldName);
 
             methodBuilder.addStatement("$T $N = new $T()",
-                    Bundle.class, newBundleVarName, Bundle.class);
+                   ClassNames.Bundle.get(), newBundleVarName, ClassNames.Bundle.get());
             methodBuilder.addStatement("$T $N = new $T()",
                     customBundler, bundlerVarName, customBundler);
             if (targetVariableName != null) {

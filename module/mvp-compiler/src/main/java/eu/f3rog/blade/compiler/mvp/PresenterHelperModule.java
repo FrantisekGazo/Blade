@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.mvp;
 
-import android.view.View;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -17,6 +15,7 @@ import blade.mvp.IPresenter;
 import blade.mvp.IView;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.name.ClassNames;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.mvp.WeavedMvpActivity;
 import eu.f3rog.blade.mvp.WeavedMvpFragment;
@@ -52,7 +51,7 @@ public final class PresenterHelperModule
                 viewType = ViewType.ACTIVITY;
             } else if (isFragmentSubClass(e)) {
                 viewType = ViewType.FRAGMENT;
-            } else if (isSubClassOf(e, View.class)) {
+            } else if (isSubClassOf(e, ClassNames.View.get())) {
                 viewType = ViewType.VIEW;
             }
         } else if (isActivitySubClass(e) && hasBladeAnnotation(e)) {

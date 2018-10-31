@@ -1,16 +1,17 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.TypeName;
+
 /**
- * Class {@link BooleanClassParceler}
+ * Class {@link BooleanParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class BooleanClassParceler implements ClassParceler {
+final class BooleanParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return boolean.class;
+    public TypeName type() {
+        return TypeName.BOOLEAN;
     }
 
     @Override
@@ -20,6 +21,6 @@ final class BooleanClassParceler implements ClassParceler {
 
     @Override
     public CallFormat readCall() {
-        return new CallFormat("$N.readByte() > 0", CallFormat.Arg.PARCEL);
+        return new CallFormat("%s.readByte() > 0", CallFormat.Arg.PARCEL);
     }
 }

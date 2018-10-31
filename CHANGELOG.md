@@ -1,10 +1,10 @@
 Change Log
 ==========
 
-Version 2.7.2 *(2018-10-28)*
+Version 2.7.2 *(2018-10-31)*
 ----------------------------
 
- * New: Add support for androidx Fragment and Activity classes.
+ * New: Add support for androidx library.
 
 Version 2.7.1 *(2017-10-29)*
 ----------------------------

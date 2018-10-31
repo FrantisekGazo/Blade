@@ -1,7 +1,9 @@
 package eu.f3rog.blade.sample;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.os.Parcelable;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import blade.I;
 import butterknife.ButterKnife;

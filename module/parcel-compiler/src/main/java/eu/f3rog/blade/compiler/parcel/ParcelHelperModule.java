@@ -1,8 +1,5 @@
 package eu.f3rog.blade.compiler.parcel;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -24,6 +21,7 @@ import blade.ParcelIgnore;
 import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
+import eu.f3rog.blade.compiler.name.ClassNames;
 import eu.f3rog.blade.compiler.parcel.p.CallFormat;
 import eu.f3rog.blade.compiler.parcel.p.Parceler;
 import eu.f3rog.blade.compiler.util.ProcessorError;
@@ -73,7 +71,7 @@ public class ParcelHelperModule
     @Override
     public void checkClass(TypeElement e) throws ProcessorError {
         // support any class that implements Parcelable
-        if (!ProcessorUtils.isSubClassOf(e, Parcelable.class)) {
+        if (!ProcessorUtils.isSubClassOf(e, ClassNames.Parcelable.get())) {
             throw new ProcessorError(e, ParcelErrorMsg.Invalid_Parcel_class);
         }
 
@@ -161,7 +159,7 @@ public class ParcelHelperModule
 
     private void addCreatorField(HelperClassBuilder builder) {
         FieldSpec.Builder field = FieldSpec.builder(
-                ParameterizedTypeName.get(ClassName.get(Parcelable.Creator.class), builder.getArgClassName()),
+                ParameterizedTypeName.get(ClassNames.Parcelable.get().nestedClass("Creator"), builder.getArgClassName()),
                 FIELD_NAME_CREATOR,
                 Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL
         );
@@ -181,8 +179,8 @@ public class ParcelHelperModule
                         "\t\treturn new $T[size];\n" +
                         "\t}\n" +
                         "}",
-                Parcelable.Creator.class, builder.getArgClassName(),
-                Override.class, builder.getArgClassName(), Parcel.class, builder.getArgClassName(),
+                ClassNames.Parcelable.get().nestedClass("Creator"), builder.getArgClassName(),
+                Override.class, builder.getArgClassName(), ClassNames.Parcel.get(), builder.getArgClassName(),
                 Override.class, builder.getArgClassName(), builder.getArgClassName()
         );
 
@@ -196,7 +194,7 @@ public class ParcelHelperModule
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_WRITE_TO_PARCEL)
                 .addAnnotation(
-                        WeaveBuilder.weave().method(METHOD_NAME_WRITE_TO_PARCEL, Parcel.class, int.class)
+                        WeaveBuilder.weave().method(METHOD_NAME_WRITE_TO_PARCEL, ClassNames.Parcel.get(), TypeName.INT)
                                 .placed(WeaveBuilder.MethodWeaveType.AFTER_SUPER)
                                 .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_WRITE_TO_PARCEL)
                                 .build()
@@ -204,7 +202,7 @@ public class ParcelHelperModule
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         addClassAsParameter(method, targetClassName, target);
-        method.addParameter(Parcel.class, parcel);
+        method.addParameter(ClassNames.Parcel.get(), parcel);
 
         for (int i = 0, c = mFields.size(); i < c; i++) {
             Field field = mFields.get(i);
@@ -228,14 +226,14 @@ public class ParcelHelperModule
 
         MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_NAME_READ_FROM_PARCEL)
                 .addAnnotation(
-                        WeaveBuilder.weave().constructor(Parcel.class)
+                        WeaveBuilder.weave().constructor(ClassNames.Parcel.get())
                                 .withStatement("%s.%s(this, $1);", fullName(builder.getClassName()), METHOD_NAME_READ_FROM_PARCEL)
                                 .build()
                 )
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         addClassAsParameter(method, targetClassName, target);
-        method.addParameter(Parcel.class, parcel);
+        method.addParameter(ClassNames.Parcel.get(), parcel);
 
         for (int i = 0, c = mFields.size(); i < c; i++) {
             Field field = mFields.get(i);
@@ -324,7 +322,7 @@ public class ParcelHelperModule
             if (e.getKind() == ElementKind.CONSTRUCTOR && hasSomeModifier(e, Modifier.PUBLIC)) {
                 ExecutableElement c = (ExecutableElement) e;
                 List<? extends VariableElement> params = c.getParameters();
-                if (params.size() == 1 && ClassName.get(params.get(0).asType()).equals(ClassName.get(Parcel.class))) {
+                if (params.size() == 1 && ClassName.get(params.get(0).asType()).equals(ClassNames.Parcel.get())) {
                     return true;
                 }
             }

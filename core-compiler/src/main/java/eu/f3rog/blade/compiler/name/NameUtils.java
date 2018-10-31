@@ -1,6 +1,7 @@
 package eu.f3rog.blade.compiler.name;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 
 /**
  * Class {@link NameUtils}
@@ -9,6 +10,14 @@ import com.squareup.javapoet.ClassName;
  * @version 2016-04-10
  */
 public class NameUtils {
+
+    public static String toFQDN(TypeName className) {
+        return className.toString();
+    }
+
+    public static String toFQDN(ClassName className) {
+        return className.packageName() + "." + String.join(".", className.simpleNames());
+    }
 
     public static String getNestedName(ClassName className) {
         return getNestedName(className, "_");
