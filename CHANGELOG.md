@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-Version 2.7.2 *(2018-10-31)*
+Version 2.7.2 *(2018-12-06)*
 ----------------------------
 
  * New: Add support for androidx library.
