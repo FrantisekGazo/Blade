@@ -3,7 +3,7 @@ package eu.f3rog.blade.sample.extra;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import blade.Extra;
 

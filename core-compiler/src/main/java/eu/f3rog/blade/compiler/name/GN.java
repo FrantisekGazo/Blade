@@ -3,7 +3,7 @@ package eu.f3rog.blade.compiler.name;
 import com.squareup.javapoet.ClassName;
 
 /**
- * Class {@link GN}
+ * Class {@link GN} represents a Generated Name.
  *
  * @author FrantisekGazo
  * @version 2015-11-21

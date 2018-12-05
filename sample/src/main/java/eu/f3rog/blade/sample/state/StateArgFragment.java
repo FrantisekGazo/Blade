@@ -1,7 +1,6 @@
 package eu.f3rog.blade.sample.state;
 
-import android.app.Fragment;
-
+import androidx.fragment.app.Fragment;
 import blade.Arg;
 import blade.State;
 

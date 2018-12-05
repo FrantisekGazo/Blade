@@ -1,16 +1,18 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
+
 /**
  * Class {@link ObjectClassParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class ObjectClassParceler implements ClassParceler {
+final class ObjectClassParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return Object.class;
+    public TypeName type() {
+        return ClassName.OBJECT;
     }
 
     @Override

@@ -3,7 +3,7 @@ package eu.f3rog.blade.sample.parcel;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.TextView;
 
 import java.util.LinkedList;

@@ -1,8 +1,5 @@
 package eu.f3rog.blade.compiler.util;
 
-import android.app.Activity;
-import android.app.Fragment;
-
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -177,11 +174,14 @@ public class ProcessorUtils {
     }
 
     public static boolean isActivitySubClass(TypeElement inspectedType) {
-        return isSubClassOf(inspectedType, Activity.class) || isSubClassOf(inspectedType, ClassNames.AppCompatActivity);
+        return isSubClassOf(inspectedType, ClassNames.AndroidActivity.get()) ||
+               isSubClassOf(inspectedType, ClassNames.SupportActivity.get()) ||
+               isSubClassOf(inspectedType, ClassNames.AndroidxActivity.get());
     }
 
     public static boolean isFragmentSubClass(TypeElement inspectedType) {
-        return isSubClassOf(inspectedType, Fragment.class) || isSubClassOf(inspectedType, ClassNames.SupportFragment);
+        return isSubClassOf(inspectedType, ClassNames.SupportFragment.get()) ||
+               isSubClassOf(inspectedType, ClassNames.AndroidxFragment.get());
     }
 
     public static boolean isSubClassOf(TypeElement inspectedType, Class lookupClass) {

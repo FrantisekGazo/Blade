@@ -1,12 +1,9 @@
 package eu.f3rog.blade.compiler.state;
 
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.view.View;
-
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +20,8 @@ import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
+import eu.f3rog.blade.compiler.name.ClassNames;
+import eu.f3rog.blade.compiler.name.NameUtils;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
@@ -61,13 +60,14 @@ public final class StateHelperModule
     private HelpedClassType mHelpedClassType;
     private boolean mHasSaveStateMethod;
     private boolean mHasRestoreStateMethod;
+    private String mBundleFQDN = NameUtils.toFQDN(ClassNames.Bundle.get());
 
     @Override
     public void checkClass(final TypeElement e) throws ProcessorError {
         // support any class
         if (isActivitySubClass(e) || isFragmentSubClass(e)) {
             mHelpedClassType = HelpedClassType.ACTIVITY_OR_FRAGMENT;
-        } else if (isSubClassOf(e, View.class)) {
+        } else if (isSubClassOf(e, ClassNames.View.get())) {
             mHelpedClassType = HelpedClassType.VIEW;
             mHasSaveStateMethod = hasViewImplementedStateMethod(e, WEAVE_onSaveInstanceState);
             mHasRestoreStateMethod = hasViewImplementedStateMethod(e, WEAVE_onRestoreInstanceState);
@@ -123,7 +123,7 @@ public final class StateHelperModule
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         addClassAsParameter(method, builder.getArgClassName(), target);
-        method.addParameter(Bundle.class, state);
+        method.addParameter(ClassNames.Bundle.get(), state);
 
         if (mHelpedClassType != HelpedClassType.OTHER) {
             method.addAnnotation(weaveSave(builder.getClassName()));
@@ -147,7 +147,7 @@ public final class StateHelperModule
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         addClassAsParameter(method, builder.getArgClassName(), target);
-        method.addParameter(Bundle.class, state);
+        method.addParameter(ClassNames.Bundle.get(), state);
 
         if (mHelpedClassType != HelpedClassType.OTHER) {
             method.addAnnotation(weaveRestore(builder.getClassName()));
@@ -167,28 +167,28 @@ public final class StateHelperModule
     private AnnotationSpec weaveSave(final ClassName helperName) {
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
-                return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState, Bundle.class)
+                return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState, ClassNames.Bundle.get())
                         .placed(WeaveBuilder.MethodWeaveType.AFTER_BODY)
                         .withStatement("%s.%s(this, $1);", helperName, METHOD_NAME_SAVE_SATE)
                         .build();
 
             case PRESENTER:
-                return WeaveBuilder.weave().method(WEAVE_onSaveState, Object.class)
+                return WeaveBuilder.weave().method(WEAVE_onSaveState, TypeName.OBJECT)
                         .placed(WeaveBuilder.MethodWeaveType.AFTER_BODY)
-                        .withStatement("%s.%s(this, (%s) $1);", helperName, METHOD_NAME_SAVE_SATE, Bundle.class.getCanonicalName())
+                        .withStatement("%s.%s(this, (%s) $1);", helperName, METHOD_NAME_SAVE_SATE, mBundleFQDN)
                         .build();
             case VIEW:
                 if (mHasSaveStateMethod) {
                     return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState)
                             .renameExistingTo(WEAVE_onSaveInstanceState + "_BladeState")
-                            .withStatement("%s bundle = new %s();", Bundle.class.getName(), Bundle.class.getName())
+                            .withStatement("%s bundle = new %s();", mBundleFQDN, mBundleFQDN)
                             .withStatement("bundle.putParcelable('USER_STATE', this.onSaveInstanceState_BladeState());")
                             .withStatement("%s.%s(this, bundle);", helperName, METHOD_NAME_SAVE_SATE)
                             .withStatement("return bundle;")
                             .build();
                 } else {
                     return WeaveBuilder.weave().method(WEAVE_onSaveInstanceState)
-                            .withStatement("%s bundle = new %s();", Bundle.class.getName(), Bundle.class.getName())
+                            .withStatement("%s bundle = new %s();", mBundleFQDN, mBundleFQDN)
                             .withStatement("bundle.putParcelable('PARENT_STATE', super.onSaveInstanceState());")
                             .withStatement("%s.%s(this, bundle);", helperName, METHOD_NAME_SAVE_SATE)
                             .withStatement("return bundle;")
@@ -202,21 +202,21 @@ public final class StateHelperModule
     private AnnotationSpec weaveRestore(final ClassName helperName) {
         switch (mHelpedClassType) {
             case ACTIVITY_OR_FRAGMENT:
-                return WeaveBuilder.weave().method(WEAVE_onCreate, Bundle.class)
+                return WeaveBuilder.weave().method(WEAVE_onCreate, ClassNames.Bundle.get())
                         .withPriority(WeaveBuilder.WeavePriority.HIGHER)
                         .withStatement("%s.%s(this, $1);", helperName, METHOD_NAME_RESTORE_SATE)
                         .build();
 
             case PRESENTER:
-                return WeaveBuilder.weave().method(WEAVE_onCreate, Object.class)
-                        .withStatement("%s.%s(this, (%s) $1);", helperName, METHOD_NAME_RESTORE_SATE, Bundle.class.getCanonicalName())
+                return WeaveBuilder.weave().method(WEAVE_onCreate, TypeName.OBJECT)
+                        .withStatement("%s.%s(this, (%s) $1);", helperName, METHOD_NAME_RESTORE_SATE, mBundleFQDN)
                         .build();
             case VIEW:
                 if (mHasRestoreStateMethod) {
-                    return WeaveBuilder.weave().method(WEAVE_onRestoreInstanceState, Parcelable.class)
+                    return WeaveBuilder.weave().method(WEAVE_onRestoreInstanceState, ClassNames.Parcelable.get())
                             .renameExistingTo(WEAVE_onRestoreInstanceState + "_BladeState")
-                            .withStatement("if ($1 instanceof %s) {", Bundle.class.getName())
-                            .withStatement("%s bundle = (%s) $1;", Bundle.class.getName(), Bundle.class.getName())
+                            .withStatement("if ($1 instanceof %s) {", mBundleFQDN)
+                            .withStatement("%s bundle = (%s) $1;", mBundleFQDN, mBundleFQDN)
                             .withStatement("%s.%s(this, bundle);", helperName, METHOD_NAME_RESTORE_SATE)
                             .withStatement("this.onRestoreInstanceState_BladeState(bundle.getParcelable('USER_STATE'));")
                             .withStatement("} else {")
@@ -225,9 +225,9 @@ public final class StateHelperModule
                             .withStatement("return;")
                             .build();
                 } else {
-                    return WeaveBuilder.weave().method(WEAVE_onRestoreInstanceState, Parcelable.class)
-                            .withStatement("if ($1 instanceof %s) {", Bundle.class.getName())
-                            .withStatement("%s bundle = (%s) $1;", Bundle.class.getName(), Bundle.class.getName())
+                    return WeaveBuilder.weave().method(WEAVE_onRestoreInstanceState, ClassNames.Parcelable.get())
+                            .withStatement("if ($1 instanceof %s) {", mBundleFQDN)
+                            .withStatement("%s bundle = (%s) $1;", mBundleFQDN, mBundleFQDN)
                             .withStatement("%s.%s(this, bundle);", helperName, METHOD_NAME_RESTORE_SATE)
                             .withStatement("super.onRestoreInstanceState(bundle.getParcelable('PARENT_STATE'));")
                             .withStatement("} else {")

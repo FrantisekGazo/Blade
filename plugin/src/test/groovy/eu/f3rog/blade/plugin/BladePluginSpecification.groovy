@@ -17,24 +17,21 @@ final class BladePluginSpecification
 
     private static String MVP_MODULE_ERROR_DAGGER_MISSING = "Blade module 'mvp' requires dagger2 dependency!"
 
-    private static final String APT_CLASSPATH = "com.neenbedankt.gradle.plugins:android-apt:1.8"
-    private static final String APT_PLUGIN = "com.neenbedankt.android-apt"
-
     private static String buildGradleClasspath(final String version) {
         return "com.android.tools.build:gradle:${version}"
     }
 
     private final static def WHERE_DATA = [
             // #gradleToolsVersion, #gradleVersion, #aptClasspath, #apt, #bladeFileType
-            ['1.5.0', '2.9', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.JSON],
-            ['2.0.0', '2.10', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.JSON],
-            ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.JSON],
             ['3.0.0', '4.1', [], [], BladeTempFileBuilder.FileType.JSON],
-            ['1.5.0', '2.9', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.YAML],
-            ['2.0.0', '2.10', [APT_CLASSPATH], [APT_PLUGIN], BladeTempFileBuilder.FileType.YAML],
-            ['2.2.0', '2.14.1', [], [], BladeTempFileBuilder.FileType.YAML],
-            ['3.0.0', '4.1', [], [], BladeTempFileBuilder.FileType.YAML]
+            ['3.2.0', '4.6', [], [], BladeTempFileBuilder.FileType.JSON],
+            ['3.2.1', '4.9', [], [], BladeTempFileBuilder.FileType.JSON],
+            ['3.0.0', '4.1', [], [], BladeTempFileBuilder.FileType.YAML],
+            ['3.2.0', '4.6', [], [], BladeTempFileBuilder.FileType.YAML],
+            ['3.2.1', '4.9', [], [], BladeTempFileBuilder.FileType.YAML]
     ]
+
+    private final static def WHERE_DATA_YAML = WHERE_DATA.findAll { it[4] == BladeTempFileBuilder.FileType.YAML }
 
     @Rule
     final TempProjectFolder projectFolder = new TempProjectFolder()
@@ -73,7 +70,7 @@ final class BladePluginSpecification
         e.getMessage().contains(BladePlugin.ERROR_ANDROID_PLUGIN_REQUIRED)
 
         where:
-        [gradleToolsVersion, _, _, _, _] << WHERE_DATA[0..3]
+        [gradleToolsVersion, _, _, _, _] << WHERE_DATA_YAML
     }
 
     @Unroll
@@ -106,35 +103,6 @@ final class BladePluginSpecification
     }
 
     @Unroll
-    def "fail if apt is not applied in gradle <2.2.0 - for #gradleToolsVersion, #bladeFileType"() {
-        given:
-        projectFolder.addBladeFile(bladeFileType, ["arg"])
-        projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
-                .classpaths([buildGradleClasspath(gradleToolsVersion), bladeClasspath])
-                .plugins(["com.android.application", "blade"])
-        )
-
-        when:
-        Exception e = null
-        try {
-            GradleRunner.create()
-                    .withGradleVersion(gradleVersion)
-                    .withProjectDir(projectFolder.root)
-                    .withArguments(':build')
-                    .build()
-        } catch (Exception ex) {
-            e = ex
-        }
-
-        then:
-        e != null
-        e.getMessage().contains(BladePlugin.ERROR_APT_IS_MISSING)
-
-        where:
-        [gradleToolsVersion, gradleVersion, _, _, bladeFileType] << WHERE_DATA[0..1] + WHERE_DATA[4..5]
-    }
-
-    @Unroll
     def "fail without blade file - for #gradleToolsVersion"() {
         given:
         projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)
@@ -159,7 +127,7 @@ final class BladePluginSpecification
         e.getMessage().contains(BladePlugin.ERROR_CONFIG_FILE_IS_MISSING)
 
         where:
-        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA[0..3]
+        [gradleToolsVersion, gradleVersion, aptClasspath, apt, _] << WHERE_DATA_YAML
     }
 
     @Unroll
@@ -221,7 +189,7 @@ final class BladePluginSpecification
     }
 
     @Unroll
-    def "fail [mvp] without dagger dependency - for #gradleToolsVersion"() {
+    def "fail [mvp] without dagger dependency - for #gradleToolsVersion, #bladeFileType"() {
         given:
         projectFolder.addBladeFile(bladeFileType, ['mvp'])
         projectFolder.addGradleFile(new GradleConfig(gradleToolsVersion)

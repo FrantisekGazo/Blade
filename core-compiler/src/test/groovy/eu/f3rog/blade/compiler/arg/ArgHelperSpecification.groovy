@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.arg
 
-import android.app.Fragment
 import android.os.Bundle
 import blade.Arg
 import blade.Blade
@@ -41,18 +40,18 @@ public final class ArgHelperSpecification
     }
 
     @Unroll
-    def "fail if @Arg is on #accessor field"() {
+    def "fail if @Arg is on a fragment field (where #accessor)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#A $accessor String mText;
                 }
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 
@@ -69,29 +68,94 @@ public final class ArgHelperSpecification
         'final'     | _
     }
 
-    def "do NOT generate _Helper for a Fragment with only @Blade"() {
+    @Unroll
+    def "do NOT generate _Helper for a fragment with only @Blade (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
                 @#B
-                public class #T extends Fragment {}
+                public class #T extends #F {}
                 """,
                 [
                         B: Blade.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
         expect:
         compilesWithoutErrorAndDoesntGenerate("com.example", "MyFragment_Helper",
                 BladeProcessor.Module.ARG, input)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate _Helper for a Fragment with 2 @Arg"() {
+    @Unroll
+    def "generate _Helper for an inherited fragment (where #fragmentClassName)"() {
+        given:
+        final JavaFileObject base = JavaFile.newFile("com.example", "BaseFragment",
+                """
+                public class #T extends #F {
+                }
+                """,
+                [
+                        F: fragmentClass
+                ]
+        )
+        final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
+                """
+                public class #T extends #F {
+
+                    @#A String text;
+                }
+                """,
+                [
+                        A: Arg.class,
+                        F: base
+                ]
+        )
+
+        expect:
+        final JavaFileObject expected = JavaFile.newGeneratedFile("com.example", "MyFragment_Helper",
+                """
+                abstract class #T {
+
+                    @Weave(
+                        into="0^onCreate",
+                        args = {"android.os.Bundle"},
+                        statement = "com.example.#T.inject(this);"
+                    )
+                    public static void inject(#I target) {
+                       if (target.getArguments() == null) {
+                           return;
+                       }
+                       BundleWrapper args = BundleWrapper.from(target.getArguments());
+                       target.text = args.get("<Arg-text>", target.text);
+                    }
+                }
+                """,
+                [
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class]
+                ]
+        )
+
+        assertFiles(base, input)
+                .with(BladeProcessor.Module.ARG)
+                .compilesWithoutError()
+                .and()
+                .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
+    }
+
+    @Unroll
+    def "generate _Helper for a fragment with 2 @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#A String mText;
                     @#A int mNumber;
@@ -99,7 +163,7 @@ public final class ArgHelperSpecification
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -134,9 +198,13 @@ public final class ArgHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate _Helper for a Fragment with 2 @Arg - 1 custom Bundler"() {
+    @Unroll
+    def "generate _Helper for a fragment with 2 @Arg - 1 custom Bundler (where #fragmentClassName)"() {
         given:
         final JavaFileObject customBundler = JavaFile.newFile("com.example", "StringBundler",
                 """
@@ -156,7 +224,7 @@ public final class ArgHelperSpecification
         )
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#A(#CB.class) String mText;
                     @#A int mNumber;
@@ -164,8 +232,8 @@ public final class ArgHelperSpecification
                 """,
                 [
                         A : Arg.class,
-                        CB: customBundler,
-                        _ : [Fragment.class]
+                        F : fragmentClass,
+                        CB: customBundler
                 ]
         )
 
@@ -202,21 +270,25 @@ public final class ArgHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate _Helper for a generic Fragment with 2 @Arg"() {
+    @Unroll
+    def "generate _Helper for a generic fragment with 2 @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T<T> extends Fragment {
+                public class #T<T> extends #F {
 
                     @#A String mText;
                     @#A int mNumber;
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        F: fragmentClass
                 ]
         )
 
@@ -241,8 +313,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class]
                 ]
         )
 
@@ -251,21 +323,26 @@ public final class ArgHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate _Helper for a generic Fragment field with 2 @Arg"() {
+    @Unroll
+    def "generate _Helper for a generic fragment field with 2 @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T<T extends Serializable> extends Fragment {
+                public class #T<T extends Serializable> extends #F {
 
                     @#A T mData;
                     @#A int mNumber;
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class, Serializable.class]
+                        A: Arg.class,
+                        F: fragmentClass,
+                        _: [Serializable.class]
                 ]
         )
 
@@ -290,8 +367,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Weave.class, Serializable.class]
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class, Serializable.class]
                 ]
         )
 
@@ -300,15 +377,19 @@ public final class ArgHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate _Helper for an inner Fragment class"() {
+    @Unroll
+    def "generate _Helper for an inner fragment class (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
 
-                    public static class MyFragment extends Fragment {
+                    public static class MyFragment extends #F {
 
                         @#A String mText;
                         @#A int mNumber;
@@ -316,8 +397,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        F: fragmentClass
                 ]
         )
 
@@ -342,8 +423,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class]
                 ]
         )
 
@@ -352,21 +433,25 @@ public final class ArgHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate _Helper for 2 inner Fragment classes"() {
+    @Unroll
+    def "generate _Helper for 2 inner fragment classes (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
 
-                    public static class MyFragment1 extends Fragment {
+                    public static class MyFragment1 extends #F {
 
                         @#A String mText;
                         @#A int mNumber;
                     }
 
-                    public static class MyFragment2 extends Fragment {
+                    public static class MyFragment2 extends #F {
 
                         @#A String mText;
                         @#A int mNumber;
@@ -374,8 +459,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        F: fragmentClass
                 ]
         )
 
@@ -400,8 +485,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class]
                 ]
         )
         final JavaFileObject expected2 = JavaFile.newGeneratedFile("com.example", "Wrapper_MyFragment2_Helper",
@@ -424,8 +509,8 @@ public final class ArgHelperSpecification
                 }
                 """,
                 [
-                        I : input,
-                        _ : [BundleWrapper.class, Weave.class]
+                        I: input,
+                        _: [BundleWrapper.class, Weave.class]
                 ]
         )
 
@@ -434,5 +519,8 @@ public final class ArgHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected1, expected2)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 }

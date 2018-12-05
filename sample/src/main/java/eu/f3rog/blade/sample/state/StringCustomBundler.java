@@ -2,8 +2,8 @@ package eu.f3rog.blade.sample.state;
 
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import blade.Bundler;
 

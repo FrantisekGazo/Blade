@@ -4,7 +4,6 @@ package eu.f3rog.blade.compiler.parcel.p;
  * Class {@link CallFormat}
  *
  * @author FrantisekGazo
- * @version 2016-04-18
  */
 public class CallFormat {
 

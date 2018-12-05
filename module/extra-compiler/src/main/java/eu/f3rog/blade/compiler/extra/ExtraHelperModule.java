@@ -1,12 +1,8 @@
 package eu.f3rog.blade.compiler.extra;
 
-import android.app.IntentService;
-import android.app.Service;
-import android.content.Intent;
-import android.os.Bundle;
-
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +18,7 @@ import eu.f3rog.blade.compiler.builder.annotation.WeaveBuilder;
 import eu.f3rog.blade.compiler.builder.helper.BaseHelperModule;
 import eu.f3rog.blade.compiler.builder.helper.HelperClassBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
+import eu.f3rog.blade.compiler.name.ClassNames;
 import eu.f3rog.blade.compiler.util.ProcessorError;
 import eu.f3rog.blade.compiler.util.ProcessorUtils;
 import eu.f3rog.blade.core.BundleWrapper;
@@ -54,9 +51,9 @@ public final class ExtraHelperModule
     public void checkClass(final TypeElement e) throws ProcessorError {
         if (isActivitySubClass(e)) {
             mInjected = Injected.ACTIVITY;
-        } else if (ProcessorUtils.isSubClassOf(e, IntentService.class)) {
+        } else if (ProcessorUtils.isSubClassOf(e, ClassNames.IntentService.get())) {
             mInjected = Injected.INTENT_SERVICE;
-        } else if (ProcessorUtils.isSubClassOf(e, Service.class)) {
+        } else if (ProcessorUtils.isSubClassOf(e, ClassNames.Service.get())) {
             mInjected = Injected.SERVICE;
         } else {
             throw new ProcessorError(e, ExtraErrorMsg.Invalid_class_with_Extra);
@@ -97,7 +94,7 @@ public final class ExtraHelperModule
 
         addClassAsParameter(method, builder.getArgClassName(), target);
 
-        method.addParameter(Intent.class, intent);
+        method.addParameter(ClassNames.Intent.get(), intent);
 
         method.beginControlFlow("if ($N == null || $N.getExtras() == null)", intent, intent)
                 .addStatement("return")
@@ -116,18 +113,18 @@ public final class ExtraHelperModule
         switch (mInjected) {
             case ACTIVITY:
                 return WeaveBuilder.weave()
-                        .method("onCreate", Bundle.class)
+                        .method("onCreate", ClassNames.Bundle.get())
                         .withStatement("%s.%s(this, this.getIntent());", fullClassName, METHOD_NAME_INJECT)
                         .and()
-                        .method("onNewIntent", Intent.class)
+                        .method("onNewIntent", ClassNames.Intent.get())
                         .withStatement("%s.%s(this, $1);", fullClassName, METHOD_NAME_INJECT)
                         .build();
             case SERVICE:
-                return WeaveBuilder.weave().method("onStartCommand", Intent.class, int.class, int.class)
+                return WeaveBuilder.weave().method("onStartCommand", ClassNames.Intent.get(), TypeName.INT, TypeName.INT)
                         .withStatement("%s.%s(this, $1);", fullClassName, METHOD_NAME_INJECT)
                         .build();
             case INTENT_SERVICE:
-                return WeaveBuilder.weave().method("onHandleIntent", Intent.class)
+                return WeaveBuilder.weave().method("onHandleIntent", ClassNames.Intent.get())
                         .withStatement("%s.%s(this, $1);", fullClassName, METHOD_NAME_INJECT)
                         .build();
             default:

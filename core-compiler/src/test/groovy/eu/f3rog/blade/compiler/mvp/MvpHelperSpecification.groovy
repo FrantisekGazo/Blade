@@ -1,8 +1,6 @@
 package eu.f3rog.blade.compiler.mvp
 
-import android.app.Activity
 import android.content.Context
-import android.support.v4.app.Fragment
 import android.view.View
 import blade.Blade
 import blade.mvp.BasePresenter
@@ -44,14 +42,14 @@ public final class MvpHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#I Object field;
                 }
                 """,
                 [
                         I: Inject.class,
-                        _: [Activity.class]
+                        A: supportActivity
                 ]
         )
 
@@ -64,14 +62,14 @@ public final class MvpHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#I Object field;
                 }
                 """,
                 [
                         I: Inject.class,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 
@@ -149,7 +147,7 @@ public final class MvpHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#I #P presenter;
                 }
@@ -157,7 +155,7 @@ public final class MvpHelperSpecification
                 [
                         I: Inject.class,
                         P: IPresenter.class,
-                        _: [Activity.class]
+                        A: supportActivity
                 ]
         )
 
@@ -173,7 +171,7 @@ public final class MvpHelperSpecification
         final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
                 """
                 @#B
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#I #P presenter;
                 }
@@ -182,7 +180,7 @@ public final class MvpHelperSpecification
                         B: Blade.class,
                         I: Inject.class,
                         P: IPresenter.class,
-                        _: [Activity.class]
+                        A: supportActivity
                 ]
         )
 
@@ -197,7 +195,7 @@ public final class MvpHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyClass",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#I #P presenter;
                 }
@@ -205,7 +203,7 @@ public final class MvpHelperSpecification
                 [
                         I: Inject.class,
                         P: IPresenter.class,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 
@@ -275,7 +273,7 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject activity = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity implements #MV1 {
+                public class #T extends #A implements #MV1 {
 
                     @#I #P mPresenter;
                 }
@@ -284,7 +282,7 @@ public final class MvpHelperSpecification
                         I  : Inject.class,
                         MV1: viewInterface1,
                         P  : presenter,
-                        _  : [Activity.class]
+                        A  : supportActivity
                 ]
         )
 
@@ -308,12 +306,12 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject activity = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity implements #MV {
+                public class #T extends #A implements #MV {
                 }
                 """,
                 [
                         MV: viewInterface,
-                        _ : [Activity.class]
+                        A : supportActivity
                 ]
         )
 
@@ -327,12 +325,12 @@ public final class MvpHelperSpecification
         final JavaFileObject activity = JavaFile.newFile("com.example", "MyActivity",
                 """
                 @#B
-                public class #T extends Activity {
+                public class #T extends #A {
                 }
                 """,
                 [
                         B: Blade.class,
-                        _: [Activity.class]
+                        A: supportActivity
                 ]
         )
 
@@ -377,7 +375,7 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject activity = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity implements #V {
+                public class #T extends #A implements #V {
 
                     @#I #P mPresenter;
                 }
@@ -386,7 +384,7 @@ public final class MvpHelperSpecification
                         I: Inject.class,
                         V: viewInterface,
                         P: presenter,
-                        _: [Activity.class]
+                        A: supportActivity
                 ]
         )
 
@@ -441,7 +439,7 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject activity = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity implements #V {
+                public class #T extends #A implements #V {
 
                     @#I #P1 mPresenter1;
                     @#I #P2 mPresenter2;
@@ -452,7 +450,7 @@ public final class MvpHelperSpecification
                         V : viewInterface,
                         P1: presenter1,
                         P2: presenter2,
-                        _ : [Activity.class]
+                        A : supportActivity
                 ]
         )
 
@@ -487,12 +485,12 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject fragment = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment implements #V {
+                public class #T extends #F implements #V {
                 }
                 """,
                 [
                         V: viewInterface,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 
@@ -524,7 +522,7 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject fragment = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment implements #V {
+                public class #T extends #F implements #V {
 
                     @#I #P mPresenter;
                 }
@@ -533,7 +531,7 @@ public final class MvpHelperSpecification
                         I: Inject.class,
                         V: viewInterface,
                         P: presenter,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 
@@ -588,7 +586,7 @@ public final class MvpHelperSpecification
         )
         final JavaFileObject fragment = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment implements #V {
+                public class #T extends #F implements #V {
 
                     @#I #P1 mPresenter1;
                     @#I #P2 mPresenter2;
@@ -599,7 +597,7 @@ public final class MvpHelperSpecification
                         V : viewInterface,
                         P1: presenter1,
                         P2: presenter2,
-                        _ : [Fragment.class]
+                        F : supportFragment
                 ]
         )
 
@@ -804,7 +802,7 @@ public final class MvpHelperSpecification
         final JavaFileObject activity = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
-                   public static class MyActivity extends Activity implements #V {
+                   public static class MyActivity extends #A implements #V {
                        @#I #P mPresenter;
                    }
                 }
@@ -813,7 +811,7 @@ public final class MvpHelperSpecification
                         I: Inject.class,
                         V: viewInterface,
                         P: presenter,
-                        _: [Activity.class]
+                        A: supportActivity
                 ]
         )
 
@@ -859,7 +857,7 @@ public final class MvpHelperSpecification
         final JavaFileObject fragment = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
-                   public static class MyFragment extends Fragment implements #V {
+                   public static class MyFragment extends #F implements #V {
                        @#I #P mPresenter;
                    }
                 }
@@ -868,7 +866,7 @@ public final class MvpHelperSpecification
                         I: Inject.class,
                         V: viewInterface,
                         P: presenter,
-                        _: [Fragment.class]
+                        F: supportFragment
                 ]
         )
 

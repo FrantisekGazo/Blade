@@ -1,7 +1,7 @@
 package eu.f3rog.blade.sample.mvp.model;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public final class Actor {
 

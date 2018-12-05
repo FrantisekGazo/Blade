@@ -2,20 +2,31 @@ package eu.f3rog.blade.compiler
 
 import com.google.common.truth.Truth
 import com.google.testing.compile.CompileTester
+import com.google.testing.compile.JavaSourcesSubject
 import com.google.testing.compile.JavaSourcesSubjectFactory
+import eu.f3rog.blade.compiler.name.ClassNames
+import eu.f3rog.blade.compiler.util.JavaFile
+import org.codehaus.groovy.runtime.InvokerInvocationException
+import spock.lang.Shared
 import spock.lang.Specification
 
 import eu.f3rog.blade.compiler.BladeProcessor
 
 import javax.tools.JavaFileObject
-import javax.tools.StandardLocation
+import javax.tools.SimpleJavaFileObject
 
 public abstract class BaseSpecification
         extends Specification {
 
     protected ITruthWrapper assertFiles(JavaFileObject... f) {
         List<JavaFileObject> files = new ArrayList<>()
-        files.addAll(Arrays.asList(f))
+        files.add(androidxActivity)
+        files.add(androidxFragment)
+        files.add(supportActivity)
+        files.add(supportFragment)
+        for (file in f) {
+            files.add(file)
+        }
 
         return new TruthWrapper(files)
     }
@@ -45,15 +56,63 @@ public abstract class BaseSpecification
                                                             String className,
                                                             BladeProcessor.Module module,
                                                             JavaFileObject... inputFiles) {
-        try {
-            assertFiles(inputFiles)
-                    .with(module)
-                    .compilesWithoutError()
-                    .and()
-                    .generatesFileNamed(StandardLocation.CLASS_OUTPUT, pkg, className + '.class')
-            return false
-        } catch (AssertionError e) {
-            return e.getMessage().contains("Did not find a generated file corresponding to ${className}.class in package ${pkg}")
+        def result = assertFiles(inputFiles)
+                .with(module)
+                .compilesWithoutError()
+
+        List<SimpleJavaFileObject> sources = result.compilation.sourceFiles
+        String target = pkg.replace(".", "/") + "/" + className
+
+        for (source in sources) {
+            if (source.toUri().path.contains(target)) {
+                return false
+            }
         }
+        return true
+    }
+
+    @Shared JavaFileObject androidxFragment = fragment(ClassNames.AndroidxFragment)
+    @Shared JavaFileObject supportFragment = fragment(ClassNames.SupportFragment)
+    @Shared JavaFileObject androidxActivity = activity(ClassNames.AndroidxActivity)
+    @Shared JavaFileObject supportActivity = activity(ClassNames.SupportActivity)
+
+    @Shared fragmentClasses = [
+            ["Support Fragment", supportFragment],
+            ["AndroidX Fragment", androidxFragment]
+    ]
+    @Shared activityClasses = [
+            ["Support Activity", supportActivity],
+            ["AndroidX Activity", androidxActivity]
+    ]
+
+    private static JavaFileObject fragment(ClassNames className) {
+        return JavaFile.newFile(className.getPackageName(), className.getClassName(), """
+            public class #T {
+                public final android.os.Bundle getArguments() {
+                    throw new RuntimeException("Stub!");
+                }
+                
+                public void setArguments(android.os.Bundle args) {
+                    throw new RuntimeException("Stub!");
+                }
+            }
+            """
+        )
+    }
+
+    private static JavaFileObject activity(ClassNames className) {
+        return JavaFile.newFile(className.getPackageName(), className.getClassName(), """
+            public class #T {
+            }
+            """
+        )
+    }
+
+    private static JavaFileObject emptyClass(ClassNames className) {
+        return JavaFile.newFile(className.getPackageName(), className.getClassName(), """
+            public class #T {
+            }
+            """
+        )
     }
 }

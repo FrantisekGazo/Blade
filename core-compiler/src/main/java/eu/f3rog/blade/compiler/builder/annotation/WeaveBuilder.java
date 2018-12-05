@@ -1,7 +1,9 @@
 package eu.f3rog.blade.compiler.builder.annotation;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.TypeName;
 
+import eu.f3rog.blade.compiler.name.NameUtils;
 import eu.f3rog.blade.core.Weave;
 import eu.f3rog.blade.core.Weaves;
 
@@ -71,9 +73,9 @@ public final class WeaveBuilder {
 
     public interface IWeaveInto extends IWeaveBuild {
 
-        IMethodWeaveStatement method(String methodName, Class... args);
+        IMethodWeaveStatement method(String methodName, TypeName... types);
 
-        IWeaveStatement constructor(Class... args);
+        IWeaveStatement constructor(TypeName... types);
 
         IWeaveStatement field();
 
@@ -115,10 +117,10 @@ public final class WeaveBuilder {
         private WeavePriority mWeavePriority = null;
 
         @Override
-        public IMethodWeaveStatement method(String methodName, Class... args) {
+        public IMethodWeaveStatement method(String methodName, TypeName... types) {
             mRename = null;
             mInto = methodName;
-            mIntoArgs = toString(args);
+            mIntoArgs = toString(types);
             mMethodWeaveType = MethodWeaveType.BEFORE_BODY;
             mWeavePriority = WeavePriority.NORMAL;
             return this;
@@ -143,9 +145,9 @@ public final class WeaveBuilder {
         }
 
         @Override
-        public IWeaveStatement constructor(Class... args) {
+        public IWeaveStatement constructor(TypeName... types) {
             mInto = Weave.WEAVE_CONSTRUCTOR;
-            mIntoArgs = toString(args);
+            mIntoArgs = toString(types);
             return this;
         }
 
@@ -213,10 +215,10 @@ public final class WeaveBuilder {
             }
         }
 
-        private String[] toString(final Class... classes) {
-            String[] array = new String[classes.length];
+        private String[] toString(final TypeName... types) {
+            String[] array = new String[types.length];
             for (int i = 0; i < array.length; i++) {
-                array[i] = classes[i].getName();
+                array[i] = NameUtils.toFQDN(types[i]);
             }
             return array;
         }
