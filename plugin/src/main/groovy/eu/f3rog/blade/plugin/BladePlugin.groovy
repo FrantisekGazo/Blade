@@ -28,11 +28,11 @@ public final class BladePlugin
     public static String ERROR_GRADLE_TOOLS_1_5_0_REQUIRED = "Blade plugin only supports android gradle plugin 1.5.0 or later!"
     public static String ERROR_ANDROID_PLUGIN_REQUIRED = "'com.android.application' or 'com.android.library' plugin required!"
     public static String ERROR_MODULE_DOES_NOT_EXIST = "Blade does not have module '%s'!"
-    public static String ERROR_APT_IS_MISSING = "Apply apt plugin or update gradle plugin to >=2.2.0!"
+    public static String ERROR_APT_IS_MISSING = "Apply apt plugin or update android gradle plugin to >=2.2.0!"
     public static String ERROR_CONFIG_FILE_IS_MISSING = "Blade configuration file is missing! (more info here: https://github.com/FrantisekGazo/Blade/wiki#1-create-configuration-file)"
 
     public static String LIB_GROUP_ID = "eu.f3rog.blade"
-    public static String LIB_VERSION = "2.7.2-beta1"
+    public static String LIB_VERSION = "2.7.2-beta3"
     public static String LIB_CONFIG_FILE_NAME = "blade"
     public static String[] LIB_MODULES = ["arg", "extra", "mvp", "parcel", "state"]
 
@@ -68,7 +68,7 @@ public final class BladePlugin
         }
 
         // apply bytecode weaving via Transform API
-        project.android.registerTransform(new BladeTransformer(mConfig.debug))
+        project.android.registerTransform(new BladeTransformer(project, mConfig.debug))
     }
 
     private String[] determineAnnotationProcessorPlugin(Project project) {

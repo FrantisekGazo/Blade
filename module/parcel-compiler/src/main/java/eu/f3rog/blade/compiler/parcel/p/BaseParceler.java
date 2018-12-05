@@ -1,14 +1,15 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.TypeName;
+
 /**
- * Class {@link ClassParceler}
+ * Class {@link BaseParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-interface ClassParceler {
+interface BaseParceler {
 
-    Class type();
+    TypeName type();
 
     /**
      * Returns format of write call.

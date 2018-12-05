@@ -25,6 +25,12 @@ public final class JavaFile {
 
     public static JavaFileObject newFile(final String packageName,
                                          final String name,
+                                         final String body) {
+        return createNewFile(false, packageName, name, body, new HashMap<String, Object>())
+    }
+
+    public static JavaFileObject newFile(final String packageName,
+                                         final String name,
                                          final String body,
                                          final Map<String, Object> imports) {
         return createNewFile(false, packageName, name, body, imports)

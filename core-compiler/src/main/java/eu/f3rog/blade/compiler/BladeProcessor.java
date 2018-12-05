@@ -58,7 +58,7 @@ public class BladeProcessor extends BaseProcessor {
                 Class<ProcessorModule> moduleClass = (Class<ProcessorModule>) Class.forName(moduleClassName.toString());
                 ProcessorModule module = moduleClass.newInstance();
                 mModules.add(module);
-                //System.out.println("> APT using " + moduleClass.getSimpleName());
+                log("> %s APT using %s", BladeProcessor.class.getSimpleName(), moduleClass.getSimpleName());
             } catch (Exception ignore) {
                 // module is not accessible
             }
@@ -67,16 +67,22 @@ public class BladeProcessor extends BaseProcessor {
 
     @Override
     protected void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
+        log("> %s prepare", BladeProcessor.class.getSimpleName());
+
         ProcessorUtils.setProcessingEnvironment(getProcessingEnvironment());
         ClassManager.init();
 
         for (int i = 0; i < mModules.size(); i++) {
             mModules.get(i).prepare();
         }
+
+        log("> %s prepare done", BladeProcessor.class.getSimpleName());
     }
 
     @Override
     protected void exec(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
+        log("> %s exec [processingOver:%b]", BladeProcessor.class.getSimpleName(), roundEnv.processingOver());
+
         for (Element e : roundEnv.getElementsAnnotatedWith(Blade.class)) {
             if (e.getKind() == ElementKind.CLASS) {
                 for (int i = 0; i < mModules.size(); i++) {
@@ -88,12 +94,18 @@ public class BladeProcessor extends BaseProcessor {
         for (int i = 0; i < mModules.size(); i++) {
             mModules.get(i).process(roundEnv);
         }
+
+        log("> %s exec done", BladeProcessor.class.getSimpleName());
     }
 
     @Override
     protected void finish(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException {
         // create class files
+        log("> %s finish", BladeProcessor.class.getSimpleName());
+
         ClassManager.getInstance().build();
+
+        log("> %s finish done", BladeProcessor.class.getSimpleName());
     }
 
 }

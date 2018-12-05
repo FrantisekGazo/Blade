@@ -1,7 +1,7 @@
 package eu.f3rog.blade.sample.mvp.ui.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import blade.Blade;
 import blade.I;

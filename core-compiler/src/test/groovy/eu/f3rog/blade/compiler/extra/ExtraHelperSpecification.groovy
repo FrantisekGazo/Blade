@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.extra
 
-import android.app.Activity
 import android.app.IntentService
 import android.app.Service
 import android.content.Intent
@@ -45,18 +44,18 @@ public final class ExtraHelperSpecification
     }
 
     @Unroll
-    def "fail if @Extra is on #accessor field"() {
+    def "fail if @Extra is on a field (where #accessor)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E $accessor String mText;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -73,36 +72,40 @@ public final class ExtraHelperSpecification
         'final'     | _
     }
 
-    def "do NOT generate _Helper if an Activity class has only @Blade"() {
+    @Unroll
+    def "do NOT generate _Helper if an activity class has only @Blade (where #activityClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
                 @#B
-                public class #T extends Activity {}
+                public class #T extends #A {}
                 """,
                 [
                         B: Blade.class,
-                        _: [Activity.class]
+                        A: activityClass
                 ]
         )
 
         expect:
         compilesWithoutErrorAndDoesntGenerate("com.example", "MyActivity_Helper", BladeProcessor.Module.EXTRA, input)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 
     @Unroll
-    def "generate _Helper if 1 @Extra #type is in an Activity class"() {
+    def "generate _Helper if 1 @Extra is in an activity class (where #type)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E $type mFlag;
                 }
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -154,11 +157,12 @@ public final class ExtraHelperSpecification
         'String'  | _
     }
 
-    def "generate _Helper if 2 @Extra are in an Activity class"() {
+    @Unroll
+    def "generate _Helper if 2 @Extra are in an activity class (where #activityClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E String mExtraString;
                     @#E int mA;
@@ -166,7 +170,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: activityClass
                 ]
         )
 
@@ -208,9 +212,13 @@ public final class ExtraHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 
-    def "generate _Helper if 2 @Extra are in an Activity class - 1 custom Bundler"() {
+    @Unroll
+    def "generate _Helper if 2 @Extra are in an activity class - 1 custom Bundler (where #activityClassName)"() {
         given:
         final JavaFileObject customBundler = JavaFile.newFile("com.example", "StringBundler",
                 """
@@ -230,7 +238,7 @@ public final class ExtraHelperSpecification
         )
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#E(#CB.class) String mText;
                     @#E int mA;
@@ -239,7 +247,7 @@ public final class ExtraHelperSpecification
                 [
                         E : Extra.class,
                         CB: customBundler,
-                        _ : [Activity.class]
+                        A : activityClass
                 ]
         )
 
@@ -274,7 +282,7 @@ public final class ExtraHelperSpecification
                 [
                         I : input,
                         CB: customBundler,
-                        _: [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
+                        _ : [BundleWrapper.class, Intent.class, Weaves.class, Weave.class]
                 ]
         )
 
@@ -283,6 +291,9 @@ public final class ExtraHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 
     def "generate _Helper if 2 @Extra are in a Service class"() {
@@ -395,11 +406,12 @@ public final class ExtraHelperSpecification
                 .generatesSources(expected)
     }
 
-    def "generate _Helper if 2 @Extra are in a generic Activity class"() {
+    @Unroll
+    def "generate _Helper if 2 @Extra are in a generic activity class (where #activityClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T<T> extends Activity {
+                public class #T<T> extends #A {
 
                     @#E String mText;
                     @#E int mNumber;
@@ -407,7 +419,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: activityClass
                 ]
         )
 
@@ -449,13 +461,17 @@ public final class ExtraHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 
-    def "generate _Helper if 2 @Extra are in a generic Activity class where T extends Serializable"() {
+    @Unroll
+    def "generate _Helper if 2 @Extra are in a generic activity class where T extends Serializable (where #activityClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T<T extends Serializable> extends Activity {
+                public class #T<T extends Serializable> extends #A {
 
                     @#E T mData;
                     @#E int mNumber;
@@ -463,7 +479,8 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class, Serializable.class]
+                        A: activityClass,
+                        _: [Serializable.class]
                 ]
         )
 
@@ -505,15 +522,19 @@ public final class ExtraHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 
-    def "generate _Helper if 2 @Extra are in an inner Activity class"() {
+    @Unroll
+    def "generate _Helper if 2 @Extra are in an inner activity class (where #activityClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
 
-                    public static class MyActivity extends Activity {
+                    public static class MyActivity extends #A {
 
                         @#E String mText;
                         @#E int mNumber;
@@ -522,7 +543,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: activityClass
                 ]
         )
 
@@ -564,21 +585,25 @@ public final class ExtraHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 
-    def "generate _Helper if 2 @Extra are in multiple inner Activity classes"() {
+    @Unroll
+    def "generate _Helper if 2 @Extra are in multiple inner activity classes (where #activityClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
 
-                    public static class MyActivity1 extends Activity {
+                    public static class MyActivity1 extends #A {
 
                         @#E String mText;
                         @#E int mNumber;
                     }
 
-                    public static class MyActivity2 extends Activity {
+                    public static class MyActivity2 extends #A {
 
                         @#E String mText;
                         @#E int mNumber;
@@ -587,7 +612,7 @@ public final class ExtraHelperSpecification
                 """,
                 [
                         E: Extra.class,
-                        _: [Activity.class]
+                        A: activityClass
                 ]
         )
 
@@ -660,5 +685,8 @@ public final class ExtraHelperSpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected1, expected2)
+
+        where:
+        [activityClassName, activityClass] << activityClasses
     }
 }

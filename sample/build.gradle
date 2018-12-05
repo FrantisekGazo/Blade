@@ -1,19 +1,16 @@
 buildscript {
     dependencies {
         repositories {
-            mavenCentral()
+            google()
             jcenter()
-            maven {
-                url 'https://maven.google.com/'
-                name 'Google'
-            }
+            mavenCentral()
 
             // NOTE: This is only needed when developing the plugin!
             mavenLocal()
         }
 
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'eu.f3rog.blade:plugin:2.7.0-beta1'
+        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'eu.f3rog.blade:plugin:2.7.2-beta3'
     }
 }
 
@@ -21,13 +18,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'blade'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
         applicationId "eu.f3rog.blade.sample"
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
     }
@@ -48,11 +45,13 @@ android {
     }
 
     productFlavors {
+        flavorDimensions "environment"
         mock {
+            dimension = "environment"
             applicationIdSuffix = ".mock"
         }
         prod {
-
+            dimension = "environment"
         }
     }
 
@@ -68,27 +67,26 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
 
     /* Dagger2 - needed for MVP module */
-    compile 'com.google.dagger:dagger:2.11'
+    implementation 'com.google.dagger:dagger:2.11'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
     /* ButterKnife */
-    compile 'com.jakewharton:butterknife:8.8.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation 'com.jakewharton:butterknife:9.0.0-rc1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
     /* Rx */
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.2.5'
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex:rxjava:1.2.5'
     /* REST API */
-    compile 'com.google.code.gson:gson:2.8.1'
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
 
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }

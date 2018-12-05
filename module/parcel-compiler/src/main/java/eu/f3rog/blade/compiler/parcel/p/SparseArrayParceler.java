@@ -1,18 +1,19 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import android.util.SparseArray;
+import com.squareup.javapoet.TypeName;
+
+import eu.f3rog.blade.compiler.name.ClassNames;
 
 /**
  * Class {@link SparseArrayParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class SparseArrayParceler implements ClassParceler {
+final class SparseArrayParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return SparseArray.class;
+    public TypeName type() {
+        return ClassNames.SparseArray.get();
     }
 
     @Override

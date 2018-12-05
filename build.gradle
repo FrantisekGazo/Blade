@@ -2,14 +2,11 @@
 
 buildscript {
     repositories {
+        google()
         jcenter()
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:3.2.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -23,16 +20,13 @@ allprojects {
     repositories {
         jcenter()
         mavenLocal()
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
     }
 
     // this is needed for running plugin tests
     configurations.all {
         resolutionStrategy {
-            force 'org.codehaus.groovy:groovy-all:2.4.4'
+            force 'org.codehaus.groovy:groovy-all:2.4.12'
         }
     }
 
@@ -43,7 +37,7 @@ allprojects {
         group = LIB_GROUP_ID
         version = LIB_VERSION
 
-        apply plugin: 'java'
+        apply plugin: 'java-library'
         apply plugin: 'maven'
         apply plugin: 'maven-publish'
         apply plugin: 'com.jfrog.bintray'
@@ -102,15 +96,14 @@ allprojects {
 ext.deps = [
         /* Android */
         // Android 4.0.x (http://mvnrepository.com/artifact/com.google.android/android)
-        google_android     : 'com.google.android:android:4.0.1.2',
+        android_runtime    : 'com.google.android:android:4.0.1.2',
         google_support_v4  : 'com.google.android:support-v4:r7',
-        support_v4         : 'com.android.support:support-v4:23.0.1',
         support_annotations: 'com.android.support:support-annotations:23.0.1',
         // Javax Annotations (@Generated)
         javax_annotations  : 'org.glassfish:javax.annotation:10.0-b28',
 
         // Square
-        javapoet           : 'com.squareup:javapoet:1.4.0',
+        javapoet           : 'com.squareup:javapoet:1.11.1',
 
         // Dagger2
         dagger2            : 'com.google.dagger:dagger:2.11',
@@ -118,18 +111,18 @@ ext.deps = [
 
         // Plugin
         javassist_helper   : 'eu.f3rog.javassist:helper:0.1.10',
-        gradle_plugin      : 'com.android.tools.build:gradle:2.2.2',
+        gradle_plugin      : 'com.android.tools.build:gradle:3.2.1',
         snakeyaml          : 'org.yaml:snakeyaml:1.17',
 
         // Test dependencies
         junit              : 'junit:junit:4.12',
-        guava              : 'com.google.guava:guava:18.0',
-        truth              : 'com.google.truth:truth:0.27',
-        compiletesting     : 'com.google.testing.compile:compile-testing:0.7',
-        autoservice        : 'com.google.auto.service:auto-service:1.0-rc2',
-        autocommon         : 'com.google.auto:auto-common:0.4',
-        groovy_all         : 'org.codehaus.groovy:groovy-all:2.4.7',
-        spock              : 'org.spockframework:spock-core:1.0-groovy-2.4'
+        guava              : 'com.google.guava:guava:26.0',
+        truth              : 'com.google.truth:truth:0.42',
+        compiletesting     : 'com.google.testing.compile:compile-testing:0.15',
+        autoservice        : 'com.google.auto.service:auto-service:1.0-rc4',
+        autocommon         : 'com.google.auto:auto-common:0.10',
+        groovy_all         : 'org.codehaus.groovy:groovy-all:2.4.12',
+        spock              : 'org.spockframework:spock-core:1.2-groovy-2.4'
 ]
 
 def parseConfig(File config) {

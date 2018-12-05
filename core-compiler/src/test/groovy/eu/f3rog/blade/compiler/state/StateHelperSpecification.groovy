@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.state
 
-import android.app.Activity
-import android.app.Fragment
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
@@ -257,7 +255,7 @@ public final class StateHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     @#S String mText;
                     @#S int mNumber;
@@ -265,7 +263,7 @@ public final class StateHelperSpecification
                 """,
                 [
                         S: State.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -320,7 +318,7 @@ public final class StateHelperSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#S String mText;
                     @#S int mNumber;
@@ -328,7 +326,7 @@ public final class StateHelperSpecification
                 """,
                 [
                         S: State.class,
-                        _: [Fragment.class]
+                        F: androidxFragment
                 ]
         )
 

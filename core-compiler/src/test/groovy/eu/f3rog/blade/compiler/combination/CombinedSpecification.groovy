@@ -1,7 +1,5 @@
 package eu.f3rog.blade.compiler.combination
 
-import android.app.Activity
-import android.app.Fragment
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -32,7 +30,7 @@ public final class CombinedSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     $annotations int number;
                 }
@@ -40,7 +38,7 @@ public final class CombinedSpecification
                 [
                         A: Arg.class,
                         S: State.class,
-                        _: [Fragment.class]
+                        F: androidxFragment
                 ]
         )
 
@@ -117,7 +115,7 @@ public final class CombinedSpecification
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity {
+                public class #T extends #A {
 
                     $annotations int number;
                 }
@@ -125,7 +123,7 @@ public final class CombinedSpecification
                 [
                         E: Extra.class,
                         S: State.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 
@@ -222,7 +220,7 @@ public final class CombinedSpecification
         )
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment implements #V {
+                public class #T extends #F implements #V {
 
                     $field1
                     $field2
@@ -235,7 +233,7 @@ public final class CombinedSpecification
                         S: State.class,
                         P: presenter,
                         V: IView.class,
-                        _: [Fragment.class]
+                        F: androidxFragment
                 ]
         )
 
@@ -328,7 +326,7 @@ public final class CombinedSpecification
         )
         final JavaFileObject input = JavaFile.newFile("com.example", "MyActivity",
                 """
-                public class #T extends Activity implements #V {
+                public class #T extends #A implements #V {
 
                     $field1
                     $field2
@@ -341,7 +339,7 @@ public final class CombinedSpecification
                         S: State.class,
                         P: presenter,
                         V: IView.class,
-                        _: [Activity.class]
+                        A: androidxActivity
                 ]
         )
 

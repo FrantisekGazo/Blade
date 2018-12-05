@@ -15,12 +15,15 @@ import javax.tools.Diagnostic;
 
 public abstract class BaseProcessor extends AbstractProcessor {
 
+    private static final boolean DEBUG = false;
+
     private ProcessingEnvironment mProcessingEnvironment;
     private Messager mMessager;
     private Filer mFiler;
     private boolean mProcessingStarted;
 
-    /**
+    /**BladePluginSpecification.groovy:77
+
      * Called only once when annotation processing starts.
      */
     protected abstract void prepare(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) throws ProcessorError, IOException;
@@ -77,6 +80,12 @@ public abstract class BaseProcessor extends AbstractProcessor {
 
     private void error(Element e, String msg, Object... args) {
         mMessager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
+    }
+
+    protected void log(String msg, Object... args) {
+        if (DEBUG) {
+            System.out.println(String.format(msg, args));
+        }
     }
 
     public ProcessingEnvironment getProcessingEnvironment() {

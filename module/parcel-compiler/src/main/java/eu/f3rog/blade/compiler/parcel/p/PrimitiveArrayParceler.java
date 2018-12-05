@@ -1,24 +1,26 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.TypeName;
+
 /**
  * Class {@link PrimitiveArrayParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class PrimitiveArrayParceler implements ClassParceler {
+final class PrimitiveArrayParceler implements BaseParceler {
 
-    private final Class mClass;
+    private final TypeName mTypeName;
     private final String mArrayType;
 
-    public PrimitiveArrayParceler(Class clazz, String arrayType) {
-        mClass = clazz;
+    public PrimitiveArrayParceler(TypeName typeName, String arrayType) {
+        mTypeName = ArrayTypeName.of(typeName);
         mArrayType = arrayType;
     }
 
     @Override
-    public Class type() {
-        return mClass;
+    public TypeName type() {
+        return mTypeName;
     }
 
     @Override

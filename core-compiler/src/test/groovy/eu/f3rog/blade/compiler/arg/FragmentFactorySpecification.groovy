@@ -1,6 +1,5 @@
 package eu.f3rog.blade.compiler.arg
 
-import android.app.Fragment
 import android.os.Bundle
 import blade.Arg
 import blade.Blade
@@ -9,23 +8,25 @@ import eu.f3rog.blade.compiler.BladeProcessor
 import eu.f3rog.blade.compiler.util.JavaFile
 import eu.f3rog.blade.core.BundleWrapper
 import blade.Bundler
+import spock.lang.Unroll
 
 import javax.tools.JavaFileObject
 
 public final class FragmentFactorySpecification
         extends BaseSpecification {
 
-    def "generate for an Fragment with only @Blade"() {
+    @Unroll
+    def "generate for a fragment with only @Blade (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
                 @#B
-                public class #T extends Fragment {
+                public class #T extends #F {
                 }
                 """,
                 [
                         B: Blade.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -53,19 +54,23 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for an Fragment with 1 @Arg"() {
+    @Unroll
+    def "generate for an fragment with 1 @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
                     @#A String mText;
                 }
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -95,9 +100,13 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for an Fragment with 2 @Arg - 1 custom Bundler"() {
+    @Unroll
+    def "generate for an fragment with 2 @Arg - 1 custom Bundler (where #fragmentClassName)"() {
         given:
         final JavaFileObject customBundler = JavaFile.newFile("com.example", "StringBundler",
                 """
@@ -117,7 +126,7 @@ public final class FragmentFactorySpecification
         )
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
 
                     @#A(#CB.class) String mText;
                     @#A int mNumber;
@@ -126,7 +135,7 @@ public final class FragmentFactorySpecification
                 [
                         A : Arg.class,
                         CB: customBundler,
-                        _ : [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -161,24 +170,28 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for 2 Fragments with @Arg"() {
+    @Unroll
+    def "generate for 2 fragments with @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "FirstFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
                     @#A int mNumber;
                 }
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "SecondFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
                     @#A String mText;
                     @#A boolean mFlag;
                     @#A double mNumber;
@@ -186,7 +199,7 @@ public final class FragmentFactorySpecification
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -227,19 +240,23 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for 2 Fragments with inherited @Arg"() {
+    @Unroll
+    def "generate for 2 fragments with inherited @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "BaseFragment",
                 """
-                public class #T extends Fragment {
+                public class #T extends #F {
                     @#A int mNumber;
                 }
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "MyFragment",
@@ -251,7 +268,7 @@ public final class FragmentFactorySpecification
                 [
                         A: Arg.class,
                         B: input1,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -291,19 +308,23 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for 2 Fragments with inherited @Arg from abstract class"() {
+    @Unroll
+    def "generate for 2 fragments with inherited @Arg from abstract class (where #fragmentClassName)"() {
         given:
         final JavaFileObject input1 = JavaFile.newFile("com.example", "BaseFragment",
                 """
-                public abstract class #T extends Fragment {
+                public abstract class #T extends #F {
                     @#A int mNumber;
                 }
                 """,
                 [
                         A: Arg.class,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
         final JavaFileObject input2 = JavaFile.newFile("com.example", "MyFragment",
@@ -315,7 +336,7 @@ public final class FragmentFactorySpecification
                 [
                         A: Arg.class,
                         B: input1,
-                        _: [Fragment.class]
+                        F: fragmentClass
                 ]
         )
 
@@ -346,21 +367,25 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for a generic Fragment with 2 @Arg"() {
+    @Unroll
+    def "generate for a generic fragment with 2 @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T<T> extends Fragment {
+                public class #T<T> extends #F {
 
                     @#A String mText;
                     @#A int mNumber;
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        F: fragmentClass
                 ]
         )
 
@@ -391,21 +416,26 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for a generic Fragment field with 2 @Arg"() {
+    @Unroll
+    def "generate for a generic fragment field with 2 @Arg (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "MyFragment",
                 """
-                public class #T<T extends Serializable> extends Fragment {
+                public class #T<T extends Serializable> extends #F {
 
                     @#A T mData;
                     @#A int mNumber;
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class, Serializable.class]
+                        A: Arg.class,
+                        F: fragmentClass,
+                        _: [Serializable.class]
                 ]
         )
 
@@ -436,15 +466,19 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for an inner Fragment class"() {
+    @Unroll
+    def "generate for an inner fragment class (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
 
-                    public static class MyFragment extends Fragment {
+                    public static class MyFragment extends #F {
 
                         @#A String mText;
                         @#A int mNumber;
@@ -452,8 +486,8 @@ public final class FragmentFactorySpecification
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        F: fragmentClass
                 ]
         )
 
@@ -484,21 +518,25 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 
-    def "generate for 2 inner Fragment classes"() {
+    @Unroll
+    def "generate for 2 inner fragment classes (where #fragmentClassName)"() {
         given:
         final JavaFileObject input = JavaFile.newFile("com.example", "Wrapper",
                 """
                 public class #T {
 
-                    public static class MyFragment1 extends Fragment {
+                    public static class MyFragment1 extends #F {
 
                         @#A String mText;
                         @#A int mNumber;
                     }
 
-                    public static class MyFragment2 extends Fragment {
+                    public static class MyFragment2 extends #F {
 
                         @#A String mText;
                         @#A int mNumber;
@@ -506,8 +544,8 @@ public final class FragmentFactorySpecification
                 }
                 """,
                 [
-                        A : Arg.class,
-                        _ : [Fragment.class]
+                        A: Arg.class,
+                        F: fragmentClass
                 ]
         )
 
@@ -547,5 +585,8 @@ public final class FragmentFactorySpecification
                 .compilesWithoutError()
                 .and()
                 .generatesSources(expected)
+
+        where:
+        [fragmentClassName, fragmentClass] << fragmentClasses
     }
 }

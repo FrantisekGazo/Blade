@@ -1,7 +1,7 @@
 package eu.f3rog.blade.sample.mvp.di.module.presenter;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import blade.State;
 import eu.f3rog.blade.sample.mvp.model.ActorDetail;

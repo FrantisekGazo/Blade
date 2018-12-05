@@ -1,18 +1,19 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import android.util.SparseBooleanArray;
+import com.squareup.javapoet.TypeName;
+
+import eu.f3rog.blade.compiler.name.ClassNames;
 
 /**
  * Class {@link SparseBooleanArrayParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class SparseBooleanArrayParceler implements ClassParceler {
+final class SparseBooleanArrayParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return SparseBooleanArray.class;
+    public TypeName type() {
+        return ClassNames.SparseBooleanArray.get();
     }
 
     @Override

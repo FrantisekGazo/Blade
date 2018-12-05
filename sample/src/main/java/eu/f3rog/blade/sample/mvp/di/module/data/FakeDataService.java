@@ -2,7 +2,7 @@ package eu.f3rog.blade.sample.mvp.di.module.data;
 
 
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

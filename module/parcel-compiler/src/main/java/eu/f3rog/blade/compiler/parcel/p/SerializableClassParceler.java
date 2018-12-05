@@ -1,18 +1,20 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
+
 import java.io.Serializable;
 
 /**
  * Class {@link SerializableClassParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class SerializableClassParceler implements ClassParceler {
+final class SerializableClassParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return Serializable.class;
+    public TypeName type() {
+        return ClassName.get(Serializable.class);
     }
 
     @Override

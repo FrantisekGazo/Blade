@@ -1,18 +1,19 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
-import android.os.Parcelable;
+import com.squareup.javapoet.TypeName;
+
+import eu.f3rog.blade.compiler.name.ClassNames;
 
 /**
  * Class {@link ParcelableClassParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class ParcelableClassParceler implements ClassParceler {
+final class ParcelableClassParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return Parcelable.class;
+    public TypeName type() {
+        return ClassNames.Parcelable.get();
     }
 
     @Override

@@ -17,13 +17,13 @@ package eu.f3rog.ptu
         final String androidConfig
         if (mConfig.hasAndroidPlugin()) {
             androidConfig = """android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
         applicationId "com.example"
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
     }
@@ -52,6 +52,15 @@ package eu.f3rog.ptu
     }
     dependencies {
         ${mConfig.getFormattedClasspaths()}
+    }
+}
+
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        ${mConfig.getRepository()}
     }
 }
 

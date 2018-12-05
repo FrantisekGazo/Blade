@@ -1,7 +1,7 @@
 package eu.f3rog.blade.compiler.name;
 
 /**
- * Enum {@link GPN}
+ * Enum {@link GPN} represents a Generated Package Name.
  *
  * @author FrantisekGazo
  * @version 2015-10-16

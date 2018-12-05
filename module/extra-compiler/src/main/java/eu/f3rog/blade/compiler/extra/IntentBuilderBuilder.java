@@ -1,9 +1,5 @@
 package eu.f3rog.blade.compiler.extra;
 
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -21,6 +17,7 @@ import blade.Extra;
 import eu.f3rog.blade.compiler.builder.BaseClassBuilder;
 import eu.f3rog.blade.compiler.builder.annotation.GeneratedForBuilder;
 import eu.f3rog.blade.compiler.module.BundleUtils;
+import eu.f3rog.blade.compiler.name.ClassNames;
 import eu.f3rog.blade.compiler.name.GCN;
 import eu.f3rog.blade.compiler.name.GPN;
 import eu.f3rog.blade.compiler.name.NameUtils;
@@ -65,7 +62,7 @@ public final class IntentBuilderBuilder
             }
         }
 
-        integrate(ClassName.get(typeElement), extras, isSubClassOf(typeElement, Service.class));
+        integrate(ClassName.get(typeElement), extras, isSubClassOf(typeElement, ClassNames.Service.get()));
     }
 
     private void integrate(final ClassName activityClassName,
@@ -79,16 +76,16 @@ public final class IntentBuilderBuilder
         final MethodSpec.Builder forMethod = MethodSpec.methodBuilder(forName)
                 .addAnnotation(GeneratedForBuilder.buildFor(activityClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(Context.class, context)
-                .returns(Intent.class);
+                .addParameter(ClassNames.Context.get(), context)
+                .returns(ClassNames.Intent.get());
         // build START method
         final MethodSpec.Builder startMethod = MethodSpec.methodBuilder(getMethodName(METHOD_NAME_START, activityClassName))
                 .addAnnotation(GeneratedForBuilder.buildFor(activityClassName))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(Context.class, context);
+                .addParameter(ClassNames.Context.get(), context);
 
         forMethod.addStatement("$T $N = new $T($N, $T.class)",
-                Intent.class, intent, Intent.class, context, activityClassName);
+               ClassNames.Intent.get(), intent, ClassNames.Intent.get(), context, activityClassName);
         forMethod.addStatement("$T $N = new $T()",
                         BundleWrapper.class, extras, BundleWrapper.class);
         startMethod.addCode("$N.$N($N($N",

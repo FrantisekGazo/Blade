@@ -1,28 +1,32 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.TypeName;
+
 import static eu.f3rog.blade.compiler.util.StringUtils.startUpperCase;
 
 /**
  * Class {@link PrimitiveTypeParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class PrimitiveTypeParceler implements ClassParceler {
+final class PrimitiveTypeParceler implements BaseParceler {
 
-    private final Class mClass;
+    private final TypeName mType;
 
-    public PrimitiveTypeParceler(Class clazz) {
-        mClass = clazz;
+    public PrimitiveTypeParceler(TypeName type) {
+        if (!type.isPrimitive()) {
+            throw new IllegalArgumentException("Unsupported " + type);
+        }
+        mType = type;
     }
 
     private String typeName() {
-        return startUpperCase(type().getSimpleName());
+        return startUpperCase(mType.toString());
     }
 
     @Override
-    public Class type() {
-        return mClass;
+    public TypeName type() {
+        return mType;
     }
 
     @Override

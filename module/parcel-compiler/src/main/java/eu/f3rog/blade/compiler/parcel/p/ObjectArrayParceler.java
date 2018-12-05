@@ -1,16 +1,19 @@
 package eu.f3rog.blade.compiler.parcel.p;
 
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
+
 /**
  * Class {@link ObjectArrayParceler}
  *
  * @author FrantisekGazo
- * @version 2016-01-24
  */
-final class ObjectArrayParceler implements ClassParceler {
+final class ObjectArrayParceler implements BaseParceler {
 
     @Override
-    public Class type() {
-        return Object[].class;
+    public TypeName type() {
+        return ArrayTypeName.of(ClassName.get(Object.class));
     }
 
     @Override
@@ -22,5 +25,4 @@ final class ObjectArrayParceler implements ClassParceler {
     public CallFormat readCall() {
         return new CallFormat("(%s) %s.readArray(%s)", CallFormat.Arg.TYPE, CallFormat.Arg.PARCEL, CallFormat.Arg.CLASS_LOADER_OR_NULL);
     }
-
 }
